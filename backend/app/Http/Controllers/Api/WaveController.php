@@ -25,6 +25,28 @@ class WaveController extends Controller
         return WaveResource::collection($waves);
     }
 
+    public function initializeUpload(Request $request): JsonResponse
+    {
+        $request->validate([
+            'size_bytes' => 'required|integer|max:104857600', // 100MB max
+            'title'      => 'nullable|string|max:255',
+        ]);
+
+        $uploadData = $this->waveService->initializeUpload(
+            $request->user(),
+            $request->size_bytes,
+            ['title' => $request->title]
+        );
+
+        if (!$uploadData) {
+            return response()->json([
+                'message' => 'Failed to initialize upload with Cloudflare.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return response()->json($uploadData);
+    }
+
     public function store(StoreWaveRequest $request): JsonResponse
     {
         $wave = $this->waveService->createWave($request->user(), $request->validated());
@@ -78,6 +100,19 @@ class WaveController extends Controller
         return response()->json([
             'message' => 'Success',
             'likes_count' => $wave->likes_count,
+        ]);
+    }
+
+    public function purchase(Request $request, Wave $wave): JsonResponse
+    {
+        try {
+            $this->waveService->purchaseWave($request->user(), $wave);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([
+            'message' => 'Wave unlocked successfully',
         ]);
     }
 }

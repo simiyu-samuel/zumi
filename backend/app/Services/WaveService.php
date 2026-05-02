@@ -10,7 +10,8 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 class WaveService
 {
     public function __construct(
-        protected WaveRepositoryInterface $waveRepository
+        protected WaveRepositoryInterface $waveRepository,
+        protected CloudflareStreamService $cloudflareStream
     ) {}
 
     public function getDiscoveryFeed(int $perPage = 15): CursorPaginator
@@ -18,9 +19,18 @@ class WaveService
         return $this->waveRepository->getFeed($perPage);
     }
 
+    /**
+     * Initialize a Wave upload by getting a Cloudflare Stream upload URL.
+     */
+    public function initializeUpload(User $user, int $sizeBytes, array $metadata = []): ?array
+    {
+        return $this->cloudflareStream->createUploadUrl($sizeBytes, $metadata);
+    }
+
     public function createWave(User $user, array $data): Wave
     {
         $data['user_id'] = $user->id;
+        $data['status'] = Wave::STATUS_PENDING;
 
         return $this->waveRepository->create($data);
     }
@@ -51,5 +61,34 @@ class WaveService
             $wave->likes()->create(['user_id' => $user->id]);
             $wave->increment('likes_count');
         }
+    }
+
+    public function purchaseWave(User $user, Wave $wave): void
+    {
+        if ($wave->visibility !== Wave::VISIBILITY_GATED) {
+            throw new \InvalidArgumentException('This Wave is not gated.');
+        }
+
+        if ($wave->purchases()->where('user_id', $user->id)->exists()) {
+            return; // Already purchased
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $wave) {
+            $dropsService = app(DropsService::class);
+            
+            $dropsService->debit(
+                $user,
+                $wave->gated_drops,
+                'wave_purchase',
+                'wave',
+                $wave->id,
+                ['title' => $wave->title]
+            );
+
+            $wave->purchases()->create([
+                'user_id' => $user->id,
+                'amount_paid' => $wave->gated_drops,
+            ]);
+        });
     }
 }

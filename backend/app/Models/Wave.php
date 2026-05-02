@@ -20,12 +20,20 @@ class Wave extends Model implements HasMedia
     const VISIBILITY_PRIVATE = 'private';
     const VISIBILITY_GATED = 'gated';
 
+    const STATUS_PENDING = 'pending';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_READY = 'ready';
+    const STATUS_FAILED = 'failed';
+
     const RELATION_USER = 'user';
     const RELATION_LIKES = 'likes';
     const RELATION_COMMENTS = 'comments';
 
     protected $fillable = [
         'user_id',
+        'cloudflare_id',
+        'status',
+        'video_metadata',
         'title',
         'description',
         'stream_id',
@@ -36,6 +44,10 @@ class Wave extends Model implements HasMedia
         'comments_count',
         'shares_count',
         'views_count',
+    ];
+
+    protected $casts = [
+        'video_metadata' => 'json',
     ];
 
     public function user(): BelongsTo
@@ -51,5 +63,10 @@ class Wave extends Model implements HasMedia
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(WavePurchase::class);
     }
 }

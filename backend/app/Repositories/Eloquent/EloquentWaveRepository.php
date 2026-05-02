@@ -11,7 +11,8 @@ class EloquentWaveRepository implements WaveRepositoryInterface
     public function getFeed(int $perPage = 15): CursorPaginator
     {
         return Wave::with([Wave::RELATION_USER])
-            ->where('visibility', Wave::VISIBILITY_PUBLIC)
+            ->whereIn('visibility', [Wave::VISIBILITY_PUBLIC, Wave::VISIBILITY_GATED])
+            ->where('status', Wave::STATUS_READY)
             ->latest()
             ->cursorPaginate($perPage);
     }
