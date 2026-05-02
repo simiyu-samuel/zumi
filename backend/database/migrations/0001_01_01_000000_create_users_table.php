@@ -14,10 +14,20 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('username')->unique()->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable(); // Nullable for social-only users
+            $table->string('google_id')->unique()->nullable();
+            $table->string('apple_id')->unique()->nullable();
+            $table->unsignedBigInteger('drops_balance')->default(0);
+            $table->boolean('onboarding_completed')->default(false);
+            $table->timestamp('verified_at')->nullable();
+            $table->text('bio')->nullable();
+            $table->string('role')->default('user');
+            $table->string('status')->default('active');
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

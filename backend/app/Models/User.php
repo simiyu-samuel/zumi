@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -19,8 +20,17 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
+        'google_id',
+        'apple_id',
+        'drops_balance',
+        'onboarding_completed',
+        'verified_at',
+        'bio',
+        'role',
+        'status',
     ];
 
     /**
@@ -42,7 +52,24 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'verified_at' => 'datetime',
             'password' => 'hashed',
+            'onboarding_completed' => 'boolean',
+            'drops_balance' => 'integer',
         ];
+    }
+
+    /**
+     * Register media collections for User.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->singleFile()
+            ->useFallbackUrl(config('app.url') . '/images/default-avatar.png');
+
+        $this->addMediaCollection('banner')
+            ->singleFile()
+            ->useFallbackUrl(config('app.url') . '/images/default-banner.png');
     }
 }
