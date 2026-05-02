@@ -15,9 +15,11 @@ class AuthService
     public function register(array $data)
     {
         $data['password'] = Hash::make($data['password']);
-        $data['role'] = 'user';
 
-        return $this->userRepository->create($data);
+        $user = $this->userRepository->create($data);
+        $user->assignRole(\App\Models\User::ROLE_USER);
+
+        return $user;
     }
 
     public function login(string $email, string $password)
@@ -31,5 +33,41 @@ class AuthService
         }
 
         return $user;
+    }
+
+    public function handleSocialCallback(string $provider, $socialUser)
+    {
+        $idField = $provider . '_id';
+        $user = $this->userRepository->findByEmail($socialUser->getEmail());
+
+        if ($user) {
+            $user->update([$idField => $socialUser->getId()]);
+            return $user;
+        }
+
+        $user = $this->userRepository->create([
+            'name'                 => $socialUser->getName() ?? $socialUser->getNickname(),
+            'email'                => $socialUser->getEmail(),
+            'username'             => $this->generateUniqueUsername($socialUser->getNickname() ?? $socialUser->getName()),
+            $idField               => $socialUser->getId(),
+            'onboarding_completed' => false,
+        ]);
+
+        $user->assignRole(\App\Models\User::ROLE_USER);
+
+        return $user;
+    }
+
+    protected function generateUniqueUsername(string $name): string
+    {
+        $base = str($name)->slug('');
+        $username = $base;
+        $counter = 1;
+
+        while ($this->userRepository->findByUsername($username)) {
+            $username = $base . $counter++;
+        }
+
+        return $username;
     }
 }

@@ -18,6 +18,17 @@ class ProfileController extends Controller
         protected ProfileService $profileService
     ) {}
 
+    public function show($username)
+    {
+        $user = $this->profileService->findByUsername($username);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return new UserResource($user);
+    }
+
     public function update(UpdateProfileRequest $request)
     {
         $user = $this->profileService->updateProfile($request->user(), $request->validated());

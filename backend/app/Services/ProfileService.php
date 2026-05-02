@@ -11,6 +11,11 @@ class ProfileService
         protected UserRepositoryInterface $userRepository
     ) {}
 
+    public function findByUsername(string $username)
+    {
+        return $this->userRepository->findByUsername($username);
+    }
+
     public function updateProfile(User $user, array $data)
     {
         $this->userRepository->update($user, $data);

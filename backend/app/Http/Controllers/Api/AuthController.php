@@ -55,10 +55,26 @@ class AuthController extends Controller
         return new UserResource($request->user());
     }
 
-    public function socialLogin(Request $request, $provider)
+    public function socialRedirect($provider)
     {
-        return response()->json([
-            'message' => 'Social login for ' . $provider . ' is not yet configured with keys.',
-        ], 501);
+        return \Laravel\Socialite\Facades\Socialite::driver($provider)->stateless()->redirect();
+    }
+
+    public function socialCallback($provider)
+    {
+        try {
+            $socialUser = \Laravel\Socialite\Facades\Socialite::driver($provider)->stateless()->user();
+            $user = $this->authService->handleSocialCallback($provider, $socialUser);
+            
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'user'         => new UserResource($user),
+                'access_token' => $token,
+                'token_type'   => 'Bearer',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Social login failed: ' . $e->getMessage()], 422);
+        }
     }
 }
