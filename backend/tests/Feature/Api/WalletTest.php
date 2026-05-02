@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\DropsTransactionDirection;
+use App\Enums\DropsTransactionStatus;
+use App\Enums\DropsTransactionType;
 use App\Models\User;
 use App\Models\DropsLedger;
 use App\Services\DropsService;
@@ -21,10 +24,10 @@ class WalletTest extends TestCase
         // Create some transactions
         DropsLedger::create([
             'user_id'   => $user->id,
-            'type'      => 'purchase',
+            'type'      => DropsTransactionType::Purchase,
             'amount'    => 1000,
-            'direction' => DropsLedger::DIRECTION_CREDIT,
-            'status'    => DropsLedger::STATUS_COMPLETED,
+            'direction' => DropsTransactionDirection::Credit,
+            'status'    => DropsTransactionStatus::Completed,
         ]);
 
         $response = $this->getJson('/api/v1/wallet');

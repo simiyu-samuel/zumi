@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\WaveStatus;
+use App\Enums\WaveVisibility;
 use App\Models\User;
 use App\Models\Wave;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,7 +28,8 @@ class WaveFactory extends Factory
             'description'   => $this->faker->paragraph(),
             'stream_id'     => $this->faker->uuid(),
             'thumbnail_url' => $this->faker->imageUrl(),
-            'visibility'    => Wave::VISIBILITY_PUBLIC,
+            'visibility'    => WaveVisibility::Public,
+            'status'        => WaveStatus::Pending,
             'gated_drops'   => 0,
             'likes_count'   => 0,
             'comments_count'=> 0,

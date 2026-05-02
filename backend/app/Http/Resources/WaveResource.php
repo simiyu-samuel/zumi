@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\WaveVisibility;
 use App\Models\Wave;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -33,7 +34,7 @@ class WaveResource extends JsonResource
                 return $this->likes()->where('user_id', auth('sanctum')->id())->exists();
             }),
             'is_unlocked'    => $this->when(auth('sanctum')->check(), function () {
-                if ($this->visibility !== Wave::VISIBILITY_GATED) {
+                if ($this->visibility !== WaveVisibility::Gated) {
                     return true;
                 }
                 if ($this->user_id === auth('sanctum')->id()) {
@@ -41,7 +42,7 @@ class WaveResource extends JsonResource
                 }
                 return $this->purchases()->where('user_id', auth('sanctum')->id())->exists();
             }, function () {
-                return $this->visibility !== Wave::VISIBILITY_GATED;
+                return $this->visibility !== WaveVisibility::Gated;
             }),
             'created_at'     => $this->created_at,
             'updated_at'     => $this->updated_at,

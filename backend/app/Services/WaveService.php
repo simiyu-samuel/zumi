@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\DropsTransactionType;
+use App\Enums\WaveStatus;
+use App\Enums\WaveVisibility;
 use App\Models\Wave;
 use App\Models\User;
 use App\Repositories\Interfaces\WaveRepositoryInterface;
@@ -19,6 +22,11 @@ class WaveService
         return $this->waveRepository->getFeed($perPage);
     }
 
+    public function getFollowedFeed(User $user, int $perPage = 15): CursorPaginator
+    {
+        return $this->waveRepository->getFollowedFeed($user, $perPage);
+    }
+
     /**
      * Initialize a Wave upload by getting a Cloudflare Stream upload URL.
      */
@@ -30,7 +38,7 @@ class WaveService
     public function createWave(User $user, array $data): Wave
     {
         $data['user_id'] = $user->id;
-        $data['status'] = Wave::STATUS_PENDING;
+        $data['status'] = WaveStatus::Pending;
 
         return $this->waveRepository->create($data);
     }
@@ -65,7 +73,7 @@ class WaveService
 
     public function purchaseWave(User $user, Wave $wave): void
     {
-        if ($wave->visibility !== Wave::VISIBILITY_GATED) {
+        if ($wave->visibility !== WaveVisibility::Gated) {
             throw new \InvalidArgumentException('This Wave is not gated.');
         }
 
@@ -79,7 +87,7 @@ class WaveService
             $dropsService->debit(
                 $user,
                 $wave->gated_drops,
-                'wave_purchase',
+                DropsTransactionType::Spend->value, // debit expects string type usually or enum if updated
                 'wave',
                 $wave->id,
                 ['title' => $wave->title]
@@ -90,5 +98,10 @@ class WaveService
                 'amount_paid' => $wave->gated_drops,
             ]);
         });
+    }
+
+    public function incrementViews(Wave $wave): void
+    {
+        $wave->increment('views_count');
     }
 }

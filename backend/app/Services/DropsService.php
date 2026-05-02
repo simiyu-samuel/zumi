@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\DropsTransactionDirection;
+use App\Enums\DropsTransactionStatus;
 use App\Models\DropsLedger;
 use App\Models\User;
 use App\Repositories\Interfaces\DropsRepositoryInterface;
@@ -28,10 +30,10 @@ class DropsService
                 'user_id'        => $user->id,
                 'type'           => $type,
                 'amount'         => $amount,
-                'direction'      => DropsLedger::DIRECTION_CREDIT,
+                'direction'      => DropsTransactionDirection::Credit,
                 'reference_type' => $referenceType,
                 'reference_id'   => $referenceId,
-                'status'         => DropsLedger::STATUS_COMPLETED,
+                'status'         => DropsTransactionStatus::Completed,
                 'metadata'       => $metadata,
             ]);
 
@@ -59,10 +61,10 @@ class DropsService
                 'user_id'        => $user->id,
                 'type'           => $type,
                 'amount'         => $amount,
-                'direction'      => DropsLedger::DIRECTION_DEBIT,
+                'direction'      => DropsTransactionDirection::Debit,
                 'reference_type' => $referenceType,
                 'reference_id'   => $referenceId,
-                'status'         => DropsLedger::STATUS_COMPLETED,
+                'status'         => DropsTransactionStatus::Completed,
                 'metadata'       => $metadata,
             ]);
 

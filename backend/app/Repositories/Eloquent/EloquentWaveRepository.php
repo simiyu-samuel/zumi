@@ -2,6 +2,9 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\WaveStatus;
+use App\Enums\WaveVisibility;
+use App\Models\User;
 use App\Models\Wave;
 use App\Repositories\Interfaces\WaveRepositoryInterface;
 use Illuminate\Contracts\Pagination\CursorPaginator;
@@ -11,8 +14,20 @@ class EloquentWaveRepository implements WaveRepositoryInterface
     public function getFeed(int $perPage = 15): CursorPaginator
     {
         return Wave::with([Wave::RELATION_USER])
-            ->whereIn('visibility', [Wave::VISIBILITY_PUBLIC, Wave::VISIBILITY_GATED])
-            ->where('status', Wave::STATUS_READY)
+            ->whereIn('visibility', [WaveVisibility::Public, WaveVisibility::Gated])
+            ->where('status', WaveStatus::Ready)
+            ->latest()
+            ->cursorPaginate($perPage);
+    }
+
+    public function getFollowedFeed(User $user, int $perPage = 15): CursorPaginator
+    {
+        $followingIds = $user->following()->pluck('following_id');
+
+        return Wave::with([Wave::RELATION_USER])
+            ->whereIn('user_id', $followingIds)
+            ->whereIn('visibility', [WaveVisibility::Public, WaveVisibility::Gated])
+            ->where('status', WaveStatus::Ready)
             ->latest()
             ->cursorPaginate($perPage);
     }

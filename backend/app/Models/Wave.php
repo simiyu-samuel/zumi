@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\WaveStatus;
+use App\Enums\WaveVisibility;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,15 +17,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Wave extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia, HasUuids;
-
-    const VISIBILITY_PUBLIC = 'public';
-    const VISIBILITY_PRIVATE = 'private';
-    const VISIBILITY_GATED = 'gated';
-
-    const STATUS_PENDING = 'pending';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_READY = 'ready';
-    const STATUS_FAILED = 'failed';
 
     const RELATION_USER = 'user';
     const RELATION_LIKES = 'likes';
@@ -48,6 +41,8 @@ class Wave extends Model implements HasMedia
 
     protected $casts = [
         'video_metadata' => 'json',
+        'status'         => WaveStatus::class,
+        'visibility'     => WaveVisibility::class,
     ];
 
     public function user(): BelongsTo

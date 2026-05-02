@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\DropsTransactionDirection;
+use App\Enums\DropsTransactionStatus;
+use App\Enums\DropsTransactionType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,15 +34,10 @@ class DropsLedger extends Model
     protected $casts = [
         'metadata'   => 'json',
         'created_at' => 'datetime',
+        'type'       => DropsTransactionType::class,
+        'direction'  => DropsTransactionDirection::class,
+        'status'     => DropsTransactionStatus::class,
     ];
-
-    const DIRECTION_CREDIT = 'credit';
-    const DIRECTION_DEBIT  = 'debit';
-
-    const STATUS_PENDING   = 'pending';
-    const STATUS_COMPLETED = 'completed';
-    const STATUS_FAILED    = 'failed';
-    const STATUS_REVERSED  = 'reversed';
 
     public function user(): BelongsTo
     {

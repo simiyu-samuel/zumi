@@ -25,6 +25,13 @@ class WaveController extends Controller
         return WaveResource::collection($waves);
     }
 
+    public function followedFeed(Request $request)
+    {
+        $waves = $this->waveService->getFollowedFeed($request->user(), $request->input('per_page', 15));
+        
+        return WaveResource::collection($waves);
+    }
+
     public function initializeUpload(Request $request): JsonResponse
     {
         $request->validate([
@@ -114,5 +121,12 @@ class WaveController extends Controller
         return response()->json([
             'message' => 'Wave unlocked successfully',
         ]);
+    }
+
+    public function recordView(Request $request, Wave $wave): JsonResponse
+    {
+        $this->waveService->incrementViews($wave);
+
+        return response()->json(['message' => 'View recorded']);
     }
 }

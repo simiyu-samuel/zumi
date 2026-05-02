@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,13 +21,6 @@ class User extends Authenticatable implements HasMedia
 
     const COLLECTION_AVATAR = 'avatar';
     const COLLECTION_BANNER = 'banner';
-
-    const ROLE_USER = 'user';
-    const ROLE_ADMIN = 'admin';
-    const ROLE_CREATOR = 'creator';
-
-    const STATUS_ACTIVE = 'active';
-    const STATUS_SUSPENDED = 'suspended';
 
     /**
      * The attributes that are mass assignable.
@@ -72,6 +67,8 @@ class User extends Authenticatable implements HasMedia
             'onboarding_completed' => 'boolean',
             'drops_balance' => 'integer',
             'flow_score' => 'integer',
+            'role' => UserRole::class,
+            'status' => UserStatus::class,
         ];
     }
 

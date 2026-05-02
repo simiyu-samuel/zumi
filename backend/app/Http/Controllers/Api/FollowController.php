@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\FollowService;
 use App\Repositories\Interfaces\FollowRepositoryInterface;
@@ -53,7 +54,8 @@ class FollowController extends Controller
     public function followers(User $user): JsonResponse
     {
         $followers = $this->followRepository->getFollowers($user);
-        return response()->json($followers);
+        
+        return response()->json(UserResource::collection($followers)->response()->getData(true));
     }
 
     /**
@@ -62,6 +64,7 @@ class FollowController extends Controller
     public function following(User $user): JsonResponse
     {
         $following = $this->followRepository->getFollowing($user);
-        return response()->json($following);
+        
+        return response()->json(UserResource::collection($following)->response()->getData(true));
     }
 }

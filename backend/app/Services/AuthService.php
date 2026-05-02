@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserRole;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -17,7 +18,7 @@ class AuthService
         $data['password'] = Hash::make($data['password']);
 
         $user = $this->userRepository->create($data);
-        $user->assignRole(\App\Models\User::ROLE_USER);
+        $user->assignRole(UserRole::User->value);
 
         return $user;
     }
@@ -53,7 +54,7 @@ class AuthService
             'onboarding_completed' => false,
         ]);
 
-        $user->assignRole(\App\Models\User::ROLE_USER);
+        $user->assignRole(UserRole::User->value);
 
         return $user;
     }

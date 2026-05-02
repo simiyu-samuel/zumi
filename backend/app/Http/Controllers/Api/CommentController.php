@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Comment\StoreCommentRequest;
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Wave;
 use App\Services\CommentService;
@@ -22,19 +24,15 @@ class CommentController extends Controller
     public function forWave(Wave $wave): JsonResponse
     {
         $comments = $this->commentService->getComments($wave);
-        return response()->json($comments);
+        
+        return response()->json(CommentResource::collection($comments)->response()->getData(true));
     }
 
     /**
      * Store a comment for a wave.
      */
-    public function storeWave(Request $request, Wave $wave): JsonResponse
+    public function storeWave(StoreCommentRequest $request, Wave $wave): JsonResponse
     {
-        $request->validate([
-            'content'   => 'required|string|max:1000',
-            'parent_id' => 'nullable|uuid|exists:comments,id',
-        ]);
-
         $comment = $this->commentService->addComment(
             $request->user(),
             $wave,
@@ -42,7 +40,7 @@ class CommentController extends Controller
             $request->parent_id
         );
 
-        return response()->json($comment, Response::HTTP_CREATED);
+        return response()->json(new CommentResource($comment), Response::HTTP_CREATED);
     }
 
     /**

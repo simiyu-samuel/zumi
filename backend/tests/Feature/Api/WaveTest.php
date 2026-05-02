@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\WaveStatus;
+use App\Enums\WaveVisibility;
 use App\Models\User;
 use App\Models\Wave;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,8 +17,8 @@ class WaveTest extends TestCase
     public function test_user_can_view_waves_feed()
     {
         Wave::factory()->count(5)->create([
-            'visibility' => Wave::VISIBILITY_PUBLIC,
-            'status'     => Wave::STATUS_READY,
+            'visibility' => WaveVisibility::Public,
+            'status'     => WaveStatus::Ready,
         ]);
 
         $response = $this->getJson('/api/v1/waves');
@@ -34,7 +36,7 @@ class WaveTest extends TestCase
             'title'       => 'My First Wave',
             'description' => 'Cool wave description',
             'stream_id'   => 'cf-stream-id-123',
-            'visibility'  => Wave::VISIBILITY_PUBLIC,
+            'visibility'  => WaveVisibility::Public->value,
         ]);
 
         $response->assertStatus(201)
@@ -76,7 +78,7 @@ class WaveTest extends TestCase
     {
         $wave = Wave::factory()->create([
             'stream_id' => 'test-stream-id',
-            'status'    => Wave::STATUS_PENDING,
+            'status'    => WaveStatus::Pending,
         ]);
 
         $this->mock(\App\Services\CloudflareStreamService::class, function ($mock) {
@@ -96,7 +98,7 @@ class WaveTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('waves', [
             'id'            => $wave->id,
-            'status'        => Wave::STATUS_READY,
+            'status'        => WaveStatus::Ready->value,
             'thumbnail_url' => 'https://thumb.url',
         ]);
     }
@@ -105,7 +107,7 @@ class WaveTest extends TestCase
     {
         $user = User::factory()->create(['drops_balance' => 100]);
         $wave = Wave::factory()->create([
-            'visibility'  => Wave::VISIBILITY_GATED,
+            'visibility'  => WaveVisibility::Gated,
             'gated_drops' => 50,
         ]);
 
@@ -122,5 +124,48 @@ class WaveTest extends TestCase
 
         $user->refresh();
         $this->assertEquals(50, $user->drops_balance);
+    }
+
+    public function test_user_can_view_followed_waves_feed()
+    {
+        $user = User::factory()->create();
+        $following = User::factory()->create();
+        
+        // Follow the user
+        $user->following()->attach($following->id, ['id' => \Illuminate\Support\Str::uuid()]);
+
+        Wave::factory()->count(3)->create([
+            'user_id'    => $following->id,
+            'visibility' => WaveVisibility::Public,
+            'status'     => WaveStatus::Ready,
+        ]);
+
+        Wave::factory()->count(2)->create([
+            'visibility' => WaveVisibility::Public,
+            'status'     => WaveStatus::Ready,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/waves/followed');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(3, 'data');
+    }
+
+    public function test_user_can_record_wave_view()
+    {
+        $user = User::factory()->create();
+        $wave = Wave::factory()->create();
+
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson("/api/v1/waves/{$wave->id}/view");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('waves', [
+            'id' => $wave->id,
+            'views_count' => 1,
+        ]);
     }
 }

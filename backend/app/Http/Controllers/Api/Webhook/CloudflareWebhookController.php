@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api\Webhook;
 
+use App\Enums\WaveStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Wave;
 use App\Services\CloudflareStreamService;
@@ -39,7 +40,7 @@ class CloudflareWebhookController extends Controller
         switch ($status) {
             case 'ready':
                 $wave->update([
-                    'status' => Wave::STATUS_READY,
+                    'status' => WaveStatus::Ready,
                     'thumbnail_url' => $payload['thumbnail'] ?? $wave->thumbnail_url,
                     'video_metadata' => array_merge($wave->video_metadata ?? [], [
                         'duration' => $payload['duration'] ?? 0,
@@ -49,11 +50,11 @@ class CloudflareWebhookController extends Controller
                 break;
             
             case 'error':
-                $wave->update(['status' => Wave::STATUS_FAILED]);
+                $wave->update(['status' => WaveStatus::Failed]);
                 break;
 
             case 'processing':
-                $wave->update(['status' => Wave::STATUS_PROCESSING]);
+                $wave->update(['status' => WaveStatus::Processing]);
                 break;
         }
 
