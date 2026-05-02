@@ -3,12 +3,14 @@
 namespace App\Repositories\Interfaces;
 
 use App\Models\Wave;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 interface WaveRepositoryInterface
 {
-    public function getFeed(string $type = 'random', int $limit = 10): LengthAwarePaginator;
+    public function getFeed(int $perPage = 15): CursorPaginator;
+    public function getByUser(string $userId, int $perPage = 15): CursorPaginator;
+    public function findById(string $id): ?Wave;
     public function create(array $data): Wave;
-    public function findById(int $id): ?Wave;
-    public function toggleLike(Wave $wave, int $userId): bool;
+    public function update(Wave $wave, array $data): Wave;
+    public function delete(Wave $wave): bool;
 }

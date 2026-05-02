@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class UserRepository implements UserRepositoryInterface
 {
-    public function findById(int $id): ?User
+    public function findById(string $id): ?User
     {
         return User::find($id);
     }

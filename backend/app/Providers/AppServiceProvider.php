@@ -2,24 +2,32 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Wave;
+use App\Policies\WavePolicy;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\Interfaces\WaveRepositoryInterface;
+use App\Repositories\Eloquent\UserRepository;
+use App\Repositories\Eloquent\EloquentWaveRepository;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * The model to policy mappings.
+     *
+     * @var array<class-string, class-string>
+     */
+    protected $policies = [
+        Wave::class => WavePolicy::class,
+    ];
+
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        $this->app->bind(
-            \App\Repositories\Interfaces\UserRepositoryInterface::class,
-            \App\Repositories\Eloquent\UserRepository::class
-        );
-
-        $this->app->bind(
-            \App\Repositories\Interfaces\WaveRepositoryInterface::class,
-            \App\Repositories\Eloquent\EloquentWaveRepository::class
-        );
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(WaveRepositoryInterface::class, EloquentWaveRepository::class);
     }
 
     /**
@@ -27,6 +35,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
     }
 }

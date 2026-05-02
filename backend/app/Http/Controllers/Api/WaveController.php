@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wave\StoreWaveRequest;
+use App\Http\Requests\Wave\UpdateWaveRequest;
 use App\Http\Resources\WaveResource;
+use App\Models\Wave;
 use App\Services\WaveService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WaveController extends Controller
@@ -16,33 +19,64 @@ class WaveController extends Controller
 
     public function index(Request $request)
     {
-        $type = $request->query('type', 'random');
-        $waves = $this->waveService->getFeed($type);
-
+        $waves = $this->waveService->getDiscoveryFeed($request->input('per_page', 15));
+        
         return WaveResource::collection($waves);
     }
 
-    public function store(StoreWaveRequest $request)
+    public function store(StoreWaveRequest $request): JsonResponse
     {
-        $data = $request->validated();
-        $data['user_id'] = $request->user()->id;
-
-        $wave = $this->waveService->createWave($data);
-
-        return new WaveResource($wave->load('user'));
+        $wave = $this->waveService->createWave($request->user(), $request->validated());
+        
+        return response()->json([
+            'message' => 'Wave created successfully',
+            'wave'    => new WaveResource($wave),
+        ], 201);
     }
 
-    public function toggleLike(Request $request, $id)
+    public function show(string $id): WaveResource
     {
-        $isLiked = $this->waveService->toggleLike($id, $request->user()->id);
+        $wave = $this->waveService->getWave($id);
 
-        if ($isLiked === null) {
-            return response()->json(['message' => 'Wave not found'], 404);
+        if (!$wave) {
+            abort(404, 'Wave not found');
         }
 
+        $wave->load(['user']);
+
+        return new WaveResource($wave);
+    }
+
+    public function update(UpdateWaveRequest $request, Wave $wave): JsonResponse
+    {
+        $this->authorize('update', $wave);
+
+        $updatedWave = $this->waveService->updateWave($wave, $request->validated());
+
         return response()->json([
-            'liked'   => $isLiked,
-            'message' => $isLiked ? 'Wave liked' : 'Wave unliked',
+            'message' => 'Wave updated successfully',
+            'wave'    => new WaveResource($updatedWave),
+        ]);
+    }
+
+    public function destroy(Wave $wave): JsonResponse
+    {
+        $this->authorize('delete', $wave);
+
+        $this->waveService->deleteWave($wave);
+
+        return response()->json([
+            'message' => 'Wave deleted successfully',
+        ]);
+    }
+
+    public function like(Request $request, Wave $wave): JsonResponse
+    {
+        $this->waveService->likeWave($request->user(), $wave);
+
+        return response()->json([
+            'message' => 'Success',
+            'likes_count' => $wave->likes_count,
         ]);
     }
 }

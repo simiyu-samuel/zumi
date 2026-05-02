@@ -3,23 +3,29 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\Wave;
-use App\Models\WaveLike;
 use App\Repositories\Interfaces\WaveRepositoryInterface;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 class EloquentWaveRepository implements WaveRepositoryInterface
 {
-    public function getFeed(string $type = 'random', int $limit = 10): LengthAwarePaginator
+    public function getFeed(int $perPage = 15): CursorPaginator
     {
-        $query = Wave::with([Wave::RELATION_USER])->where('visibility', Wave::VISIBILITY_PUBLIC);
+        return Wave::with([Wave::RELATION_USER])
+            ->where('visibility', Wave::VISIBILITY_PUBLIC)
+            ->latest()
+            ->cursorPaginate($perPage);
+    }
 
-        if ($type === 'random') {
-            $query->inRandomOrder();
-        } else {
-            $query->latest();
-        }
+    public function getByUser(string $userId, int $perPage = 15): CursorPaginator
+    {
+        return Wave::where('user_id', $userId)
+            ->latest()
+            ->cursorPaginate($perPage);
+    }
 
-        return $query->paginate($limit);
+    public function findById(string $id): ?Wave
+    {
+        return Wave::with([Wave::RELATION_USER])->find($id);
     }
 
     public function create(array $data): Wave
@@ -27,23 +33,14 @@ class EloquentWaveRepository implements WaveRepositoryInterface
         return Wave::create($data);
     }
 
-    public function findById(int $id): ?Wave
+    public function update(Wave $wave, array $data): Wave
     {
-        return Wave::with([Wave::RELATION_USER])->find($id);
+        $wave->update($data);
+        return $wave;
     }
 
-    public function toggleLike(Wave $wave, int $userId): bool
+    public function delete(Wave $wave): bool
     {
-        $like = WaveLike::where('user_id', $userId)->where('wave_id', $wave->id)->first();
-
-        if ($like) {
-            $like->delete();
-            $wave->decrement('likes_count');
-            return false; // Unliked
-        }
-
-        WaveLike::create(['user_id' => $userId, 'wave_id' => $wave->id]);
-        $wave->increment('likes_count');
-        return true; // Liked
+        return $wave->delete();
     }
 }
