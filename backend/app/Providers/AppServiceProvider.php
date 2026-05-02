@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Wave;
+use App\Models\Comment;
 use App\Policies\WavePolicy;
+use App\Policies\CommentPolicy;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\WaveRepositoryInterface;
 use App\Repositories\Eloquent\UserRepository;
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Wave::class => WavePolicy::class,
+        Comment::class => CommentPolicy::class,
     ];
 
     /**

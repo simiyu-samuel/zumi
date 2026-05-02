@@ -20,4 +20,5 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/modules/waves.php';
     require __DIR__ . '/api/modules/wallet.php';
     require __DIR__ . '/api/modules/follow.php';
+    require __DIR__ . '/api/modules/comments.php';
 });
