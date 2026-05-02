@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Resources\UserResource;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Services\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected ProfileService $profileService
+    ) {}
+
     public function update(Request $request)
     {
         $user = $request->user();
@@ -25,50 +30,45 @@ class ProfileController extends Controller
             'bio'      => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $user->update($request->only(['name', 'username', 'bio']));
+        $user = $this->profileService->updateProfile($user, $request->only(['name', 'username', 'bio']));
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user'    => new UserResource($user->fresh()),
+            'user'    => new UserResource($user),
         ]);
     }
 
     public function uploadAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => ['required', 'image', 'max:2048'], // 2MB Max
+            'avatar' => ['required', 'image', 'max:2048'],
         ]);
 
-        $user = $request->user();
-        $user->addMediaFromRequest('avatar')
-            ->toMediaCollection('avatar');
+        $avatarUrl = $this->profileService->uploadMedia($request->user(), $request->file('avatar'), 'avatar');
 
         return response()->json([
             'message'    => 'Avatar uploaded successfully',
-            'avatar_url' => $user->getFirstMediaUrl('avatar'),
+            'avatar_url' => $avatarUrl,
         ]);
     }
 
     public function uploadBanner(Request $request)
     {
         $request->validate([
-            'banner' => ['required', 'image', 'max:5120'], // 5MB Max
+            'banner' => ['required', 'image', 'max:5120'],
         ]);
 
-        $user = $request->user();
-        $user->addMediaFromRequest('banner')
-            ->toMediaCollection('banner');
+        $bannerUrl = $this->profileService->uploadMedia($request->user(), $request->file('banner'), 'banner');
 
         return response()->json([
             'message'    => 'Banner uploaded successfully',
-            'banner_url' => $user->getFirstMediaUrl('banner'),
+            'banner_url' => $bannerUrl,
         ]);
     }
 
     public function completeOnboarding(Request $request)
     {
-        $user = $request->user();
-        $user->update(['onboarding_completed' => true]);
+        $user = $this->profileService->updateProfile($request->user(), ['onboarding_completed' => true]);
 
         return response()->json([
             'message' => 'Onboarding completed',
@@ -82,12 +82,7 @@ class ProfileController extends Controller
             'query' => 'required|string|min:2',
         ]);
 
-        $query = $request->input('query');
-
-        $users = User::where('name', 'like', "%{$query}%")
-            ->orWhere('username', 'like', "%{$query}%")
-            ->limit(10)
-            ->get();
+        $users = $this->profileService->search($request->input('query'));
 
         return UserResource::collection($users);
     }

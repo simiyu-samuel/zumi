@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        protected AuthService $authService
+    ) {}
+
     public function register(Request $request)
     {
         $request->validate([
@@ -20,13 +23,7 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'username' => $request->username,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'user',
-        ]);
+        $user = $this->authService->register($request->all());
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -44,13 +41,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid login credentials',
-            ], 401);
-        }
+        $user = $this->authService->login($request->email, $request->password);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -77,8 +68,6 @@ class AuthController extends Controller
 
     public function socialLogin(Request $request, $provider)
     {
-        // This is a stub for Socialite logic.
-        // You will need to implement the actual provider logic here.
         return response()->json([
             'message' => 'Social login for ' . $provider . ' is not yet configured with keys.',
         ], 501);
