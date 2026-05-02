@@ -15,6 +15,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Interfaces\UserRepositoryInterface::class,
             \App\Repositories\Eloquent\UserRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Interfaces\WaveRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentWaveRepository::class
+        );
     }
 
     /**
