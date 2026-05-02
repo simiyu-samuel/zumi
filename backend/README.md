@@ -1,66 +1,63 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Zumi Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The core API and administrative dashboard for the Zumi platform, built with Laravel 11.
 
-## About Laravel
+## Tech Stack
+- **Framework**: [Laravel 11](https://laravel.com/)
+- **PHP Version**: 8.4+
+- **Database**: PostgreSQL (Production), SQLite (Local)
+- **Monitoring**: 
+  - [Laravel Horizon](https://laravel.com/docs/horizon) (Queue Management)
+  - [Laravel Pulse](https://laravel.com/docs/pulse) (Health Monitoring)
+  - [Laravel Telescope](https://laravel.com/docs/telescope) (Debug Assistant)
+- **Admin Panel**: [Filament v3](https://filamentphp.com/)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Key Features Implemented
+- **Monetary System**: Drops ledger (immutable transaction history).
+- **ACL**: Role-based access control via Spatie Permission.
+- **Media**: Robust file handling via Spatie MediaLibrary.
+- **Search**: Algolia/Meilisearch integration via Laravel Scout.
+- **Billing**: Stripe integration via Laravel Cashier.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Getting Started
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Prerequisites
+- PHP 8.4+
+- Composer
+- SQLite (for local dev) or PostgreSQL
 
-## Learning Laravel
+### Installation
+1. Clone the repository and navigate to the backend:
+   ```bash
+   cd zumi/backend
+   ```
+2. Install dependencies:
+   ```bash
+   composer install
+   ```
+3. Set up environment:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+4. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+5. Create an admin user for Filament:
+   ```bash
+   php artisan make:filament-user
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Running Locally
+Start the development server:
+```bash
+php artisan serve
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Architecture
+This backend follows a **Domain-Driven** architecture:
+- `app/Domain`: Core domain logic and business rules.
+- `app/Services`: Business logic orchestration.
+- `app/Repositories`: Data access abstraction.
+- `app/Enums`: Single source of truth for fixed values.
