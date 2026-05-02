@@ -44,7 +44,7 @@ class ProfileController extends Controller
             'avatar' => ['required', 'image', 'max:2048'],
         ]);
 
-        $avatarUrl = $this->profileService->uploadMedia($request->user(), $request->file('avatar'), 'avatar');
+        $avatarUrl = $this->profileService->uploadMedia($request->user(), $request->file('avatar'), User::COLLECTION_AVATAR);
 
         return response()->json([
             'message'    => 'Avatar uploaded successfully',
@@ -58,7 +58,7 @@ class ProfileController extends Controller
             'banner' => ['required', 'image', 'max:5120'],
         ]);
 
-        $bannerUrl = $this->profileService->uploadMedia($request->user(), $request->file('banner'), 'banner');
+        $bannerUrl = $this->profileService->uploadMedia($request->user(), $request->file('banner'), User::COLLECTION_BANNER);
 
         return response()->json([
             'message'    => 'Banner uploaded successfully',

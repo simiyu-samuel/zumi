@@ -27,8 +27,8 @@ class WaveController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'stream_id'   => 'required|string',
-            'visibility'  => 'required|in:public,private,gated',
-            'gated_drops' => 'required_if:visibility,gated|integer|min:0',
+            'visibility'  => 'required|in:' . Wave::VISIBILITY_PUBLIC . ',' . Wave::VISIBILITY_PRIVATE . ',' . Wave::VISIBILITY_GATED,
+            'gated_drops' => 'required_if:visibility,' . Wave::VISIBILITY_GATED . '|integer|min:0',
         ]);
 
         $data = $request->all();

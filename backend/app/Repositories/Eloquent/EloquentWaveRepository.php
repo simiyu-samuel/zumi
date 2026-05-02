@@ -11,7 +11,7 @@ class EloquentWaveRepository implements WaveRepositoryInterface
 {
     public function getFeed(string $type = 'random', int $limit = 10): LengthAwarePaginator
     {
-        $query = Wave::with(['user'])->where('visibility', 'public');
+        $query = Wave::with([Wave::RELATION_USER])->where('visibility', Wave::VISIBILITY_PUBLIC);
 
         if ($type === 'random') {
             $query->inRandomOrder();
@@ -29,7 +29,7 @@ class EloquentWaveRepository implements WaveRepositoryInterface
 
     public function findById(int $id): ?Wave
     {
-        return Wave::with(['user'])->find($id);
+        return Wave::with([Wave::RELATION_USER])->find($id);
     }
 
     public function toggleLike(Wave $wave, int $userId): bool

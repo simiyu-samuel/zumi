@@ -13,6 +13,14 @@ class Wave extends Model
 {
     use HasFactory, SoftDeletes;
 
+    const VISIBILITY_PUBLIC = 'public';
+    const VISIBILITY_PRIVATE = 'private';
+    const VISIBILITY_GATED = 'gated';
+
+    const RELATION_USER = 'user';
+    const RELATION_LIKES = 'likes';
+    const RELATION_COMMENTS = 'comments';
+
     protected $fillable = [
         'user_id',
         'title',

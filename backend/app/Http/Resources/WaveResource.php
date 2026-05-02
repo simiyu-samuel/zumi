@@ -26,7 +26,7 @@ class WaveResource extends JsonResource
             'comments_count' => $this->comments_count,
             'shares_count'   => $this->shares_count,
             'views_count'    => $this->views_count,
-            'user'           => new UserResource($this->whenLoaded('user')),
+            'user'           => new UserResource($this->whenLoaded(\App\Models\Wave::RELATION_USER)),
             'is_liked'       => $this->when($request->user(), function () use ($request) {
                 return $this->likes()->where('user_id', $request->user()->id)->exists();
             }),

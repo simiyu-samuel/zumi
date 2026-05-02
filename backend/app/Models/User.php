@@ -13,6 +13,16 @@ class User extends Authenticatable implements HasMedia
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, InteractsWithMedia;
 
+    const COLLECTION_AVATAR = 'avatar';
+    const COLLECTION_BANNER = 'banner';
+
+    const ROLE_USER = 'user';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_CREATOR = 'creator';
+
+    const STATUS_ACTIVE = 'active';
+    const STATUS_SUSPENDED = 'suspended';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -64,11 +74,11 @@ class User extends Authenticatable implements HasMedia
      */
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('avatar')
+        $this->addMediaCollection(self::COLLECTION_AVATAR)
             ->singleFile()
             ->useFallbackUrl(config('app.url') . '/images/default-avatar.png');
 
-        $this->addMediaCollection('banner')
+        $this->addMediaCollection(self::COLLECTION_BANNER)
             ->singleFile()
             ->useFallbackUrl(config('app.url') . '/images/default-banner.png');
     }
