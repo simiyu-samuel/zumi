@@ -11,6 +11,7 @@ use App\Http\Requests\Wave\SearchRequest;
 use App\Http\Resources\UserResource;
 use App\Services\ProfileService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ProfileController extends Controller
 {
@@ -23,7 +24,7 @@ class ProfileController extends Controller
         $user = $this->profileService->findByUsername($username);
 
         if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
         return new UserResource($user);

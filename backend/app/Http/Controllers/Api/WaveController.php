@@ -10,6 +10,7 @@ use App\Models\Wave;
 use App\Services\WaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class WaveController extends Controller
 {
@@ -31,7 +32,7 @@ class WaveController extends Controller
         return response()->json([
             'message' => 'Wave created successfully',
             'wave'    => new WaveResource($wave),
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     public function show(string $id): WaveResource
@@ -39,7 +40,7 @@ class WaveController extends Controller
         $wave = $this->waveService->getWave($id);
 
         if (!$wave) {
-            abort(404, 'Wave not found');
+            abort(Response::HTTP_NOT_FOUND, 'Wave not found');
         }
 
         $wave->load(['user']);

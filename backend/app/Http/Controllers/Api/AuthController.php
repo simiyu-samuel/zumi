@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class AuthController extends Controller
 {
@@ -25,7 +26,7 @@ class AuthController extends Controller
             'user'         => new UserResource($user),
             'access_token' => $token,
             'token_type'   => 'Bearer',
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     public function login(LoginRequest $request)
@@ -74,7 +75,7 @@ class AuthController extends Controller
                 'token_type'   => 'Bearer',
             ]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Social login failed: ' . $e->getMessage()], 422);
+            return response()->json(['message' => 'Social login failed: ' . $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }
