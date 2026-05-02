@@ -9,4 +9,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/profile', [ProfileController::class, 'update']);
     Route::post('/user/avatar', [ProfileController::class, 'uploadAvatar']);
     Route::post('/user/banner', [ProfileController::class, 'uploadBanner']);
+    Route::post('/user/onboarding', [ProfileController::class, 'completeOnboarding']);
+    Route::get('/users/search', [ProfileController::class, 'search']);
 });

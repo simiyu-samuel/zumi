@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user'         => $user,
+            'user'         => new UserResource($user),
             'access_token' => $token,
             'token_type'   => 'Bearer',
         ], 201);
@@ -54,7 +55,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user'         => $user,
+            'user'         => new UserResource($user),
             'access_token' => $token,
             'token_type'   => 'Bearer',
         ]);
@@ -67,6 +68,11 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully',
         ]);
+    }
+
+    public function user(Request $request)
+    {
+        return new UserResource($request->user());
     }
 
     public function socialLogin(Request $request, $provider)
