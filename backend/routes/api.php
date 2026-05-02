@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Modular Routes
-require __DIR__ . '/api/modules/auth.php';
-require __DIR__ . '/api/modules/user.php';
+// API v1
+Route::prefix('v1')->group(function () {
+    require __DIR__ . '/api/modules/auth.php';
+    require __DIR__ . '/api/modules/user.php';
+});
