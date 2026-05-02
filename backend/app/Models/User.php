@@ -40,6 +40,7 @@ class User extends Authenticatable implements HasMedia
         'google_id',
         'apple_id',
         'drops_balance',
+        'flow_score',
         'onboarding_completed',
         'verified_at',
         'bio',
@@ -70,6 +71,7 @@ class User extends Authenticatable implements HasMedia
             'password' => 'hashed',
             'onboarding_completed' => 'boolean',
             'drops_balance' => 'integer',
+            'flow_score' => 'integer',
         ];
     }
 
@@ -85,5 +87,10 @@ class User extends Authenticatable implements HasMedia
         $this->addMediaCollection(self::COLLECTION_BANNER)
             ->singleFile()
             ->useFallbackUrl(config('app.url') . '/images/default-banner.png');
+    }
+
+    public function dropsLedger(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(DropsLedger::class);
     }
 }

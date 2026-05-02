@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('google_id')->unique()->nullable();
             $table->string('apple_id')->unique()->nullable();
             $table->unsignedBigInteger('drops_balance')->default(0);
+            $table->unsignedInteger('flow_score')->default(0);
             $table->boolean('onboarding_completed')->default(false);
             $table->timestamp('verified_at')->nullable();
             $table->text('bio')->nullable();
