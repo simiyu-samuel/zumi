@@ -3,9 +3,14 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Repositories\Interfaces\FollowRepositoryInterface;
 
 class FollowService
 {
+    public function __construct(
+        protected FollowRepositoryInterface $followRepository
+    ) {}
+
     /**
      * Follow a user.
      */
@@ -15,11 +20,11 @@ class FollowService
             return false;
         }
 
-        if ($follower->following()->where('following_id', $following->id)->exists()) {
+        if ($this->followRepository->isFollowing($follower, $following)) {
             return false;
         }
 
-        $follower->following()->attach($following->id, ['id' => \Illuminate\Support\Str::uuid()]);
+        $this->followRepository->follow($follower, $following);
         return true;
     }
 
@@ -28,7 +33,8 @@ class FollowService
      */
     public function unfollow(User $follower, User $following): bool
     {
-        return (bool) $follower->following()->detach($following->id);
+        $this->followRepository->unfollow($follower, $following);
+        return true;
     }
 
     /**
@@ -36,6 +42,6 @@ class FollowService
      */
     public function isFollowing(User $follower, User $following): bool
     {
-        return $follower->following()->where('following_id', $following->id)->exists();
+        return $this->followRepository->isFollowing($follower, $following);
     }
 }

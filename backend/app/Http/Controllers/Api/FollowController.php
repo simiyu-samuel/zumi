@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\FollowService;
+use App\Repositories\Interfaces\FollowRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,7 +13,8 @@ use Illuminate\Http\Response;
 class FollowController extends Controller
 {
     public function __construct(
-        protected FollowService $followService
+        protected FollowService $followService,
+        protected FollowRepositoryInterface $followRepository
     ) {}
 
     /**
@@ -50,7 +52,7 @@ class FollowController extends Controller
      */
     public function followers(User $user): JsonResponse
     {
-        $followers = $user->followers()->paginate(20);
+        $followers = $this->followRepository->getFollowers($user);
         return response()->json($followers);
     }
 
@@ -59,7 +61,7 @@ class FollowController extends Controller
      */
     public function following(User $user): JsonResponse
     {
-        $following = $user->following()->paginate(20);
+        $following = $this->followRepository->getFollowing($user);
         return response()->json($following);
     }
 }

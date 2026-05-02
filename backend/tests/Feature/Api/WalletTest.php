@@ -37,7 +37,7 @@ class WalletTest extends TestCase
     public function test_drops_service_credits_balance_correctly()
     {
         $user = User::factory()->create(['drops_balance' => 0]);
-        $service = new DropsService();
+        $service = app(DropsService::class);
 
         $service->credit($user, 500, 'earn');
 
@@ -53,7 +53,7 @@ class WalletTest extends TestCase
     public function test_drops_service_debits_balance_correctly()
     {
         $user = User::factory()->create(['drops_balance' => 1000]);
-        $service = new DropsService();
+        $service = app(DropsService::class);
 
         $service->debit($user, 300, 'spend');
 
@@ -69,7 +69,7 @@ class WalletTest extends TestCase
     public function test_drops_service_prevents_insufficient_balance()
     {
         $user = User::factory()->create(['drops_balance' => 100]);
-        $service = new DropsService();
+        $service = app(DropsService::class);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Insufficient Drops balance.');

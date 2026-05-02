@@ -4,11 +4,16 @@ namespace App\Services;
 
 use App\Models\DropsLedger;
 use App\Models\User;
+use App\Repositories\Interfaces\DropsRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class DropsService
 {
+    public function __construct(
+        protected DropsRepositoryInterface $dropsRepository
+    ) {}
+
     /**
      * Credit Drops to a user.
      */
@@ -19,7 +24,7 @@ class DropsService
         }
 
         return DB::transaction(function () use ($user, $amount, $type, $referenceType, $referenceId, $metadata) {
-            $ledger = DropsLedger::create([
+            $ledger = $this->dropsRepository->create([
                 'user_id'        => $user->id,
                 'type'           => $type,
                 'amount'         => $amount,
@@ -50,7 +55,7 @@ class DropsService
         }
 
         return DB::transaction(function () use ($user, $amount, $type, $referenceType, $referenceId, $metadata) {
-            $ledger = DropsLedger::create([
+            $ledger = $this->dropsRepository->create([
                 'user_id'        => $user->id,
                 'type'           => $type,
                 'amount'         => $amount,
@@ -72,16 +77,6 @@ class DropsService
      */
     public function calculateBalance(User $user): int
     {
-        $credits = DropsLedger::where('user_id', $user->id)
-            ->where('direction', DropsLedger::DIRECTION_CREDIT)
-            ->where('status', DropsLedger::STATUS_COMPLETED)
-            ->sum('amount');
-
-        $debits = DropsLedger::where('user_id', $user->id)
-            ->where('direction', DropsLedger::DIRECTION_DEBIT)
-            ->where('status', DropsLedger::STATUS_COMPLETED)
-            ->sum('amount');
-
-        return $credits - $debits;
+        return $this->dropsRepository->calculateBalance($user);
     }
 }

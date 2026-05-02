@@ -4,20 +4,25 @@ namespace App\Services;
 
 use App\Models\Comment;
 use App\Models\User;
+use App\Repositories\Interfaces\CommentRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 
 class CommentService
 {
+    public function __construct(
+        protected CommentRepositoryInterface $commentRepository
+    ) {}
+
     /**
      * Add a comment to a model.
      */
     public function addComment(User $user, Model $commentable, string $content, ?string $parentId = null): Comment
     {
-        return $commentable->comments()->create([
+        return $this->commentRepository->create([
             'user_id' => $user->id,
             'content' => $content,
             'parent_id' => $parentId,
-        ]);
+        ], $commentable);
     }
 
     /**
@@ -25,11 +30,7 @@ class CommentService
      */
     public function getComments(Model $commentable)
     {
-        return $commentable->comments()
-            ->with(['user', 'replies.user'])
-            ->whereNull('parent_id')
-            ->latest()
-            ->paginate(20);
+        return $this->commentRepository->getForModel($commentable);
     }
 
     /**
@@ -37,6 +38,6 @@ class CommentService
      */
     public function deleteComment(Comment $comment): bool
     {
-        return $comment->delete();
+        return $this->commentRepository->delete($comment);
     }
 }
