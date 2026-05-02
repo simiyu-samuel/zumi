@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -14,16 +15,9 @@ class AuthController extends Controller
         protected AuthService $authService
     ) {}
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:30', 'unique:users', 'alpha_dash'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
-
-        $user = $this->authService->register($request->all());
+        $user = $this->authService->register($request->validated());
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -34,13 +28,8 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email'    => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-
         $user = $this->authService->login($request->email, $request->password);
 
         $token = $user->createToken('auth_token')->plainTextToken;

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Requests\Profile\UploadAvatarRequest;
+use App\Http\Requests\Profile\UploadBannerRequest;
+use App\Http\Requests\Wave\SearchRequest;
 use App\Http\Resources\UserResource;
 use App\Services\ProfileService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -14,23 +18,9 @@ class ProfileController extends Controller
         protected ProfileService $profileService
     ) {}
 
-    public function update(Request $request)
+    public function update(UpdateProfileRequest $request)
     {
-        $user = $request->user();
-
-        $request->validate([
-            'name'     => ['sometimes', 'string', 'max:255'],
-            'username' => [
-                'sometimes',
-                'string',
-                'max:30',
-                'alpha_dash',
-                Rule::unique('users')->ignore($user->id),
-            ],
-            'bio'      => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $user = $this->profileService->updateProfile($user, $request->only(['name', 'username', 'bio']));
+        $user = $this->profileService->updateProfile($request->user(), $request->validated());
 
         return response()->json([
             'message' => 'Profile updated successfully',
@@ -38,12 +28,8 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function uploadAvatar(Request $request)
+    public function uploadAvatar(UploadAvatarRequest $request)
     {
-        $request->validate([
-            'avatar' => ['required', 'image', 'max:2048'],
-        ]);
-
         $avatarUrl = $this->profileService->uploadMedia($request->user(), $request->file('avatar'), User::COLLECTION_AVATAR);
 
         return response()->json([
@@ -52,12 +38,8 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function uploadBanner(Request $request)
+    public function uploadBanner(UploadBannerRequest $request)
     {
-        $request->validate([
-            'banner' => ['required', 'image', 'max:5120'],
-        ]);
-
         $bannerUrl = $this->profileService->uploadMedia($request->user(), $request->file('banner'), User::COLLECTION_BANNER);
 
         return response()->json([
@@ -76,12 +58,8 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function search(Request $request)
+    public function search(SearchRequest $request)
     {
-        $request->validate([
-            'query' => 'required|string|min:2',
-        ]);
-
         $users = $this->profileService->search($request->input('query'));
 
         return UserResource::collection($users);

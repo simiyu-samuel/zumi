@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Wave\StoreWaveRequest;
 use App\Http\Resources\WaveResource;
 use App\Services\WaveService;
 use Illuminate\Http\Request;
@@ -21,17 +22,9 @@ class WaveController extends Controller
         return WaveResource::collection($waves);
     }
 
-    public function store(Request $request)
+    public function store(StoreWaveRequest $request)
     {
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'stream_id'   => 'required|string',
-            'visibility'  => 'required|in:' . Wave::VISIBILITY_PUBLIC . ',' . Wave::VISIBILITY_PRIVATE . ',' . Wave::VISIBILITY_GATED,
-            'gated_drops' => 'required_if:visibility,' . Wave::VISIBILITY_GATED . '|integer|min:0',
-        ]);
-
-        $data = $request->all();
+        $data = $request->validated();
         $data['user_id'] = $request->user()->id;
 
         $wave = $this->waveService->createWave($data);
