@@ -35,4 +35,18 @@ class CircleResource extends JsonResource
             'created_at'    => $this->created_at,
         ];
     }
+
+    public function with(Request $request): array
+    {
+        return [
+            'meta' => [
+                'seo' => [
+                    'title'       => $this->name . ' | Zumi Circle',
+                    'description' => $this->description ?? 'Join this community on Zumi!',
+                    'image'       => $this->avatar,
+                    'type'        => 'profile',
+                ]
+            ]
+        ];
+    }
 }

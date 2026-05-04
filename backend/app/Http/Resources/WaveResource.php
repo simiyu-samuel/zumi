@@ -53,6 +53,23 @@ class WaveResource extends JsonResource
     }
 
     /**
+     * Get additional data that should be returned with the resource array.
+     */
+    public function with(Request $request): array
+    {
+        return [
+            'meta' => [
+                'seo' => [
+                    'title'       => $this->title . ' | Zumi',
+                    'description' => $this->description ?? 'Check out this Wave on Zumi!',
+                    'image'       => $this->thumbnail_url,
+                    'type'        => 'video.other',
+                ]
+            ]
+        ];
+    }
+
+    /**
      * Extract mentions from text.
      */
     protected function getMentions(?string $text): array

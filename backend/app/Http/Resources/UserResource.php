@@ -31,4 +31,18 @@ class UserResource extends JsonResource
             'updated_at'           => $this->updated_at,
         ];
     }
+
+    public function with(Request $request): array
+    {
+        return [
+            'meta' => [
+                'seo' => [
+                    'title'       => $this->name . ' (@' . $this->username . ') | Zumi',
+                    'description' => $this->bio ?? 'Connect with me on Zumi!',
+                    'image'       => $this->getFirstMediaUrl(\App\Models\User::COLLECTION_AVATAR),
+                    'type'        => 'profile',
+                ]
+            ]
+        ];
+    }
 }
