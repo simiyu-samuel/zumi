@@ -71,33 +71,42 @@ class WaveService
         }
     }
 
-    public function purchaseWave(User $user, Wave $wave): void
+    public function purchaseWave(User $user, Wave $wave): array
     {
-        if ($wave->visibility !== WaveVisibility::Gated) {
-            throw new \InvalidArgumentException('This Wave is not gated.');
+        try {
+            if ($wave->visibility !== WaveVisibility::Gated) {
+                throw new \InvalidArgumentException('This Wave is not gated.');
+            }
+
+            if ($wave->purchases()->where('user_id', $user->id)->exists()) {
+                return ['success' => true]; // Already purchased
+            }
+
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $wave) {
+                $dropsService = app(DropsService::class);
+                
+                $dropsService->transfer(
+                    $user,
+                    $wave->user,
+                    $wave->gated_drops,
+                    DropsTransactionType::Spend,
+                    $wave,
+                    ['title' => $wave->title]
+                );
+
+                $wave->purchases()->create([
+                    'user_id' => $user->id,
+                    'amount_paid' => $wave->gated_drops,
+                ]);
+            });
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
         }
-
-        if ($wave->purchases()->where('user_id', $user->id)->exists()) {
-            return; // Already purchased
-        }
-
-        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $wave) {
-            $dropsService = app(DropsService::class);
-            
-            $dropsService->transfer(
-                $user,
-                $wave->user,
-                $wave->gated_drops,
-                DropsTransactionType::Spend,
-                $wave,
-                ['title' => $wave->title]
-            );
-
-            $wave->purchases()->create([
-                'user_id' => $user->id,
-                'amount_paid' => $wave->gated_drops,
-            ]);
-        });
     }
 
     public function incrementViews(Wave $wave): void

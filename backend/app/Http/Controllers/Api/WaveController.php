@@ -109,10 +109,10 @@ class WaveController extends Controller
 
     public function purchase(Request $request, Wave $wave): JsonResponse
     {
-        try {
-            $this->waveService->purchaseWave($request->user(), $wave);
-        } catch (\InvalidArgumentException $e) {
-            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        $result = $this->waveService->purchaseWave($request->user(), $wave);
+
+        if (!$result['success']) {
+            return response()->json(['message' => $result['message']], Response::HTTP_BAD_REQUEST);
         }
 
         return response()->json([

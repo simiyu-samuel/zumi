@@ -21,8 +21,10 @@ class WithdrawRequest extends FormRequest
      */
     public function rules(): array
     {
+        $minPayout = config('zumi.drops.min_payout_amount', 5000);
+
         return [
-            'amount' => 'required|integer|min:5000',
+            'amount' => "required|integer|min:{$minPayout}",
         ];
     }
 }

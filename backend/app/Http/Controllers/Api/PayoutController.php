@@ -33,21 +33,20 @@ class PayoutController extends Controller
      */
     public function withdraw(WithdrawRequest $request): JsonResponse
     {
-        try {
-            $ledger = $this->payoutService->processWithdrawal(
-                $request->user(),
-                $request->amount
-            );
+        $result = $this->payoutService->processWithdrawal(
+            $request->user(),
+            $request->amount
+        );
 
+        if (!$result['success']) {
             return response()->json([
-                'message'     => 'Withdrawal successful. Funds transferred to your account.',
-                'transaction' => new DropsTransactionResource($ledger),
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
+                'message' => $result['message'],
             ], Response::HTTP_BAD_REQUEST);
         }
+
+        return response()->json([
+            'message'     => 'Withdrawal successful. Funds transferred to your account.',
+            'transaction' => new DropsTransactionResource($result['ledger']),
+        ]);
     }
 }

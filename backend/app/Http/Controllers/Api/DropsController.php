@@ -46,10 +46,10 @@ class DropsController extends Controller
             $reference = $request->reference_type::findOrFail($request->reference_id);
         }
 
-        try {
-            $this->dropsService->gift($sender, $receiver, $request->amount, $reference);
-        } catch (\InvalidArgumentException $e) {
-            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        $result = $this->dropsService->gift($sender, $receiver, $request->amount, $reference);
+
+        if (!$result['success']) {
+            return response()->json(['message' => $result['message']], Response::HTTP_BAD_REQUEST);
         }
 
         return response()->json([

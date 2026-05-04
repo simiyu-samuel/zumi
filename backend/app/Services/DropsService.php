@@ -137,9 +137,18 @@ class DropsService
     /**
      * Gift Drops from one user to another.
      */
-    public function gift(User $sender, User $receiver, int $amount, ?Model $reference = null): void
+    public function gift(User $sender, User $receiver, int $amount, ?Model $reference = null): array
     {
-        $this->transfer($sender, $receiver, $amount, DropsTransactionType::Gift, $reference);
+        try {
+            $this->transfer($sender, $receiver, $amount, DropsTransactionType::Gift, $reference);
+            
+            return ['success' => true];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
@@ -231,7 +240,7 @@ class DropsService
      */
     public function calculatePlatformFee(User $user, int $amount): int
     {
-        $rate = 0.05; // Standard 5% platform fee
+        $rate = config('zumi.drops.platform_fee_rate', 0.05); // Standard platform fee
 
         return (int) floor($amount * $rate);
     }
