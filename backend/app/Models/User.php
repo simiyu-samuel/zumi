@@ -102,4 +102,10 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsToMany(User::class, 'followers', 'following_id', 'follower_id')
             ->withTimestamps();
     }
+    public function circles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Circle::class, 'circle_members')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
+    }
 }

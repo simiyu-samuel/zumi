@@ -23,9 +23,13 @@ class EloquentWaveRepository implements WaveRepositoryInterface
     public function getFollowedFeed(User $user, int $perPage = 15): CursorPaginator
     {
         $followingIds = $user->following()->pluck('following_id');
+        $circleIds = $user->circles()->pluck('circles.id');
 
         return Wave::with([Wave::RELATION_USER])
-            ->whereIn('user_id', $followingIds)
+            ->where(function ($query) use ($followingIds, $circleIds) {
+                $query->whereIn('user_id', $followingIds)
+                      ->orWhereIn('circle_id', $circleIds);
+            })
             ->whereIn('visibility', [WaveVisibility::Public, WaveVisibility::Gated])
             ->where('status', WaveStatus::Ready)
             ->latest()

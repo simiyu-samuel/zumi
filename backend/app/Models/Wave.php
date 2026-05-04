@@ -37,6 +37,7 @@ class Wave extends Model implements HasMedia
         'comments_count',
         'shares_count',
         'views_count',
+        'circle_id',
     ];
 
     protected $casts = [

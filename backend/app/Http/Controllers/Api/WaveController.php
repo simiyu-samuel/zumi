@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Wave\InitializeUploadRequest;
 use App\Http\Requests\Wave\StoreWaveRequest;
 use App\Http\Requests\Wave\UpdateWaveRequest;
 use App\Http\Resources\WaveResource;
@@ -32,12 +33,8 @@ class WaveController extends Controller
         return WaveResource::collection($waves);
     }
 
-    public function initializeUpload(Request $request): JsonResponse
+    public function initializeUpload(InitializeUploadRequest $request): JsonResponse
     {
-        $request->validate([
-            'size_bytes' => 'required|integer|max:104857600', // 100MB max
-            'title'      => 'nullable|string|max:255',
-        ]);
 
         $uploadData = $this->waveService->initializeUpload(
             $request->user(),

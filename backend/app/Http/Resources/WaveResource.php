@@ -19,6 +19,8 @@ class WaveResource extends JsonResource
         return [
             'id'             => $this->id,
             'user'           => new UserResource($this->whenLoaded('user')),
+            'circle_id'      => $this->circle_id,
+            'circle'         => new CircleResource($this->whenLoaded('circle')),
             'title'          => $this->title,
             'description'    => $this->description,
             'stream_id'      => $this->stream_id,

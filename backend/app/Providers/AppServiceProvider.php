@@ -11,11 +11,13 @@ use App\Repositories\Interfaces\WaveRepositoryInterface;
 use App\Repositories\Interfaces\DropsRepositoryInterface;
 use App\Repositories\Interfaces\FollowRepositoryInterface;
 use App\Repositories\Interfaces\CommentRepositoryInterface;
+use App\Repositories\Interfaces\CircleRepositoryInterface;
 use App\Repositories\Eloquent\UserRepository;
 use App\Repositories\Eloquent\EloquentWaveRepository;
 use App\Repositories\Eloquent\EloquentDropsRepository;
 use App\Repositories\Eloquent\EloquentFollowRepository;
 use App\Repositories\Eloquent\EloquentCommentRepository;
+use App\Repositories\Eloquent\EloquentCircleRepository;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DropsRepositoryInterface::class, EloquentDropsRepository::class);
         $this->app->bind(FollowRepositoryInterface::class, EloquentFollowRepository::class);
         $this->app->bind(CommentRepositoryInterface::class, EloquentCommentRepository::class);
+        $this->app->bind(CircleRepositoryInterface::class, EloquentCircleRepository::class);
     }
 
     /**
