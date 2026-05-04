@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\DropsTransactionDirection;
+use App\Enums\DropsTransactionStatus;
 use App\Models\DropsLedger;
 use App\Models\User;
 use App\Repositories\Interfaces\DropsRepositoryInterface;
@@ -24,13 +26,13 @@ class EloquentDropsRepository implements DropsRepositoryInterface
     public function calculateBalance(User $user): int
     {
         $credits = DropsLedger::where('user_id', $user->id)
-            ->where('direction', DropsLedger::DIRECTION_CREDIT)
-            ->where('status', DropsLedger::STATUS_COMPLETED)
+            ->where('direction', DropsTransactionDirection::Credit)
+            ->where('status', DropsTransactionStatus::Completed)
             ->sum('amount');
 
         $debits = DropsLedger::where('user_id', $user->id)
-            ->where('direction', DropsLedger::DIRECTION_DEBIT)
-            ->where('status', DropsLedger::STATUS_COMPLETED)
+            ->where('direction', DropsTransactionDirection::Debit)
+            ->where('status', DropsTransactionStatus::Completed)
             ->sum('amount');
 
         return $credits - $debits;

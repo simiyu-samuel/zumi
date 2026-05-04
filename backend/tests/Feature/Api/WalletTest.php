@@ -79,4 +79,61 @@ class WalletTest extends TestCase
 
         $service->debit($user, 500, 'spend');
     }
+
+    public function test_user_can_gift_drops_to_another_user()
+    {
+        $sender = User::factory()->create(['drops_balance' => 1000]);
+        $receiver = User::factory()->create(['drops_balance' => 0, 'role' => \App\Enums\UserRole::User]);
+        
+        Sanctum::actingAs($sender);
+
+        $response = $this->postJson('/api/v1/drops/gift', [
+            'receiver_id' => $receiver->id,
+            'amount'      => 100,
+        ]);
+
+        $response->assertStatus(200);
+
+        $sender->refresh();
+        $receiver->refresh();
+
+        // 100 gifted. 15% fee for Free user = 15 Drops. Receiver gets 85.
+        $this->assertEquals(900, $sender->drops_balance);
+        $this->assertEquals(85, $receiver->drops_balance);
+
+        $this->assertDatabaseHas('drops_ledger', [
+            'user_id'   => $sender->id,
+            'amount'    => 100,
+            'direction' => 'debit',
+            'type'      => 'gift',
+        ]);
+
+        $this->assertDatabaseHas('drops_ledger', [
+            'user_id'   => $receiver->id,
+            'amount'    => 85,
+            'direction' => 'credit',
+            'type'      => 'gift',
+        ]);
+
+        // Fee entry
+        $this->assertDatabaseHas('drops_ledger', [
+            'user_id'   => null,
+            'amount'    => 15,
+            'direction' => 'credit',
+            'type'      => 'fee',
+        ]);
+    }
+
+    public function test_platform_fee_is_calculated_correctly()
+    {
+        $service = app(DropsService::class);
+        
+        $freeUser = User::factory()->create(['role' => \App\Enums\UserRole::User]);
+        $proUser = User::factory()->create(['role' => \App\Enums\UserRole::Pro]);
+        $studioUser = User::factory()->create(['role' => \App\Enums\UserRole::Studio]);
+
+        $this->assertEquals(15, $service->calculatePlatformFee($freeUser, 100));
+        $this->assertEquals(10, $service->calculatePlatformFee($proUser, 100));
+        $this->assertEquals(7, $service->calculatePlatformFee($studioUser, 100));
+    }
 }

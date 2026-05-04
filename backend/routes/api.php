@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/modules/auth.php';
     require __DIR__ . '/api/modules/user.php';
     require __DIR__ . '/api/modules/waves.php';
-    require __DIR__ . '/api/modules/wallet.php';
+    require __DIR__ . '/api/modules/drops.php';
     require __DIR__ . '/api/modules/follow.php';
     require __DIR__ . '/api/modules/comments.php';
     require __DIR__ . '/api/modules/webhooks.php';
