@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CircleMemberRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -16,6 +17,10 @@ class CircleMember extends Model
         'user_id',
         'role',
         'joined_at',
+    ];
+
+    protected $casts = [
+        'role' => CircleMemberRole::class,
     ];
 
     public function circle(): BelongsTo

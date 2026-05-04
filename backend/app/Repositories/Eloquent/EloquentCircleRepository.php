@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\CircleMemberRole;
 use App\Models\Circle;
 use App\Models\User;
 use App\Repositories\Interfaces\CircleRepositoryInterface;
@@ -45,10 +46,10 @@ class EloquentCircleRepository implements CircleRepositoryInterface
         return $circle->delete();
     }
 
-    public function addMember(Circle $circle, User $user, string $role = 'member'): void
+    public function addMember(Circle $circle, User $user, CircleMemberRole $role = CircleMemberRole::Member): void
     {
         $circle->members()->syncWithoutDetaching([
-            $user->id => ['id' => \Illuminate\Support\Str::uuid(), 'role' => $role]
+            $user->id => ['id' => \Illuminate\Support\Str::uuid(), 'role' => $role->value]
         ]);
         $circle->increment('members_count');
     }

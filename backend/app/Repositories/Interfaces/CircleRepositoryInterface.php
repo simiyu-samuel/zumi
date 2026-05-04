@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Interfaces;
 
+use App\Enums\CircleMemberRole;
 use App\Models\Circle;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -15,6 +16,6 @@ interface CircleRepositoryInterface
     public function create(array $data): Circle;
     public function update(Circle $circle, array $data): Circle;
     public function delete(Circle $circle): bool;
-    public function addMember(Circle $circle, User $user, string $role = 'member'): void;
+    public function addMember(Circle $circle, User $user, CircleMemberRole $role = CircleMemberRole::Member): void;
     public function removeMember(Circle $circle, User $user): void;
 }

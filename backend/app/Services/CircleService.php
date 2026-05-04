@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CircleMemberRole;
 use App\Models\Circle;
 use App\Models\User;
 use App\Repositories\Interfaces\CircleRepositoryInterface;
@@ -22,7 +23,7 @@ class CircleService
         $circle = $this->circleRepository->create($data);
         
         // Owner automatically becomes a member/owner
-        $this->circleRepository->addMember($circle, $user, 'owner');
+        $this->circleRepository->addMember($circle, $user, CircleMemberRole::Owner);
         
         return $circle;
     }
