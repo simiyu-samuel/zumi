@@ -24,6 +24,13 @@ class Challenge extends Model
         self::RELATION_WINNER,
     ];
 
+    const DETAILED_EAGER_LOAD = [
+        self::RELATION_USER,
+        self::RELATION_WINNER,
+        'participations.user',
+        'participations.wave',
+    ];
+
     protected $fillable = [
         'user_id',
         'title',

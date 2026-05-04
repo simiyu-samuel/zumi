@@ -17,7 +17,7 @@ class EloquentCommentRepository implements CommentRepositoryInterface
     public function getForModel(Model $commentable, int $perPage = 20): LengthAwarePaginator
     {
         return $commentable->comments()
-            ->with(array_merge(Comment::DEFAULT_EAGER_LOAD, ['replies.user']))
+            ->with(Comment::RECURSIVE_EAGER_LOAD)
             ->whereNull('parent_id')
             ->latest()
             ->paginate($perPage);

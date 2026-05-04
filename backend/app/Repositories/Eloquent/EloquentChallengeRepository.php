@@ -29,10 +29,7 @@ class EloquentChallengeRepository implements ChallengeRepositoryInterface
 
     public function findById(string $id): ?Challenge
     {
-        return Challenge::with(array_merge(
-            Challenge::DEFAULT_EAGER_LOAD,
-            ['participations.user', 'participations.wave']
-        ))->find($id);
+        return Challenge::with(Challenge::DETAILED_EAGER_LOAD)->find($id);
     }
 
     public function update(Challenge $challenge, array $data): Challenge

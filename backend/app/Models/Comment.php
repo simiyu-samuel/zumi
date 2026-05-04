@@ -21,6 +21,11 @@ class Comment extends Model
         self::RELATION_USER,
     ];
 
+    const RECURSIVE_EAGER_LOAD = [
+        self::RELATION_USER,
+        'replies.user',
+    ];
+
     protected $fillable = [
         'user_id',
         'commentable_id',
