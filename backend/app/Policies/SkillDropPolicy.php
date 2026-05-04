@@ -12,7 +12,7 @@ class SkillDropPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isPremium();
+        return $user->can('publish skill drops') || $user->isPremium();
     }
 
     /**

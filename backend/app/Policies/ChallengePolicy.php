@@ -13,7 +13,7 @@ class ChallengePolicy
      */
     public function create(User $user): bool
     {
-        return $user->isPremium();
+        return $user->can('host wave challenges') || $user->isPremium();
     }
 
     /**

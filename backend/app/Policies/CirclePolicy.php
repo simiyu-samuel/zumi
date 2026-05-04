@@ -13,7 +13,7 @@ class CirclePolicy
      */
     public function create(User $user): bool
     {
-        if ($user->isPremium()) {
+        if ($user->can('create circles') || $user->isPremium()) {
             return true;
         }
 

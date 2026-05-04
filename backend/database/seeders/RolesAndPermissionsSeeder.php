@@ -22,22 +22,67 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::updateOrCreate(['name' => 'pro', 'guard_name' => 'web']);
         Role::updateOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
-        // Define permissions
-        Permission::updateOrCreate(['name' => 'upload waves', 'guard_name' => 'web']);
-        Permission::updateOrCreate(['name' => 'manage drops', 'guard_name' => 'web']);
-        Permission::updateOrCreate(['name' => 'view analytics', 'guard_name' => 'web']);
-        Permission::updateOrCreate(['name' => 'create circles', 'guard_name' => 'web']);
+        // Define Permissions
+        $permissions = [
+            // Basic User Features
+            'upload waves',
+            'join circles',
+            'gift drops',
+            'view wallet',
+            
+            // Premium Features
+            'create circles',
+            'publish skill drops',
+            'host gated rooms',
+            'host wave challenges',
+            'view analytics',
+            
+            // Administrative Features
+            'manage users',
+            'manage drops',
+            'view admin dashboard',
+        ];
 
-        // Assign basic permissions to all users
+        foreach ($permissions as $permission) {
+            Permission::updateOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        // Assign permissions to 'user' (Free)
         $userRole = Role::findByName('user');
-        $userRole->givePermissionTo(['upload waves']);
+        $userRole->givePermissionTo([
+            'upload waves',
+            'join circles',
+            'gift drops',
+            'view wallet',
+        ]);
 
-        // Assign premium permissions to Pro and Studio
+        // Assign permissions to 'pro'
         $proRole = Role::findByName('pro');
-        $proRole->givePermissionTo(['upload waves', 'view analytics', 'create circles']);
+        $proRole->givePermissionTo([
+            'upload waves',
+            'join circles',
+            'gift drops',
+            'view wallet',
+            'create circles',
+            'publish skill drops',
+            'host gated rooms',
+            'host wave challenges',
+            'view analytics',
+        ]);
 
+        // Assign permissions to 'studio' (Same as Pro, with potentially more in future)
         $studioRole = Role::findByName('studio');
-        $studioRole->givePermissionTo(['upload waves', 'view analytics', 'create circles']);
+        $studioRole->givePermissionTo([
+            'upload waves',
+            'join circles',
+            'gift drops',
+            'view wallet',
+            'create circles',
+            'publish skill drops',
+            'host gated rooms',
+            'host wave challenges',
+            'view analytics',
+        ]);
 
         // Assign everything to admin
         $adminRole = Role::findByName('admin');

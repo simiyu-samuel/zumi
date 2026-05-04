@@ -12,7 +12,7 @@ class GatedRoomPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isPremium();
+        return $user->can('host gated rooms') || $user->isPremium();
     }
 
     /**
