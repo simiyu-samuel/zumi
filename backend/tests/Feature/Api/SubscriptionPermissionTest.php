@@ -83,18 +83,18 @@ class SubscriptionPermissionTest extends TestCase
 
         $amount = 1000;
 
-        // Free: 15%
-        $this->assertEquals(150, $dropsService->calculatePlatformFee($freeUser, $amount));
+        // Free: 15% (for Circle Subscription)
+        $this->assertEquals(150, $dropsService->calculatePlatformFee($amount, \App\Enums\DropsTransactionType::CircleSubscription, $freeUser));
         
         // Pro: 10%
-        $this->assertEquals(100, $dropsService->calculatePlatformFee($proUser, $amount));
+        $this->assertEquals(100, $dropsService->calculatePlatformFee($amount, \App\Enums\DropsTransactionType::CircleSubscription, $proUser));
         
         // Studio: 7%
-        $this->assertEquals(70, $dropsService->calculatePlatformFee($studioUser, $amount));
+        $this->assertEquals(70, $dropsService->calculatePlatformFee($amount, \App\Enums\DropsTransactionType::CircleSubscription, $studioUser));
 
         // Challenge Prize (Release): Fixed 5% for everyone
-        $this->assertEquals(50, $dropsService->calculatePlatformFee($freeUser, $amount, \App\Enums\DropsTransactionType::Release));
-        $this->assertEquals(50, $dropsService->calculatePlatformFee($studioUser, $amount, \App\Enums\DropsTransactionType::Release));
+        $this->assertEquals(50, $dropsService->calculatePlatformFee($amount, \App\Enums\DropsTransactionType::Release, $freeUser));
+        $this->assertEquals(50, $dropsService->calculatePlatformFee($amount, \App\Enums\DropsTransactionType::Release, $studioUser));
     }
 
     public function test_payout_threshold_enforced()

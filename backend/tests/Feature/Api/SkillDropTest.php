@@ -57,9 +57,9 @@ class SkillDropTest extends TestCase
         $buyer->refresh();
         $creator->refresh();
 
-        // 500 drops spent. 10% fee = 50. Creator gets 450.
+        // 500 drops spent. 15% fee = 75. Creator gets 425.
         $this->assertEquals(500, $buyer->drops_balance);
-        $this->assertEquals(450, $creator->drops_balance);
+        $this->assertEquals(425, $creator->drops_balance);
 
         $this->assertDatabaseHas('skill_drop_purchases', [
             'user_id'       => $buyer->id,
