@@ -41,6 +41,8 @@ class ReportResource extends Resource
                     ->required(),
                 Forms\Components\Textarea::make('moderator_notes')
                     ->columnSpanFull(),
+                Forms\Components\Select::make('action_taken')
+                    ->options(\App\Enums\ModerationAction::class),
                 Forms\Components\DateTimePicker::make('resolved_at'),
                 Forms\Components\Select::make('moderator_id')
                     ->relationship('moderator', 'name'),
@@ -68,6 +70,8 @@ class ReportResource extends Resource
                         'dismissed' => 'gray',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('action_taken')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('resolved_at')
                     ->dateTime()
                     ->sortable(),
@@ -90,6 +94,25 @@ class ReportResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('resolve')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\Select::make('action')
+                            ->options(\App\Enums\ModerationAction::class)
+                            ->required(),
+                        Forms\Components\Textarea::make('notes')
+                            ->required(),
+                    ])
+                    ->action(function (Report $record, array $data): void {
+                        app(\App\Services\ModerationService::class)->resolveReport(
+                            $record,
+                            auth()->user(),
+                            $data['notes'],
+                            \App\Enums\ModerationAction::from($data['action'])
+                        );
+                    })
+                    ->visible(fn (Report $record): bool => $record->status !== \App\Enums\ReportStatus::Resolved),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

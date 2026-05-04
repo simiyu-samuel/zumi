@@ -23,15 +23,20 @@ class Report extends Model
         'description',
         'status',
         'moderator_notes',
+        'action_taken',
         'resolved_at',
         'moderator_id',
     ];
 
-    protected $casts = [
-        'reason'      => ReportReason::class,
-        'status'      => ReportStatus::class,
-        'resolved_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'status'       => \App\Enums\ReportStatus::class,
+            'reason'       => \App\Enums\ReportReason::class,
+            'action_taken' => \App\Enums\ModerationAction::class,
+            'resolved_at'  => 'datetime',
+        ];
+    }
 
     public function reporter(): BelongsTo
     {
