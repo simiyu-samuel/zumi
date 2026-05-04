@@ -13,6 +13,8 @@ class SkillDrop extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
+    const DEFAULT_EAGER_LOAD = ['user'];
+
     protected $fillable = [
         'user_id',
         'title',

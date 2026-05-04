@@ -12,27 +12,27 @@ class EloquentSkillDropRepository implements SkillDropRepositoryInterface
 {
     public function findById(string $id): ?SkillDrop
     {
-        return SkillDrop::with(['user'])->find($id);
+        return SkillDrop::with(SkillDrop::DEFAULT_EAGER_LOAD)->find($id);
     }
 
     public function findBySlug(string $slug): ?SkillDrop
     {
-        return SkillDrop::with(['user'])->where('slug', $slug)->first();
+        return SkillDrop::with(SkillDrop::DEFAULT_EAGER_LOAD)->where('slug', $slug)->first();
     }
 
     public function getAll(int $perPage = 15): LengthAwarePaginator
     {
-        return SkillDrop::with(['user'])->latest()->paginate($perPage);
+        return SkillDrop::with(SkillDrop::DEFAULT_EAGER_LOAD)->latest()->paginate($perPage);
     }
 
     public function getByUser(User $user, int $perPage = 15): LengthAwarePaginator
     {
-        return SkillDrop::where('user_id', $user->id)->latest()->paginate($perPage);
+        return SkillDrop::with(SkillDrop::DEFAULT_EAGER_LOAD)->where('user_id', $user->id)->latest()->paginate($perPage);
     }
 
     public function getPurchasedByUser(User $user, int $perPage = 15): LengthAwarePaginator
     {
-        return $user->purchasedSkillDrops()->latest('purchased_at')->paginate($perPage);
+        return $user->purchasedSkillDrops()->with(SkillDrop::DEFAULT_EAGER_LOAD)->latest('purchased_at')->paginate($perPage);
     }
 
     public function create(array $data): SkillDrop
