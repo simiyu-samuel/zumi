@@ -32,4 +32,16 @@ class ProfileService
     {
         return $this->userRepository->search($query, $perPage);
     }
+
+    public function updateNotificationSettings(User $user, array $settings): User
+    {
+        $currentSettings = $user->notification_settings ?? [];
+        $newSettings = array_merge($currentSettings, $settings);
+
+        $this->userRepository->update($user, [
+            'notification_settings' => $newSettings,
+        ]);
+
+        return $user->fresh();
+    }
 }

@@ -63,19 +63,15 @@ class AuthController extends Controller
 
     public function socialCallback($provider)
     {
-        try {
-            $socialUser = \Laravel\Socialite\Facades\Socialite::driver($provider)->stateless()->user();
-            $user = $this->authService->handleSocialCallback($provider, $socialUser);
-            
-            $token = $user->createToken('auth_token')->plainTextToken;
+        $socialUser = \Laravel\Socialite\Facades\Socialite::driver($provider)->stateless()->user();
+        $user = $this->authService->handleSocialCallback($provider, $socialUser);
+        
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-            return response()->json([
-                'user'         => new UserResource($user),
-                'access_token' => $token,
-                'token_type'   => 'Bearer',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Social login failed: ' . $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+        return response()->json([
+            'user'         => new UserResource($user),
+            'access_token' => $token,
+            'token_type'   => 'Bearer',
+        ]);
     }
 }

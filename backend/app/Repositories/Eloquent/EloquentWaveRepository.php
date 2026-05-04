@@ -64,4 +64,71 @@ class EloquentWaveRepository implements WaveRepositoryInterface
     {
         return $wave->delete();
     }
+
+    // Likes
+
+    public function findLike(Wave $wave, string $userId): ?\App\Models\WaveLike
+    {
+        return $wave->likes()->where('user_id', $userId)->first();
+    }
+
+    public function addLike(Wave $wave, string $userId): void
+    {
+        $wave->likes()->create(['user_id' => $userId]);
+        $wave->increment('likes_count');
+    }
+
+    public function removeLike(Wave $wave, \App\Models\WaveLike $like): void
+    {
+        $like->delete();
+        $wave->decrement('likes_count');
+    }
+
+    // Bookmarks
+
+    public function findBookmark(Wave $wave, string $userId): ?\App\Models\WaveBookmark
+    {
+        return $wave->bookmarks()->where('user_id', $userId)->first();
+    }
+
+    public function addBookmark(Wave $wave, string $userId): void
+    {
+        $wave->bookmarks()->create(['user_id' => $userId]);
+    }
+
+    public function removeBookmark(Wave $wave, \App\Models\WaveBookmark $bookmark): void
+    {
+        $bookmark->delete();
+    }
+
+    public function getBookmarks(User $user, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return Wave::whereHas('bookmarks', fn ($q) => $q->where('user_id', $user->id))
+            ->with(Wave::DEFAULT_EAGER_LOAD)
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    // Purchases
+
+    public function hasPurchased(Wave $wave, string $userId): bool
+    {
+        return $wave->purchases()->where('user_id', $userId)->exists();
+    }
+
+    public function addPurchase(Wave $wave, string $userId, int $amountPaid): void
+    {
+        $wave->purchases()->create([
+            'user_id'     => $userId,
+            'amount_paid' => $amountPaid,
+        ]);
+    }
+
+    public function getTopForCircle(string $circleId, int $limit = 3): \Illuminate\Database\Eloquent\Collection
+    {
+        return Wave::where('circle_id', $circleId)
+            ->orderByDesc('views_count')
+            ->limit($limit)
+            ->get();
+    }
 }

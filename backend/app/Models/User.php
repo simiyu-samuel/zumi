@@ -68,6 +68,7 @@ class User extends Authenticatable implements HasMedia
         'status',
         'stripe_connect_id',
         'stripe_onboarding_completed',
+        'notification_settings',
     ];
 
     /**
@@ -97,7 +98,18 @@ class User extends Authenticatable implements HasMedia
             'role' => UserRole::class,
             'status' => UserStatus::class,
             'stripe_onboarding_completed' => 'boolean',
+            'notification_settings' => 'array',
         ];
+    }
+
+    /**
+     * Check if user has opted in for a specific notification type.
+     * Assumes true (opt-in) by default unless explicitly set to false.
+     */
+    public function wantsNotification(\App\Enums\NotificationType $type): bool
+    {
+        $settings = $this->notification_settings ?? [];
+        return $settings[$type->value] ?? true;
     }
 
     /**
@@ -140,6 +152,11 @@ class User extends Authenticatable implements HasMedia
     public function ownedCircles(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Circle::class, 'owner_id');
+    }
+
+    public function joinRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CircleJoinRequest::class);
     }
 
     /**

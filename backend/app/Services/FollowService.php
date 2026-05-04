@@ -25,6 +25,9 @@ class FollowService
         }
 
         $this->followRepository->follow($follower, $following);
+
+        $following->notify(new \App\Notifications\NewFollowerNotification($follower));
+
         return true;
     }
 

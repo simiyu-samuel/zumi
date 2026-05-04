@@ -10,6 +10,7 @@ use App\Models\DropsLedger;
 use App\Models\User;
 use App\Models\Wave;
 use App\Repositories\Interfaces\CircleRepositoryInterface;
+use App\Repositories\Interfaces\WaveRepositoryInterface;
 use App\Services\DropsService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class CircleService
 {
     public function __construct(
         protected CircleRepositoryInterface $circleRepository,
+        protected WaveRepositoryInterface $waveRepository,
         protected DropsService $dropsService,
         protected FlowScoreService $flowScoreService,
     ) {}
@@ -43,10 +45,14 @@ class CircleService
 
     public function joinCircle(User $user, Circle $circle): void
     {
-        $requiresDrops = in_array($circle->type, [CircleType::FreeGated, CircleType::Premium])
-            && $circle->monthly_drops_price > 0;
+        // 1. Handle Private Circles (Approval Required)
+        if ($circle->type === CircleType::Private) {
+            $this->requestToJoin($user, $circle);
+            return;
+        }
 
-        if ($requiresDrops) {
+        // 2. Handle Gated Circles (Paid)
+        if ($circle->type === CircleType::Gated && $circle->monthly_drops_price > 0) {
             if ($user->drops_balance < $circle->monthly_drops_price) {
                 throw new \DomainException('Insufficient Drops balance to join this Circle.');
             }
@@ -61,18 +67,65 @@ class CircleService
                     ['title' => 'Circle subscription: ' . $circle->name],
                 );
                 $this->circleRepository->addMember($circle, $user);
-
-                // Award Flow Score to circle owner
                 $this->flowScoreService->award($circle->owner, 'circle_joined');
             });
 
             return;
         }
 
+        // 3. Handle Public Circles (Immediate Join)
         $this->circleRepository->addMember($circle, $user);
-
-        // Award Flow Score to circle owner
         $this->flowScoreService->award($circle->owner, 'circle_joined');
+    }
+
+    /**
+     * Create a pending join request for a private circle.
+     */
+    protected function requestToJoin(User $user, Circle $circle): void
+    {
+        $existing = $this->circleRepository->findPendingJoinRequest($user->id, $circle->id);
+
+        if ($existing) {
+            throw new \DomainException('You already have a pending join request for this Circle.');
+        }
+
+        $request = $this->circleRepository->createJoinRequest($user->id, $circle->id);
+
+        $circle->owner->notify(new \App\Notifications\CircleJoinRequestNotification($request));
+    }
+
+    /**
+     * Approve a pending join request.
+     */
+    public function approveJoinRequest(\App\Models\CircleJoinRequest $request): void
+    {
+        if ($request->status !== \App\Enums\CircleJoinRequestStatus::Pending) {
+            throw new \DomainException('This request is no longer pending.');
+        }
+
+        DB::transaction(function () use ($request) {
+            $request->update(['status' => \App\Enums\CircleJoinRequestStatus::Approved]);
+            $this->circleRepository->addMember($request->circle, $request->user);
+            $this->flowScoreService->award($request->circle->owner, 'circle_joined');
+            
+            $request->user->notify(new \App\Notifications\CircleApprovedNotification($request->circle));
+        });
+    }
+
+    /**
+     * Decline a pending join request.
+     */
+    public function declineJoinRequest(\App\Models\CircleJoinRequest $request): void
+    {
+        $request->update(['status' => \App\Enums\CircleJoinRequestStatus::Declined]);
+    }
+
+    /**
+     * Get pending join requests for a circle.
+     */
+    public function getPendingRequests(Circle $circle, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->circleRepository->getPendingJoinRequests($circle, $perPage);
     }
 
     public function leaveCircle(User $user, Circle $circle): void
@@ -92,25 +145,14 @@ class CircleService
 
     public function getInsights(Circle $circle): array
     {
-        $totalRevenue = DropsLedger::where('reference_type', Circle::class)
-            ->where('reference_id', $circle->id)
-            ->where('direction', 'credit') // revenue credited to owner
-            ->sum('amount');
-
-        $membersLast30Days = $circle->members()
-            ->wherePivot('joined_at', '>=', now()->subDays(30))
-            ->count();
-
-        $topWaves = Wave::where('circle_id', $circle->id)
-            ->orderByDesc('views_count')
-            ->limit(3)
-            ->get();
+        $since = now()->subDays(30);
 
         return [
-            'total_members'        => $circle->members_count,
-            'members_last_30_days' => $membersLast30Days,
-            'total_revenue_drops'  => (int) $totalRevenue,
-            'top_waves'            => $topWaves->map(fn ($w) => [
+            'total_members'   => $circle->members_count,
+            'new_members_30d' => $this->circleRepository->getMembersJoinedSince($circle, $since),
+            'total_revenue'   => $this->circleRepository->getRevenue($circle),
+            'revenue_30d'     => $this->circleRepository->getRevenue($circle, $since),
+            'top_waves'       => $this->waveRepository->getTopForCircle($circle->id)->map(fn ($w) => [
                 'id'          => $w->id,
                 'title'       => $w->title,
                 'views_count' => $w->views_count,

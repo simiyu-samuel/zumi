@@ -61,4 +61,9 @@ class Circle extends Model
     {
         return $this->hasMany(Wave::class);
     }
+
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(CircleJoinRequest::class);
+    }
 }

@@ -9,11 +9,30 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // DomainExceptions from the service layer return 422
+        $exceptions->render(function (\DomainException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(
+                    ['message' => $e->getMessage()],
+                    \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY
+                );
+            }
+        });
+
+        // Socialite errors return 401
+        $exceptions->render(function (\Laravel\Socialite\Two\InvalidStateException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(
+                    ['message' => 'Social login failed. Please try again.'],
+                    \Illuminate\Http\Response::HTTP_UNAUTHORIZED
+                );
+            }
+        });
     })->create();

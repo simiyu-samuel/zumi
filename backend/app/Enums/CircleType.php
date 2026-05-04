@@ -5,6 +5,6 @@ namespace App\Enums;
 enum CircleType: string
 {
     case Public = 'public';
-    case FreeGated = 'free_gated';
-    case Premium = 'premium';
+    case Private = 'private'; // Approval required
+    case Gated = 'gated';     // Paid Drops subscription
 }

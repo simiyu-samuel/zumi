@@ -16,6 +16,7 @@ class WaveService
         protected WaveRepositoryInterface $waveRepository,
         protected CloudflareStreamService $cloudflareStream,
         protected FlowScoreService $flowScoreService,
+        protected MentionService $mentionService,
     ) {}
 
     public function getDiscoveryFeed(int $perPage = 15): CursorPaginator
@@ -43,6 +44,9 @@ class WaveService
 
         $wave = $this->waveRepository->create($data);
 
+        // Process mentions
+        $this->mentionService->processMentions($wave, $wave->title . ' ' . ($wave->description ?? ''));
+
         // Award Flow Score for posting a Wave
         $this->flowScoreService->award($user, 'wave_posted');
 
@@ -66,19 +70,18 @@ class WaveService
 
     public function likeWave(User $user, Wave $wave): void
     {
-        $like = $wave->likes()->where('user_id', $user->id)->first();
+        $like = $this->waveRepository->findLike($wave, $user->id);
 
         if ($like) {
-            $like->delete();
-            $wave->decrement('likes_count');
+            $this->waveRepository->removeLike($wave, $like);
         } else {
-            $wave->likes()->create(['user_id' => $user->id]);
-            $wave->increment('likes_count');
+            $this->waveRepository->addLike($wave, $user->id);
 
-            // Award Flow Score to wave owner (not for self-likes)
+            // Award Flow Score and notify wave owner (not for self-likes)
             if ($wave->user_id !== $user->id) {
                 $waveOwner = $wave->user ?? $wave->load('user')->user;
                 $this->flowScoreService->award($waveOwner, 'wave_liked');
+                $waveOwner->notify(new \App\Notifications\WaveLikedNotification($wave, $user));
             }
         }
     }
@@ -90,7 +93,7 @@ class WaveService
                 throw new \InvalidArgumentException('This Wave is not gated.');
             }
 
-            if ($wave->purchases()->where('user_id', $user->id)->exists()) {
+            if ($this->waveRepository->hasPurchased($wave, $user->id)) {
                 return ['success' => true]; // Already purchased
             }
 
@@ -106,10 +109,7 @@ class WaveService
                     ['title' => $wave->title]
                 );
 
-                $wave->purchases()->create([
-                    'user_id' => $user->id,
-                    'amount_paid' => $wave->gated_drops,
-                ]);
+                $this->waveRepository->addPurchase($wave, $user->id, $wave->gated_drops);
             });
 
             return ['success' => true];
@@ -133,22 +133,19 @@ class WaveService
 
     public function toggleBookmark(User $user, Wave $wave): bool
     {
-        $existing = $wave->bookmarks()->where('user_id', $user->id)->first();
+        $existing = $this->waveRepository->findBookmark($wave, $user->id);
 
         if ($existing) {
-            $existing->delete();
+            $this->waveRepository->removeBookmark($wave, $existing);
             return false; // removed bookmark
         }
 
-        $wave->bookmarks()->create(['user_id' => $user->id]);
+        $this->waveRepository->addBookmark($wave, $user->id);
         return true; // added bookmark
     }
 
     public function getBookmarks(User $user, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        return Wave::whereHas('bookmarks', fn ($q) => $q->where('user_id', $user->id))
-            ->with(Wave::DEFAULT_EAGER_LOAD)
-            ->latest()
-            ->paginate($perPage);
+        return $this->waveRepository->getBookmarks($user, $perPage);
     }
 }

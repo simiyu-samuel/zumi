@@ -35,6 +35,7 @@ class WaveResource extends JsonResource
             'is_liked'       => $this->when(auth('sanctum')->check(), function () {
                 return $this->likes()->where('user_id', auth('sanctum')->id())->exists();
             }),
+            'mentions'       => $this->getMentions($this->title . ' ' . ($this->description ?? '')),
             'is_unlocked'    => $this->when(auth('sanctum')->check(), function () {
                 if ($this->visibility !== WaveVisibility::Gated) {
                     return true;
@@ -49,5 +50,22 @@ class WaveResource extends JsonResource
             'created_at'     => $this->created_at,
             'updated_at'     => $this->updated_at,
         ];
+    }
+
+    /**
+     * Extract mentions from text.
+     */
+    protected function getMentions(?string $text): array
+    {
+        if (!$text) return [];
+
+        preg_match_all('/(?<=^|\s)@([a-zA-Z0-9_]+)/', $text, $matches);
+        $usernames = array_unique($matches[1]);
+
+        if (empty($usernames)) return [];
+
+        return \App\Models\User::whereIn('username', $usernames)
+            ->get(['id', 'username', 'name'])
+            ->toArray();
     }
 }

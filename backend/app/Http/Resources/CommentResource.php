@@ -20,8 +20,26 @@ class CommentResource extends JsonResource
             'user'       => new UserResource($this->whenLoaded('user')),
             'parent_id'  => $this->parent_id,
             'replies'    => CommentResource::collection($this->whenLoaded('replies')),
+            'mentions'   => $this->getMentions($this->content),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    /**
+     * Extract mentions from text.
+     */
+    protected function getMentions(?string $text): array
+    {
+        if (!$text) return [];
+
+        preg_match_all('/(?<=^|\s)@([a-zA-Z0-9_]+)/', $text, $matches);
+        $usernames = array_unique($matches[1]);
+
+        if (empty($usernames)) return [];
+
+        return \App\Models\User::whereIn('username', $usernames)
+            ->get(['id', 'username', 'name'])
+            ->toArray();
     }
 }

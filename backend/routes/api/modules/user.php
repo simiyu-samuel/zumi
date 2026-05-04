@@ -19,4 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/users/search', [ProfileController::class, 'search']);
     Route::get('/user/flow-score', [ProfileController::class, 'flowScore']);
+    
+    // Notification Preferences
+    Route::patch('/users/me/notifications', [ProfileController::class, 'updateNotificationSettings']);
 });

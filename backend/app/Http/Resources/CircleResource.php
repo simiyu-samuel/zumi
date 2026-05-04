@@ -28,6 +28,10 @@ class CircleResource extends JsonResource
             'is_member'     => $this->when(auth('sanctum')->check(), function () {
                 return $this->members()->where('user_id', auth('sanctum')->id())->exists();
             }),
+            'has_pending_request' => $this->when(auth('sanctum')->check(), function () {
+                return $this->joinRequests()->where('user_id', auth('sanctum')->id())->where('status', 'pending')->exists();
+            }),
+            'is_owner'      => auth('sanctum')->id() === $this->owner_id,
             'created_at'    => $this->created_at,
         ];
     }

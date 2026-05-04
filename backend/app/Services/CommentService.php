@@ -12,6 +12,7 @@ class CommentService
     public function __construct(
         protected CommentRepositoryInterface $commentRepository,
         protected FlowScoreService $flowScoreService,
+        protected MentionService $mentionService,
     ) {}
 
     /**
@@ -25,10 +26,15 @@ class CommentService
             'parent_id' => $parentId,
         ], $commentable);
 
-        // Award Flow Score to the owner of the commentable model (e.g. Wave owner)
+        // Process mentions
+        $this->mentionService->processMentions($comment, $comment->content);
+
+        // Notify the owner of the commentable model (e.g. Wave owner)
         // Only if the owner is not the commenter themselves.
         if (isset($commentable->user_id) && $commentable->user_id !== $user->id) {
-            $this->flowScoreService->award($commentable->user, 'comment_received');
+            $owner = $commentable->user ?? $commentable->load('user')->user;
+            $this->flowScoreService->award($owner, 'comment_received');
+            $owner->notify(new \App\Notifications\NewCommentNotification($comment, $user));
         }
 
         return $comment;

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Circle\StoreCircleRequest;
 use App\Http\Resources\CircleResource;
 use App\Models\Circle;
+use App\Models\CircleJoinRequest;
 use App\Services\CircleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -55,22 +56,46 @@ class CircleController extends Controller
     {
         $this->authorize('join', $circle);
 
-        try {
-            $this->circleService->joinCircle($request->user(), $circle);
-        } catch (\DomainException $e) {
-            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+        $this->circleService->joinCircle($request->user(), $circle);
 
-        return response()->json(['message' => 'Joined circle successfully']);
+        $isPrivate = $circle->type === \App\Enums\CircleType::Private;
+
+        $message = $isPrivate 
+            ? 'Join request sent successfully' 
+            : 'Joined circle successfully';
+            
+        $status = $isPrivate ? Response::HTTP_ACCEPTED : Response::HTTP_OK;
+
+        return response()->json(['message' => $message], $status);
     }
 
-    public function leave(Request $request, Circle $circle): JsonResponse
+    public function requests(Circle $circle): JsonResponse
     {
-        $this->authorize('leave', $circle);
+        $this->authorize('manageJoinRequests', $circle);
 
-        $this->circleService->leaveCircle($request->user(), $circle);
+        $requests = $this->circleService->getPendingRequests($circle);
         
-        return response()->json(['message' => 'Left circle successfully']);
+        return response()->json($requests);
+    }
+
+    public function approveRequest(Request $request, string $requestId): JsonResponse
+    {
+        $joinRequest = CircleJoinRequest::with('circle')->findOrFail($requestId);
+        $this->authorize('manageJoinRequests', $joinRequest->circle);
+
+        $this->circleService->approveJoinRequest($joinRequest);
+
+        return response()->json(['message' => 'Request approved successfully']);
+    }
+
+    public function declineRequest(Request $request, string $requestId): JsonResponse
+    {
+        $joinRequest = CircleJoinRequest::with('circle')->findOrFail($requestId);
+        $this->authorize('manageJoinRequests', $joinRequest->circle);
+
+        $this->circleService->declineJoinRequest($joinRequest);
+
+        return response()->json(['message' => 'Request declined successfully']);
     }
 
     public function insights(Circle $circle): JsonResponse

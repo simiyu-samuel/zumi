@@ -89,4 +89,14 @@ class ProfileController extends Controller
 
         return response()->json($summary);
     }
+
+    public function updateNotificationSettings(\App\Http\Requests\Profile\UpdateNotificationSettingsRequest $request): JsonResponse
+    {
+        $user = $this->profileService->updateNotificationSettings($request->user(), $request->validated('settings'));
+
+        return response()->json([
+            'message' => 'Notification preferences updated successfully.',
+            'notification_settings' => $user->notification_settings,
+        ]);
+    }
 }
