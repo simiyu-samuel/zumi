@@ -1,20 +1,19 @@
-# Zumi API: Complete Reference & Onboarding Guide
+# Zumi API: Complete Reference & Integration Guide
 
-This document provides an exhaustive guide for the frontend to consume the Zumi API.
+This document is the source of truth for the Zumi Backend API v1.0.
 
 ---
 
-## 1. General Concepts
+## 1. Core Architecture
 - **Base URL**: `http://localhost:8000/api/v1`
-- **Headers**: `Accept: application/json`, `Content-Type: application/json`
-- **UUIDs**: All public IDs are UUID strings.
-- **Currency**: `Drops` are integers.
-- **Global Metadata**: **Every response** (single or list) now contains a `meta` object with `api_version`, `timestamp`, and `request_id`. Entities also include an `seo` sub-object within `meta` for easy head-tag management.
+- **Global Metadata**: **Every single API response** includes a `meta` block (see section 2).
+- **Authentication**: Bearer Token (Sanctum).
+- **Onboarding**: All users must complete `POST /user/onboarding` before full access is granted.
 
 ---
 
-## 2. Global Response Format
-All responses follow this standard structure:
+## 2. Global Response Structure
+Regardless of the endpoint, the response will always contain a `meta` object.
 ```json
 {
     "data": { ... },
@@ -23,7 +22,7 @@ All responses follow this standard structure:
         "timestamp": "2026-05-04T19:20:00Z",
         "request_id": "uuid-v4",
         "seo": {
-            "title": "Example Title | Zumi",
+            "title": "Page Title | Zumi",
             "description": "...",
             "image": "...",
             "type": "..."
@@ -31,66 +30,11 @@ All responses follow this standard structure:
     }
 }
 ```
-*Note: For non-entity responses (like "Message sent"), the `seo` block may be absent.*
+*Note: SEO sub-object is present for entities like Users, Waves, and Circles.*
 
 ---
 
-## 3. Authentication & Identity Flow
-
-Zumi uses **Laravel Sanctum** for token-based authentication.
-
-### Standard Login/Register
-1.  **Register** (`POST /auth/register`): Creates a user. Returns a `token` and `user` object.
-2.  **Login** (`POST /auth/login`): Validates credentials. Returns a `token` and `user` object.
-3.  **Logout** (`POST /auth/logout`): Revokes the current token.
-
-### Onboarding Flow (CRITICAL)
-Every user has an `onboarding_completed` (boolean) flag.
-1.  **Check Status**: After login, check `user.onboarding_completed`.
-2.  **Redirection**: If `false`, the frontend MUST show the onboarding screen.
-3.  **Completion** (`POST /user/onboarding`): 
-    *   **Body**: `{ "interests": ["tech", "music"], "follows": ["uuid1", "uuid2"] }`
-    *   **Result**: Updates interests, follows selected creators, and sets `onboarding_completed = true`.
-
----
-
-## 4. Comprehensive Endpoint Reference
-
-### 👤 Profile & User Settings
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/user` | Get current authenticated user details. |
-| `PATCH` | `/users/me` | Update name, username, bio, or location. |
-| `POST` | `/user/avatar` | Upload profile picture (Multipart/Form-Data). |
-| `PATCH` | `/users/me/notifications` | Update opt-in settings for push/email. |
-| `POST` | `/user/fcm-token` | Register/Update the FCM token. |
-
-### 🎥 Waves (Content)
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/waves` | Discovery Feed. Includes `is_liked`, `is_bookmarked`. |
-| `GET` | `/waves/followed` | Feed of creators the user follows. |
-| `POST` | `/waves/initialize-upload` | Get Cloudflare upload URL. |
-| `POST` | `/waves` | Create Wave with `cloudflare_id`. |
-| `POST` | `/waves/{id}/purchase` | Purchase access to a **Gated Wave**. |
-
-### ⭕ Circles (Communities)
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/circles` | List discovery circles. |
-| `POST` | `/circles` | Create a circle (`public` or `private`). |
-| `POST` | `/circles/{id}/join` | Join a circle. |
-| `POST` | `/circles/{id}/messages` | Send a message to the circle chat. |
-
-### 💰 Wallet & Drops
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/wallet` | Get balance and transaction history. |
-| `POST` | `/drops/gift` | Send Drops to another user. |
-
----
-
-## 5. JSON Payload & Response Examples
+## 3. Auth & Onboarding Flow
 
 ### **POST** `/auth/register`
 **Req:** `{ "name": "John", "username": "johndoe", "email": "john@zumi.app", "password": "password" }`
@@ -103,19 +47,119 @@ Every user has an `onboarding_completed` (boolean) flag.
 }
 ```
 
+### **POST** `/user/onboarding`
+**Req:** `{ "interests": ["tech"], "follows": ["uuid-1"] }`
+**Res:** `200 OK`
+```json
+{
+    "message": "Onboarding completed",
+    "user": { "id": "...", "onboarding_completed": true },
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+---
+
+## 4. Waves & Content
+
+### **GET** `/waves` (Feed)
+**Res:** `200 OK`
+```json
+{
+    "data": [{ "id": "...", "title": "Great Video", "is_liked": false }],
+    "meta": { "api_version": "1.0.0", "total": 150 }
+}
+```
+
 ### **POST** `/waves`
 **Req:** `{ "title": "Sunset", "cloudflare_id": "cf-uid", "visibility": "gated", "gated_drops": 50 }`
 **Res:** `201 Created`
 ```json
 {
-    "message": "Wave created successfully",
     "wave": { "id": "wave-uuid", "title": "Sunset" },
-    "meta": {
-        "api_version": "1.0.0",
-        "seo": { "title": "Sunset | Zumi", "image": "...", "type": "video.other" }
-    }
+    "meta": { "api_version": "1.0.0", "seo": { "title": "Sunset | Zumi", "image": "..." } }
 }
 ```
+
+---
+
+## 5. Circles (Communities)
+
+### **POST** `/circles`
+**Req:** `{ "name": "Design Pros", "type": "public" }`
+**Res:** `201 Created`
+```json
+{
+    "id": "circle-uuid",
+    "name": "Design Pros",
+    "meta": { "api_version": "1.0.0", "seo": { "title": "Design Pros | Zumi" } }
+}
+```
+
+### **POST** `/circles/{id}/messages`
+**Req:** `{ "content": "Hello!" }`
+**Res:** `201 Created`
+```json
+{
+    "message": { "id": "msg-uuid", "content": "Hello!" },
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+---
+
+## 6. Drops & Wallet
+
+### **GET** `/wallet`
+**Res:** `200 OK`
+```json
+{
+    "balance": 1000,
+    "transactions": [{ "id": "...", "amount": 100, "direction": "debit" }],
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+### **POST** `/drops/gift`
+**Req:** `{ "receiver_id": "uuid", "amount": 100 }`
+**Res:** `200 OK`
+```json
+{
+    "success": true,
+    "new_balance": 900,
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+---
+
+## 7. Challenges & Skill Drops
+
+### **POST** `/challenges`
+**Req:** `{ "title": "Dance", "prize_pool": 1000, "ends_at": "2026-12-31" }`
+**Res:** `201 Created`
+```json
+{
+    "id": "challenge-uuid",
+    "title": "Dance",
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+### **POST** `/skill-drops`
+**Req:** `{ "title": "PDF Guide", "price_drops": 500, "content_url": "..." }`
+**Res:** `201 Created`
+```json
+{
+    "id": "skill-drop-uuid",
+    "title": "PDF Guide",
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+---
+
+## 8. Gated Rooms & Live
 
 ### **POST** `/rooms`
 **Req:** `{ "title": "Live Jam", "entry_fee_drops": 100 }`
@@ -125,6 +169,53 @@ Every user has an `onboarding_completed` (boolean) flag.
     "id": "room-uuid",
     "title": "Live Jam",
     "live_stream_url": "...",
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+---
+
+## 9. Payouts (Creator Withdrawals)
+
+### **POST** `/payouts/onboard`
+**Res:** `200 OK`
+```json
+{
+    "url": "https://connect.stripe.com/...",
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+### **POST** `/payouts/withdraw`
+**Req:** `{ "amount": 5000 }`
+**Res:** `200 OK`
+```json
+{
+    "message": "Withdrawal processed",
+    "transaction_id": "...",
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+---
+
+## 10. Search & Moderation
+
+### **GET** `/search?q=test`
+**Res:** `200 OK`
+```json
+{
+    "users": [], "waves": [], "circles": [],
+    "meta": { "api_version": "1.0.0" }
+}
+```
+
+### **POST** `/reports`
+**Req:** `{ "reportable_type": "wave", "reportable_id": "...", "reason": "spam" }`
+**Res:** `201 Created`
+```json
+{
+    "message": "Report submitted",
     "meta": { "api_version": "1.0.0" }
 }
 ```
