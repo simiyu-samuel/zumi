@@ -97,9 +97,9 @@ class WalletTest extends TestCase
         $sender->refresh();
         $receiver->refresh();
 
-        // 100 gifted. 15% fee for Free user = 15 Drops. Receiver gets 85.
+        // 100 gifted. 5% fee = 5 Drops. Receiver gets 95.
         $this->assertEquals(900, $sender->drops_balance);
-        $this->assertEquals(85, $receiver->drops_balance);
+        $this->assertEquals(95, $receiver->drops_balance);
 
         $this->assertDatabaseHas('drops_ledger', [
             'user_id'   => $sender->id,
@@ -110,7 +110,7 @@ class WalletTest extends TestCase
 
         $this->assertDatabaseHas('drops_ledger', [
             'user_id'   => $receiver->id,
-            'amount'    => 85,
+            'amount'    => 95,
             'direction' => 'credit',
             'type'      => 'gift',
         ]);
@@ -118,7 +118,7 @@ class WalletTest extends TestCase
         // Fee entry
         $this->assertDatabaseHas('drops_ledger', [
             'user_id'   => null,
-            'amount'    => 15,
+            'amount'    => 5,
             'direction' => 'credit',
             'type'      => 'fee',
         ]);
@@ -132,8 +132,8 @@ class WalletTest extends TestCase
         $proUser = User::factory()->create(['role' => \App\Enums\UserRole::Pro]);
         $studioUser = User::factory()->create(['role' => \App\Enums\UserRole::Studio]);
 
-        $this->assertEquals(15, $service->calculatePlatformFee($freeUser, 100));
-        $this->assertEquals(10, $service->calculatePlatformFee($proUser, 100));
-        $this->assertEquals(7, $service->calculatePlatformFee($studioUser, 100));
+        $this->assertEquals(5, $service->calculatePlatformFee($freeUser, 100));
+        $this->assertEquals(5, $service->calculatePlatformFee($proUser, 100));
+        $this->assertEquals(5, $service->calculatePlatformFee($studioUser, 100));
     }
 }

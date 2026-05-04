@@ -39,7 +39,23 @@ class StripeWebhookController extends Controller
             $this->handleDropsPurchase($session);
         }
 
+        if ($event->type === 'account.updated') {
+            $account = $event->data->object;
+            $this->handleAccountUpdate($account);
+        }
+
         return response()->json(['status' => 'success']);
+    }
+
+    protected function handleAccountUpdate($account)
+    {
+        if ($account->details_submitted && $account->charges_enabled && $account->payouts_enabled) {
+            $user = User::where('stripe_connect_id', $account->id)->first();
+            if ($user) {
+                $user->update(['stripe_onboarding_completed' => true]);
+                Log::info("User {$user->id} completed Stripe onboarding.");
+            }
+        }
     }
 
     protected function handleDropsPurchase($session)

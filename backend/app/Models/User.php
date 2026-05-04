@@ -42,6 +42,8 @@ class User extends Authenticatable implements HasMedia
         'bio',
         'role',
         'status',
+        'stripe_connect_id',
+        'stripe_onboarding_completed',
     ];
 
     /**
@@ -70,6 +72,7 @@ class User extends Authenticatable implements HasMedia
             'flow_score' => 'integer',
             'role' => UserRole::class,
             'status' => UserStatus::class,
+            'stripe_onboarding_completed' => 'boolean',
         ];
     }
 

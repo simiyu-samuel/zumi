@@ -22,5 +22,6 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/modules/follow.php';
     require __DIR__ . '/api/modules/comments.php';
     require __DIR__ . '/api/modules/circles.php';
+    require __DIR__ . '/api/modules/payouts.php';
     require __DIR__ . '/api/modules/webhooks.php';
 });

@@ -84,12 +84,12 @@ class WaveService
         \Illuminate\Support\Facades\DB::transaction(function () use ($user, $wave) {
             $dropsService = app(DropsService::class);
             
-            $dropsService->debit(
+            $dropsService->transfer(
                 $user,
+                $wave->user,
                 $wave->gated_drops,
-                DropsTransactionType::Spend->value, // debit expects string type usually or enum if updated
-                'wave',
-                $wave->id,
+                DropsTransactionType::Spend,
+                $wave,
                 ['title' => $wave->title]
             );
 

@@ -143,15 +143,95 @@ class DropsService
     }
 
     /**
+     * Hold Drops in Escrow (e.g. for a Challenge).
+     */
+    public function holdInEscrow(User $user, int $amount, string $referenceType, string $referenceId): void
+    {
+        DB::transaction(function () use ($user, $amount, $referenceType, $referenceId) {
+            // Debit user
+            $this->debit($user, $amount, DropsTransactionType::Escrow, $referenceType, $referenceId);
+
+            // Credit Platform/Escrow account (user_id = null)
+            $this->dropsRepository->create([
+                'user_id'        => null,
+                'type'           => DropsTransactionType::Escrow->value,
+                'amount'         => $amount,
+                'direction'      => DropsTransactionDirection::Credit,
+                'reference_type' => $referenceType,
+                'reference_id'   => $referenceId,
+                'status'         => DropsTransactionStatus::Completed,
+            ]);
+        });
+    }
+
+    /**
+     * Release Drops from Escrow to a winner.
+     */
+    public function releaseFromEscrow(User $receiver, int $amount, string $referenceType, string $referenceId): void
+    {
+        DB::transaction(function () use ($receiver, $amount, $referenceType, $referenceId) {
+            // Debit Escrow account (user_id = null)
+            $this->dropsRepository->create([
+                'user_id'        => null,
+                'type'           => DropsTransactionType::Release->value,
+                'amount'         => $amount,
+                'direction'      => DropsTransactionDirection::Debit,
+                'reference_type' => $referenceType,
+                'reference_id'   => $referenceId,
+                'status'         => DropsTransactionStatus::Completed,
+            ]);
+
+            // Calculate platform fee on release
+            $feeAmount = $this->calculatePlatformFee($receiver, $amount);
+            $netAmount = $amount - $feeAmount;
+
+            // Credit winner (Net amount)
+            $this->credit($receiver, $netAmount, DropsTransactionType::Release, $referenceType, $referenceId, ['gross_amount' => $amount, 'fee_deducted' => $feeAmount]);
+
+            // Record fee in platform ledger
+            if ($feeAmount > 0) {
+                $this->dropsRepository->create([
+                    'user_id'        => null,
+                    'type'           => DropsTransactionType::Fee->value,
+                    'amount'         => $feeAmount,
+                    'direction'      => DropsTransactionDirection::Credit,
+                    'reference_type' => $referenceType,
+                    'reference_id'   => $referenceId,
+                    'status'         => DropsTransactionStatus::Completed,
+                    'metadata'       => ['type' => 'escrow_release_fee', 'gross_amount' => $amount],
+                ]);
+            }
+        });
+    }
+
+    /**
+     * Refund Drops from Escrow back to the original sender.
+     */
+    public function refundFromEscrow(User $sender, int $amount, string $referenceType, string $referenceId): void
+    {
+        DB::transaction(function () use ($sender, $amount, $referenceType, $referenceId) {
+            // Debit Escrow account
+            $this->dropsRepository->create([
+                'user_id'        => null,
+                'type'           => DropsTransactionType::Refund->value,
+                'amount'         => $amount,
+                'direction'      => DropsTransactionDirection::Debit,
+                'reference_type' => $referenceType,
+                'reference_id'   => $referenceId,
+                'status'         => DropsTransactionStatus::Completed,
+            ]);
+
+            // Credit sender (Full amount, no fee on refund)
+            $this->credit($sender, $amount, DropsTransactionType::Refund, $referenceType, $referenceId);
+        });
+    }
+
+    /**
      * Calculate platform fee based on the user's role/plan.
      */
     public function calculatePlatformFee(User $user, int $amount): int
     {
-        $rate = match ($user->role) {
-            UserRole::Studio => 0.07,
-            UserRole::Pro    => 0.10,
-            default          => 0.15,
-        };
+        $rate = 0.05; // Standard 5% platform fee
 
         return (int) floor($amount * $rate);
     }
