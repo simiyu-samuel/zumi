@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 class CommentService
 {
     public function __construct(
-        protected CommentRepositoryInterface $commentRepository
+        protected CommentRepositoryInterface $commentRepository,
+        protected FlowScoreService $flowScoreService,
     ) {}
 
     /**
@@ -18,19 +19,27 @@ class CommentService
      */
     public function addComment(User $user, Model $commentable, string $content, ?string $parentId = null): Comment
     {
-        return $this->commentRepository->create([
+        $comment = $this->commentRepository->create([
             'user_id' => $user->id,
             'content' => $content,
             'parent_id' => $parentId,
         ], $commentable);
+
+        // Award Flow Score to the owner of the commentable model (e.g. Wave owner)
+        // Only if the owner is not the commenter themselves.
+        if (isset($commentable->user_id) && $commentable->user_id !== $user->id) {
+            $this->flowScoreService->award($commentable->user, 'comment_received');
+        }
+
+        return $comment;
     }
 
     /**
      * Get comments for a model.
      */
-    public function getComments(Model $commentable)
+    public function getComments(Model $commentable, int $perPage = 15)
     {
-        return $this->commentRepository->getForModel($commentable);
+        return $this->commentRepository->getForModel($commentable, $perPage);
     }
 
     /**

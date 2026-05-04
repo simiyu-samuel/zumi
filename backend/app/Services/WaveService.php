@@ -14,7 +14,8 @@ class WaveService
 {
     public function __construct(
         protected WaveRepositoryInterface $waveRepository,
-        protected CloudflareStreamService $cloudflareStream
+        protected CloudflareStreamService $cloudflareStream,
+        protected FlowScoreService $flowScoreService,
     ) {}
 
     public function getDiscoveryFeed(int $perPage = 15): CursorPaginator
@@ -40,7 +41,12 @@ class WaveService
         $data['user_id'] = $user->id;
         $data['status'] = WaveStatus::Pending;
 
-        return $this->waveRepository->create($data);
+        $wave = $this->waveRepository->create($data);
+
+        // Award Flow Score for posting a Wave
+        $this->flowScoreService->award($user, 'wave_posted');
+
+        return $wave;
     }
 
     public function getWave(string $id): ?Wave
@@ -68,6 +74,12 @@ class WaveService
         } else {
             $wave->likes()->create(['user_id' => $user->id]);
             $wave->increment('likes_count');
+
+            // Award Flow Score to wave owner (not for self-likes)
+            if ($wave->user_id !== $user->id) {
+                $waveOwner = $wave->user ?? $wave->load('user')->user;
+                $this->flowScoreService->award($waveOwner, 'wave_liked');
+            }
         }
     }
 
@@ -112,5 +124,31 @@ class WaveService
     public function incrementViews(Wave $wave): void
     {
         $wave->increment('views_count');
+    }
+
+    public function recordShare(Wave $wave): void
+    {
+        $wave->increment('shares_count');
+    }
+
+    public function toggleBookmark(User $user, Wave $wave): bool
+    {
+        $existing = $wave->bookmarks()->where('user_id', $user->id)->first();
+
+        if ($existing) {
+            $existing->delete();
+            return false; // removed bookmark
+        }
+
+        $wave->bookmarks()->create(['user_id' => $user->id]);
+        return true; // added bookmark
+    }
+
+    public function getBookmarks(User $user, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return Wave::whereHas('bookmarks', fn ($q) => $q->where('user_id', $user->id))
+            ->with(Wave::DEFAULT_EAGER_LOAD)
+            ->latest()
+            ->paginate($perPage);
     }
 }

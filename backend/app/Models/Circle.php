@@ -25,11 +25,13 @@ class Circle extends Model
         'avatar',
         'cover_image',
         'members_count',
+        'monthly_drops_price',
     ];
 
     protected $casts = [
-        'type'   => CircleType::class,
-        'status' => CircleStatus::class,
+        'type'                => CircleType::class,
+        'status'              => CircleStatus::class,
+        'monthly_drops_price' => 'integer',
     ];
 
     /**

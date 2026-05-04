@@ -21,14 +21,19 @@ class WaveController extends Controller
 
     public function index(Request $request)
     {
-        $waves = $this->waveService->getDiscoveryFeed($request->input('per_page', 15));
+        $waves = $this->waveService->getDiscoveryFeed(
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         
         return WaveResource::collection($waves);
     }
 
     public function followedFeed(Request $request)
     {
-        $waves = $this->waveService->getFollowedFeed($request->user(), $request->input('per_page', 15));
+        $waves = $this->waveService->getFollowedFeed(
+            $request->user(), 
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         
         return WaveResource::collection($waves);
     }
@@ -125,5 +130,35 @@ class WaveController extends Controller
         $this->waveService->incrementViews($wave);
 
         return response()->json(['message' => 'View recorded']);
+    }
+
+    public function share(Request $request, Wave $wave): JsonResponse
+    {
+        $this->waveService->recordShare($wave);
+
+        return response()->json([
+            'message'      => 'Share recorded',
+            'shares_count' => $wave->shares_count,
+        ]);
+    }
+
+    public function toggleBookmark(Request $request, Wave $wave): JsonResponse
+    {
+        $bookmarked = $this->waveService->toggleBookmark($request->user(), $wave);
+
+        return response()->json([
+            'message'    => $bookmarked ? 'Wave bookmarked' : 'Bookmark removed',
+            'bookmarked' => $bookmarked,
+        ]);
+    }
+
+    public function bookmarks(Request $request): JsonResponse
+    {
+        $waves = $this->waveService->getBookmarks(
+            $request->user(),
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
+
+        return response()->json(WaveResource::collection($waves)->response()->getData(true));
     }
 }

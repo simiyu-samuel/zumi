@@ -15,7 +15,8 @@ class ChallengeService
 {
     public function __construct(
         protected ChallengeRepositoryInterface $challengeRepository,
-        protected DropsService $dropsService
+        protected DropsService $dropsService,
+        protected FlowScoreService $flowScoreService,
     ) {}
 
     public function getActiveChallenges(int $perPage = 15): CursorPaginator
@@ -147,6 +148,9 @@ class ChallengeService
                         $challenge->id
                     );
                 }
+
+                // Award Flow Score to Winner
+                $this->flowScoreService->award($winner, 'challenge_won');
 
                 // 3. Mark as completed
                 $challenge->update([

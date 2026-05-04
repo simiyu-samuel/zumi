@@ -16,11 +16,12 @@ class StoreCircleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type'        => ['nullable', new Enum(CircleType::class)],
-            'avatar'      => 'nullable|string',
-            'cover_image' => 'nullable|string',
+            'name'                => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'type'                => ['nullable', new Enum(CircleType::class)],
+            'avatar'              => 'nullable|string',
+            'cover_image'         => 'nullable|string',
+            'monthly_drops_price' => 'nullable|integer|min:1',
         ];
     }
 }

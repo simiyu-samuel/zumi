@@ -21,7 +21,7 @@ class CirclePolicy
      */
     public function update(User $user, Circle $circle): bool
     {
-        return $circle->user_id === $user->id || 
+        return $circle->owner_id === $user->id || 
                $circle->members()->where('user_id', $user->id)->where('role', \App\Enums\CircleMemberRole::Moderator)->exists();
     }
 
@@ -30,7 +30,7 @@ class CirclePolicy
      */
     public function delete(User $user, Circle $circle): bool
     {
-        return $circle->user_id === $user->id;
+        return $circle->owner_id === $user->id;
     }
 
     /**
@@ -46,7 +46,15 @@ class CirclePolicy
      */
     public function leave(User $user, Circle $circle): bool
     {
-        return $circle->user_id !== $user->id && 
+        return $circle->owner_id !== $user->id && 
                $circle->members()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Determine whether the user can view circle insights.
+     */
+    public function viewInsights(User $user, Circle $circle): bool
+    {
+        return $circle->owner_id === $user->id;
     }
 }

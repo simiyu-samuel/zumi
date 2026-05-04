@@ -51,9 +51,12 @@ class FollowController extends Controller
     /**
      * Get followers of a user.
      */
-    public function followers(User $user): JsonResponse
+    public function followers(Request $request, User $user): JsonResponse
     {
-        $followers = $this->followRepository->getFollowers($user);
+        $followers = $this->followRepository->getFollowers(
+            $user, 
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         
         return response()->json(UserResource::collection($followers)->response()->getData(true));
     }
@@ -61,9 +64,12 @@ class FollowController extends Controller
     /**
      * Get following of a user.
      */
-    public function following(User $user): JsonResponse
+    public function following(Request $request, User $user): JsonResponse
     {
-        $following = $this->followRepository->getFollowing($user);
+        $following = $this->followRepository->getFollowing(
+            $user, 
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         
         return response()->json(UserResource::collection($following)->response()->getData(true));
     }

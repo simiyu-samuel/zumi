@@ -10,4 +10,5 @@ Route::middleware('auth:sanctum')->prefix('circles')->group(function () {
     Route::get('/{circle}', [CircleController::class, 'show']);
     Route::post('/{circle}/join', [CircleController::class, 'join']);
     Route::post('/{circle}/leave', [CircleController::class, 'leave']);
+    Route::get('/{circle}/insights', [CircleController::class, 'insights']);
 });

@@ -21,7 +21,10 @@ class WalletController extends Controller
     {
         $user = $request->user();
         
-        $transactions = $this->dropsRepository->getForUser($user);
+        $transactions = $this->dropsRepository->getForUser(
+            $user, 
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
 
         return response()->json([
             'balance'      => $user->drops_balance,

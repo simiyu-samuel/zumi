@@ -10,13 +10,16 @@ use App\Http\Requests\Profile\UploadBannerRequest;
 use App\Http\Requests\Wave\SearchRequest;
 use App\Http\Resources\UserResource;
 use App\Services\ProfileService;
+use App\Services\FlowScoreService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 
 class ProfileController extends Controller
 {
     public function __construct(
-        protected ProfileService $profileService
+        protected ProfileService $profileService,
+        protected FlowScoreService $flowScoreService,
     ) {}
 
     public function show($username)
@@ -72,8 +75,18 @@ class ProfileController extends Controller
 
     public function search(SearchRequest $request)
     {
-        $users = $this->profileService->search($request->input('query'));
+        $users = $this->profileService->search(
+            $request->input('query'),
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
 
         return UserResource::collection($users);
+    }
+
+    public function flowScore(Request $request): JsonResponse
+    {
+        $summary = $this->flowScoreService->summary($request->user());
+
+        return response()->json($summary);
     }
 }

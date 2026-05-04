@@ -33,11 +33,10 @@ class UserRepository implements UserRepositoryInterface
         return $user->update($data);
     }
 
-    public function search(string $query, int $limit = 10): Collection
+    public function search(string $query, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return User::where('name', 'like', "%{$query}%")
             ->orWhere('username', 'like', "%{$query}%")
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage);
     }
 }

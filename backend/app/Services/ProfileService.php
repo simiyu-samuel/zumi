@@ -28,8 +28,8 @@ class ProfileService
         return $user->getFirstMediaUrl($collection);
     }
 
-    public function search(string $query)
+    public function search(string $query, int $perPage = 15)
     {
-        return $this->userRepository->search($query);
+        return $this->userRepository->search($query, $perPage);
     }
 }

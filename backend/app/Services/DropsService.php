@@ -105,7 +105,7 @@ class DropsService
             );
 
             // 2. Calculate platform fee
-            $feeAmount = $this->calculatePlatformFee($receiver, $amount);
+            $feeAmount = $this->calculatePlatformFee($receiver, $amount, $type);
             $netAmount = $amount - $feeAmount;
 
             // 3. Credit receiver (Net amount)
@@ -191,7 +191,7 @@ class DropsService
             ]);
 
             // Calculate platform fee on release
-            $feeAmount = $this->calculatePlatformFee($receiver, $amount);
+            $feeAmount = $this->calculatePlatformFee($receiver, $amount, DropsTransactionType::Release);
             $netAmount = $amount - $feeAmount;
 
             // Credit winner (Net amount)
@@ -236,11 +236,22 @@ class DropsService
     }
 
     /**
-     * Calculate platform fee based on the user's role/plan.
+     * Calculate platform fee based on the transaction type and user's context.
      */
-    public function calculatePlatformFee(User $user, int $amount): int
+    public function calculatePlatformFee(User $user, int $amount, ?DropsTransactionType $type = null): int
     {
-        $rate = config('zumi.drops.platform_fee_rate', 0.05); // Standard platform fee
+        $fees = config('zumi.drops.fees', []);
+        $rate = $fees['default'] ?? 0.15;
+
+        if ($type === DropsTransactionType::Gift) {
+            $rate = $fees['wave_gift'] ?? $rate;
+        } elseif ($type === DropsTransactionType::Spend) {
+            // For general spending (including Circle subscriptions), check user role
+            $roleValue = $user->role instanceof \UnitEnum ? $user->role->value : $user->role;
+            $rate = $fees['circle_subscription'][$roleValue] ?? ($fees['circle_subscription']['default'] ?? $rate);
+        } elseif ($type === DropsTransactionType::Release) {
+            $rate = $fees['challenge_prize'] ?? $rate;
+        }
 
         return (int) floor($amount * $rate);
     }

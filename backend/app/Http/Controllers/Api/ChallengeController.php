@@ -24,7 +24,9 @@ class ChallengeController extends Controller
      */
     public function index(Request $request)
     {
-        $challenges = $this->challengeService->getActiveChallenges($request->input('per_page', 15));
+        $challenges = $this->challengeService->getActiveChallenges(
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         
         return ChallengeResource::collection($challenges);
     }

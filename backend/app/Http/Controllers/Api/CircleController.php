@@ -19,13 +19,18 @@ class CircleController extends Controller
 
     public function index(Request $request)
     {
-        $circles = $this->circleService->getDiscoveryCircles($request->input('per_page', 15));
+        $circles = $this->circleService->getDiscoveryCircles(
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         return CircleResource::collection($circles);
     }
 
     public function myCircles(Request $request)
     {
-        $circles = $this->circleService->getUserCircles($request->user(), $request->input('per_page', 15));
+        $circles = $this->circleService->getUserCircles(
+            $request->user(), 
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         return CircleResource::collection($circles);
     }
 
@@ -48,8 +53,12 @@ class CircleController extends Controller
     {
         $this->authorize('join', $circle);
 
-        $this->circleService->joinCircle($request->user(), $circle);
-        
+        try {
+            $this->circleService->joinCircle($request->user(), $circle);
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         return response()->json(['message' => 'Joined circle successfully']);
     }
 
@@ -60,5 +69,14 @@ class CircleController extends Controller
         $this->circleService->leaveCircle($request->user(), $circle);
         
         return response()->json(['message' => 'Left circle successfully']);
+    }
+
+    public function insights(Circle $circle): JsonResponse
+    {
+        $this->authorize('viewInsights', $circle);
+
+        $insights = $this->circleService->getInsights($circle);
+
+        return response()->json($insights);
     }
 }

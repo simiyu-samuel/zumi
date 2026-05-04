@@ -18,4 +18,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/onboarding', [ProfileController::class, 'completeOnboarding']);
     
     Route::get('/users/search', [ProfileController::class, 'search']);
+    Route::get('/user/flow-score', [ProfileController::class, 'flowScore']);
 });

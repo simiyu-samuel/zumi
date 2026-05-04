@@ -10,6 +10,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('waves/{wave}/like', [WaveController::class, 'like']);
     Route::post('waves/{wave}/purchase', [WaveController::class, 'purchase']);
     Route::post('waves/{wave}/view', [WaveController::class, 'recordView']);
+    Route::post('waves/{wave}/share', [WaveController::class, 'share']);
+    Route::post('waves/{wave}/bookmark', [WaveController::class, 'toggleBookmark']);
+    Route::get('waves/bookmarks', [WaveController::class, 'bookmarks']);
 });
 
 // Public routes

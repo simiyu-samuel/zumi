@@ -21,9 +21,12 @@ class CommentController extends Controller
     /**
      * Get comments for a wave.
      */
-    public function forWave(Wave $wave): JsonResponse
+    public function forWave(Request $request, Wave $wave): JsonResponse
     {
-        $comments = $this->commentService->getComments($wave);
+        $comments = $this->commentService->getComments(
+            $wave, 
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
         
         return response()->json(CommentResource::collection($comments)->response()->getData(true));
     }

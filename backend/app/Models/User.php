@@ -112,4 +112,14 @@ class User extends Authenticatable implements HasMedia
             ->withPivot('role', 'joined_at')
             ->withTimestamps();
     }
+
+    /**
+     * Skill Drops purchased by the user.
+     */
+    public function purchasedSkillDrops(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(SkillDrop::class, 'skill_drop_purchases')
+            ->withPivot(['id', 'amount_paid', 'purchased_at'])
+            ->withTimestamps();
+    }
 }

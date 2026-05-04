@@ -21,6 +21,7 @@ class Wave extends Model implements HasMedia
     const RELATION_USER = 'user';
     const RELATION_LIKES = 'likes';
     const RELATION_COMMENTS = 'comments';
+    const RELATION_BOOKMARKS = 'bookmarks';
     
     const DEFAULT_EAGER_LOAD = [
         self::RELATION_USER,
@@ -68,5 +69,10 @@ class Wave extends Model implements HasMedia
     public function purchases(): HasMany
     {
         return $this->hasMany(WavePurchase::class);
+    }
+
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(WaveBookmark::class);
     }
 }
