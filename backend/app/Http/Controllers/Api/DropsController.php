@@ -11,6 +11,7 @@ use App\Repositories\Interfaces\DropsRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
 class DropsController extends Controller
 {
@@ -24,6 +25,8 @@ class DropsController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        Gate::authorize('view-wallet');
+
         $user = $request->user();
         $transactions = $this->dropsRepository->getForUser($user);
 
@@ -38,8 +41,10 @@ class DropsController extends Controller
      */
     public function gift(GiftDropsRequest $request): JsonResponse
     {
+        Gate::authorize('gift-drops');
+
         $sender = $request->user();
-        $receiver = User::findOrFail($request->receiver_id);
+        $receiver = User::where('id', $request->receiver_id)->firstOrFail();
         
         $reference = null;
         if ($request->reference_type && $request->reference_id) {

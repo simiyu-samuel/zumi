@@ -46,6 +46,8 @@ class CircleController extends Controller
 
     public function join(Request $request, Circle $circle): JsonResponse
     {
+        $this->authorize('join', $circle);
+
         $this->circleService->joinCircle($request->user(), $circle);
         
         return response()->json(['message' => 'Joined circle successfully']);
@@ -53,6 +55,8 @@ class CircleController extends Controller
 
     public function leave(Request $request, Circle $circle): JsonResponse
     {
+        $this->authorize('leave', $circle);
+
         $this->circleService->leaveCircle($request->user(), $circle);
         
         return response()->json(['message' => 'Left circle successfully']);

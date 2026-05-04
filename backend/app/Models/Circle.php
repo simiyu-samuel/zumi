@@ -39,6 +39,10 @@ class Circle extends Model
     const RELATION_MEMBERS = 'members';
     const RELATION_WAVES = 'waves';
 
+    const DEFAULT_EAGER_LOAD = [
+        self::RELATION_OWNER,
+    ];
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');

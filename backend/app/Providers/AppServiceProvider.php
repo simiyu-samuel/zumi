@@ -21,6 +21,7 @@ use App\Repositories\Eloquent\EloquentCommentRepository;
 use App\Repositories\Eloquent\EloquentCircleRepository;
 use App\Repositories\Eloquent\EloquentChallengeRepository;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
     protected $policies = [
         Wave::class => WavePolicy::class,
         Comment::class => CommentPolicy::class,
+        \App\Models\Circle::class => \App\Policies\CirclePolicy::class,
+        \App\Models\Challenge::class => \App\Policies\ChallengePolicy::class,
     ];
 
     /**
@@ -54,5 +57,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+
+        Gate::define('view-wallet', [\App\Policies\DropsPolicy::class, 'viewWallet']);
+        Gate::define('gift-drops', [\App\Policies\DropsPolicy::class, 'viewWallet']); // Reuse for now
     }
 }

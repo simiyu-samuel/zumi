@@ -17,7 +17,7 @@ class EloquentChallengeRepository implements ChallengeRepositoryInterface
     {
         return Challenge::where('status', ChallengeStatus::Active)
             ->where('ends_at', '>', now())
-            ->with(['user', 'winner'])
+            ->with(Challenge::DEFAULT_EAGER_LOAD)
             ->latest()
             ->cursorPaginate($perPage);
     }
@@ -29,7 +29,10 @@ class EloquentChallengeRepository implements ChallengeRepositoryInterface
 
     public function findById(string $id): ?Challenge
     {
-        return Challenge::with(['user', 'winner', 'participations.user', 'participations.wave'])->find($id);
+        return Challenge::with(array_merge(
+            Challenge::DEFAULT_EAGER_LOAD,
+            ['participations.user', 'participations.wave']
+        ))->find($id);
     }
 
     public function update(Challenge $challenge, array $data): Challenge

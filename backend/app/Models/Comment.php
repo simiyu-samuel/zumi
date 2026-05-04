@@ -14,6 +14,13 @@ class Comment extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
 
+    const RELATION_USER = 'user';
+    const RELATION_REPLIES = 'replies';
+
+    const DEFAULT_EAGER_LOAD = [
+        self::RELATION_USER,
+    ];
+
     protected $fillable = [
         'user_id',
         'commentable_id',

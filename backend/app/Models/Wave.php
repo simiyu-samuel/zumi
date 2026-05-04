@@ -21,6 +21,10 @@ class Wave extends Model implements HasMedia
     const RELATION_USER = 'user';
     const RELATION_LIKES = 'likes';
     const RELATION_COMMENTS = 'comments';
+    
+    const DEFAULT_EAGER_LOAD = [
+        self::RELATION_USER,
+    ];
 
     protected $fillable = [
         'user_id',

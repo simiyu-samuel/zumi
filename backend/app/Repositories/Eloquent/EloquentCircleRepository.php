@@ -12,17 +12,17 @@ class EloquentCircleRepository implements CircleRepositoryInterface
 {
     public function findById(string $id): ?Circle
     {
-        return Circle::find($id);
+        return Circle::with(Circle::DEFAULT_EAGER_LOAD)->find($id);
     }
 
     public function findBySlug(string $slug): ?Circle
     {
-        return Circle::where('slug', $slug)->first();
+        return Circle::with(Circle::DEFAULT_EAGER_LOAD)->where('slug', $slug)->first();
     }
 
     public function getAll(int $perPage = 15): LengthAwarePaginator
     {
-        return Circle::latest()->paginate($perPage);
+        return Circle::with(Circle::DEFAULT_EAGER_LOAD)->latest()->paginate($perPage);
     }
 
     public function getJoinedByUser(User $user, int $perPage = 15): LengthAwarePaginator

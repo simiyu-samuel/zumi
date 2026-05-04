@@ -13,7 +13,7 @@ class EloquentWaveRepository implements WaveRepositoryInterface
 {
     public function getFeed(int $perPage = 15): CursorPaginator
     {
-        return Wave::with([Wave::RELATION_USER])
+        return Wave::with(Wave::DEFAULT_EAGER_LOAD)
             ->whereIn('visibility', [WaveVisibility::Public, WaveVisibility::Gated])
             ->where('status', WaveStatus::Ready)
             ->latest()
@@ -25,7 +25,7 @@ class EloquentWaveRepository implements WaveRepositoryInterface
         $followingIds = $user->following()->pluck('following_id');
         $circleIds = $user->circles()->pluck('circles.id');
 
-        return Wave::with([Wave::RELATION_USER])
+        return Wave::with(Wave::DEFAULT_EAGER_LOAD)
             ->where(function ($query) use ($followingIds, $circleIds) {
                 $query->whereIn('user_id', $followingIds)
                       ->orWhereIn('circle_id', $circleIds);
@@ -39,13 +39,14 @@ class EloquentWaveRepository implements WaveRepositoryInterface
     public function getByUser(string $userId, int $perPage = 15): CursorPaginator
     {
         return Wave::where('user_id', $userId)
+            ->with(Wave::DEFAULT_EAGER_LOAD)
             ->latest()
             ->cursorPaginate($perPage);
     }
 
     public function findById(string $id): ?Wave
     {
-        return Wave::with([Wave::RELATION_USER])->find($id);
+        return Wave::with(Wave::DEFAULT_EAGER_LOAD)->find($id);
     }
 
     public function create(array $data): Wave

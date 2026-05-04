@@ -14,6 +14,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Challenge extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
+    
+    const RELATION_USER = 'user';
+    const RELATION_WINNER = 'winner';
+    const RELATION_PARTICIPATIONS = 'participations';
+
+    const DEFAULT_EAGER_LOAD = [
+        self::RELATION_USER,
+        self::RELATION_WINNER,
+    ];
 
     protected $fillable = [
         'user_id',

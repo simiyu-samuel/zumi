@@ -61,6 +61,8 @@ class ChallengeController extends Controller
      */
     public function join(JoinChallengeRequest $request, Challenge $challenge): JsonResponse
     {
+        $this->authorize('join', $challenge);
+
         $result = $this->challengeService->joinChallenge(
             $request->user(),
             $challenge,
@@ -81,6 +83,9 @@ class ChallengeController extends Controller
      */
     public function vote(Request $request, string $participationId): JsonResponse
     {
+        $participation = \App\Models\ChallengeParticipation::findOrFail($participationId);
+        $this->authorize('vote', $participation->challenge);
+
         $result = $this->challengeService->vote($request->user(), $participationId);
 
         if (!$result['success']) {
@@ -97,10 +102,7 @@ class ChallengeController extends Controller
      */
     public function close(Challenge $challenge): JsonResponse
     {
-        // For simplicity, we allow the creator to close it (in production this would be automated)
-        if (auth()->id() !== $challenge->user_id) {
-            abort(Response::HTTP_FORBIDDEN);
-        }
+        $this->authorize('close', $challenge);
 
         $result = $this->challengeService->closeChallenge($challenge);
 
