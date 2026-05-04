@@ -41,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Challenge::class => \App\Policies\ChallengePolicy::class,
         \App\Models\SkillDrop::class => \App\Policies\SkillDropPolicy::class,
         \App\Models\GatedRoom::class => \App\Policies\GatedRoomPolicy::class,
+        'subscription' => \App\Policies\SubscriptionPolicy::class,
     ];
 
     /**
@@ -57,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ChallengeRepositoryInterface::class, EloquentChallengeRepository::class);
         $this->app->bind(SkillDropRepositoryInterface::class, EloquentSkillDropRepository::class);
         $this->app->bind(GatedRoomRepositoryInterface::class, EloquentGatedRoomRepository::class);
+        $this->app->bind(
+            \App\Repositories\Interfaces\SubscriptionRepositoryInterface::class,
+            \App\Repositories\Eloquent\EloquentSubscriptionRepository::class
+        );
     }
 
     /**

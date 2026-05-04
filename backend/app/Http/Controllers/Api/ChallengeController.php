@@ -36,6 +36,8 @@ class ChallengeController extends Controller
      */
     public function store(StoreChallengeRequest $request): JsonResponse
     {
+        $this->authorize('create', Challenge::class);
+
         $result = $this->challengeService->createChallenge($request->user(), $request->validated());
 
         if (!$result['success']) {

@@ -33,6 +33,11 @@ return [
         'payout' => [
             'min_threshold' => 5000, // $50 USD
             'fee_percentage' => 0,    // Fees are taken on receipt, not payout
+            'cooldown_days' => [
+                'user'   => 30,
+                'pro'    => 30,
+                'studio' => 14,
+            ],
         ],
         'fees' => [
             // Standard fees by transaction type (§3.5)
@@ -52,5 +57,20 @@ return [
 
     'waves' => [
         'min_gated_amount' => 100,
+    ],
+
+    'subscriptions' => [
+        'plans' => [
+            'pro' => [
+                'price_id' => env('STRIPE_PRO_PRICE_ID', 'price_dummy_pro'),
+                'name'     => 'Pro',
+                'amount'   => 2500, // $25.00
+            ],
+            'studio' => [
+                'price_id' => env('STRIPE_STUDIO_PRICE_ID', 'price_dummy_studio'),
+                'name'     => 'Studio',
+                'amount'   => 9900, // $99.00
+            ],
+        ],
     ],
 ];

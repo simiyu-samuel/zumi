@@ -9,6 +9,18 @@ use Illuminate\Auth\Access\Response;
 class CirclePolicy
 {
     /**
+     * Determine whether the user can create circles.
+     */
+    public function create(User $user): bool
+    {
+        if ($user->isPremium()) {
+            return true;
+        }
+
+        return $user->ownedCircles()->count() < 1;
+    }
+
+    /**
      * Determine whether the user can view the model.
      */
     public function view(User $user, Circle $circle): bool

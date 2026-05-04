@@ -20,6 +20,30 @@ class User extends Authenticatable implements HasMedia
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, InteractsWithMedia, HasUuids, Billable;
 
+    /**
+     * Check if user is a Pro subscriber.
+     */
+    public function isPro(): bool
+    {
+        return $this->role === UserRole::Pro;
+    }
+
+    /**
+     * Check if user is a Studio subscriber.
+     */
+    public function isStudio(): bool
+    {
+        return $this->role === UserRole::Studio;
+    }
+
+    /**
+     * Check if user has any premium subscription.
+     */
+    public function isPremium(): bool
+    {
+        return in_array($this->role, [UserRole::Pro, UserRole::Studio, UserRole::Admin]);
+    }
+
     const COLLECTION_AVATAR = 'avatar';
     const COLLECTION_BANNER = 'banner';
 
@@ -111,6 +135,11 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsToMany(Circle::class, 'circle_members')
             ->withPivot('role', 'joined_at')
             ->withTimestamps();
+    }
+
+    public function ownedCircles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Circle::class, 'owner_id');
     }
 
     /**

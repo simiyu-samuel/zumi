@@ -8,6 +8,14 @@ use App\Models\User;
 class SkillDropPolicy
 {
     /**
+     * Determine whether the user can create skill drops.
+     */
+    public function create(User $user): bool
+    {
+        return $user->isPremium();
+    }
+
+    /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, SkillDrop $skillDrop): bool

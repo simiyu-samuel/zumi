@@ -9,6 +9,14 @@ use Illuminate\Auth\Access\Response;
 class ChallengePolicy
 {
     /**
+     * Determine whether the user can create challenges.
+     */
+    public function create(User $user): bool
+    {
+        return $user->isPremium();
+    }
+
+    /**
      * Determine whether the user can view the model.
      */
     public function view(User $user, Challenge $challenge): bool

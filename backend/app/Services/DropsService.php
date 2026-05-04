@@ -241,16 +241,20 @@ class DropsService
     public function calculatePlatformFee(User $user, int $amount, ?DropsTransactionType $type = null): int
     {
         $fees = config('zumi.drops.fees', []);
-        $rate = $fees['default'] ?? 0.15;
+        
+        // 1. Fixed fees for specific types
+        if ($type === DropsTransactionType::Release) {
+            $rate = $fees['challenge_prize'] ?? 0.05;
+            return (int) floor($amount * $rate);
+        }
 
-        if ($type === DropsTransactionType::Gift) {
-            $rate = $fees['wave_gift'] ?? $rate;
-        } elseif ($type === DropsTransactionType::Spend) {
-            // For general spending (including Circle subscriptions), check user role
-            $roleValue = $user->role instanceof \UnitEnum ? $user->role->value : $user->role;
-            $rate = $fees['circle_subscription'][$roleValue] ?? ($fees['circle_subscription']['default'] ?? $rate);
-        } elseif ($type === DropsTransactionType::Release) {
-            $rate = $fees['challenge_prize'] ?? $rate;
+        // 2. Tiered fees based on receiver's role
+        if ($user->isStudio()) {
+            $rate = $fees['circle_subscription']['studio'] ?? 0.07;
+        } elseif ($user->isPro()) {
+            $rate = $fees['circle_subscription']['pro'] ?? 0.10;
+        } else {
+            $rate = $fees['default'] ?? 0.15;
         }
 
         return (int) floor($amount * $rate);

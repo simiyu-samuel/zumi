@@ -38,6 +38,8 @@ class GatedRoomController extends Controller
 
     public function store(StoreGatedRoomRequest $request): JsonResponse
     {
+        $this->authorize('create', GatedRoom::class);
+
         $room = $this->roomService->createRoom($request->user(), $request->validated());
 
         return response()->json([

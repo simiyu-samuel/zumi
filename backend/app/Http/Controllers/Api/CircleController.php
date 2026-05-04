@@ -36,6 +36,8 @@ class CircleController extends Controller
 
     public function store(StoreCircleRequest $request): JsonResponse
     {
+        $this->authorize('create', Circle::class);
+
         $circle = $this->circleService->createCircle($request->user(), $request->validated());
         
         return response()->json([

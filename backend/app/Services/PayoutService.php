@@ -25,8 +25,27 @@ class PayoutService
                 throw new Exception('Please complete Stripe onboarding before withdrawing.');
             }
 
+            $minThreshold = config('zumi.drops.payout.min_threshold', 5000);
+            if ($amount < $minThreshold) {
+                throw new Exception("Minimum withdrawal amount is {$minThreshold} Drops.");
+            }
+
             if ($user->drops_balance < $amount) {
                 throw new Exception('Insufficient Drops balance.');
+            }
+
+            // Check payout cooldown based on role
+            $roleValue = $user->role instanceof \UnitEnum ? $user->role->value : $user->role;
+            $cooldownDays = config("zumi.drops.payout.cooldown_days.{$roleValue}", 30);
+            
+            $lastPayout = $user->dropsLedger()
+                ->where('type', DropsTransactionType::Payout)
+                ->latest()
+                ->first();
+
+            if ($lastPayout && $lastPayout->created_at->addDays($cooldownDays)->isFuture()) {
+                $availableAt = $lastPayout->created_at->addDays($cooldownDays)->diffForHumans();
+                throw new Exception("Payout schedule restriction. Next withdrawal available {$availableAt}.");
             }
 
             $ledger = DB::transaction(function () use ($user, $amount) {

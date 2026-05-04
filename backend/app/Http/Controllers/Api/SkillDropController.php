@@ -49,6 +49,8 @@ class SkillDropController extends Controller
 
     public function store(StoreSkillDropRequest $request): JsonResponse
     {
+        $this->authorize('create', \App\Models\SkillDrop::class);
+
         $skillDrop = $this->skillDropService->create($request->user(), $request->validated());
 
         return response()->json([

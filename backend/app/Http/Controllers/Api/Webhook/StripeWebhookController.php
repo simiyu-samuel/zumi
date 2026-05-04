@@ -44,7 +44,38 @@ class StripeWebhookController extends Controller
             $this->handleAccountUpdate($account);
         }
 
+        if (in_array($event->type, ['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'])) {
+            $subscription = $event->data->object;
+            $this->handleSubscriptionSync($subscription);
+        }
+
         return response()->json(['status' => 'success']);
+    }
+
+    protected function handleSubscriptionSync($stripeSubscription)
+    {
+        $user = User::where('stripe_id', $stripeSubscription->customer)->first();
+
+        if (!$user) {
+            return;
+        }
+
+        if ($stripeSubscription->status !== 'active' && $stripeSubscription->status !== 'trialing') {
+            $user->update(['role' => \App\Enums\UserRole::User]);
+            return;
+        }
+
+        $priceId = $stripeSubscription->items->data[0]->price->id;
+        $plans = config('zumi.subscriptions.plans');
+
+        if ($priceId === ($plans['studio']['price_id'] ?? null)) {
+            $user->update(['role' => \App\Enums\UserRole::Studio]);
+        } elseif ($priceId === ($plans['pro']['price_id'] ?? null)) {
+            $user->update(['role' => \App\Enums\UserRole::Pro]);
+        } else {
+            // Default to User if price doesn't match Pro/Studio
+            $user->update(['role' => \App\Enums\UserRole::User]);
+        }
     }
 
     protected function handleAccountUpdate($account)
