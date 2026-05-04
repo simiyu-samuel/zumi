@@ -36,6 +36,15 @@ class EloquentWaveRepository implements WaveRepositoryInterface
             ->cursorPaginate($perPage);
     }
 
+    public function getCircleFeed(string $circleId, int $perPage = 15): CursorPaginator
+    {
+        return Wave::where('circle_id', $circleId)
+            ->with(Wave::DEFAULT_EAGER_LOAD)
+            ->where('status', WaveStatus::Ready)
+            ->latest()
+            ->cursorPaginate($perPage);
+    }
+
     public function getByUser(string $userId, int $perPage = 15): CursorPaginator
     {
         return Wave::where('user_id', $userId)

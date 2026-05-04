@@ -41,4 +41,10 @@ return [
         'webhook_secret' => env('CLOUDFLARE_WEBHOOK_SECRET'),
     ],
 
+    'livekit' => [
+        'url'        => env('LIVEKIT_URL'),
+        'api_key'    => env('LIVEKIT_API_KEY'),
+        'api_secret' => env('LIVEKIT_API_SECRET'),
+    ],
+
 ];

@@ -78,4 +78,24 @@ class CirclePolicy
         return $circle->owner_id === $user->id || 
                $circle->members()->where('user_id', $user->id)->where('role', \App\Enums\CircleMemberRole::Moderator)->exists();
     }
+
+    /**
+     * Determine whether the user can view circle content (feed).
+     */
+    public function viewContent(User $user, Circle $circle): bool
+    {
+        if ($circle->type === \App\Enums\CircleType::Public) {
+            return true;
+        }
+
+        return $circle->members()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Determine whether the user can chat in the circle.
+     */
+    public function chat(User $user, Circle $circle): bool
+    {
+        return $circle->members()->where('user_id', $user->id)->exists();
+    }
 }

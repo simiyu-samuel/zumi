@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\GatedRoomStatus;
 use App\Enums\UserRole;
 use App\Models\GatedRoom;
 use App\Models\User;
@@ -36,28 +37,32 @@ class GatedRoomTest extends TestCase
 
     public function test_user_can_join_gated_room_with_drops()
     {
+        config(['services.livekit.api_key' => 'test_key', 'services.livekit.api_secret' => 'a_very_long_secret_key_for_testing_purposes_only']);
+
         $host = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create(['drops_balance' => 1000]);
         
         $room = GatedRoom::create([
-            'user_id'         => $host->id,
-            'title'           => 'Paid Workshop',
-            'entry_fee_drops' => 300,
-            'status'          => 'scheduled',
+            'user_id'           => $host->id,
+            'title'             => 'Paid Workshop',
+            'livekit_room_name' => 'test_room',
+            'entry_fee_drops'   => 300,
+            'status'            => GatedRoomStatus::Scheduled,
         ]);
 
         Sanctum::actingAs($participant);
 
         $response = $this->postJson("/api/v1/rooms/{$room->id}/join");
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure(['success', 'token', 'is_host']);
 
         $participant->refresh();
         $host->refresh();
 
-        // 300 drops spent. 10% fee = 30. Host gets 270.
+        // 300 drops spent. 15% flat fee = 45. Host gets 255.
         $this->assertEquals(700, $participant->drops_balance);
-        $this->assertEquals(270, $host->drops_balance);
+        $this->assertEquals(255, $host->drops_balance);
 
         $this->assertDatabaseHas('gated_room_participants', [
             'user_id'       => $participant->id,
@@ -70,9 +75,10 @@ class GatedRoomTest extends TestCase
     {
         $host = User::factory()->create(['role' => UserRole::Pro]);
         $room = GatedRoom::create([
-            'user_id'         => $host->id,
-            'title'           => 'Live Room',
-            'status'          => 'scheduled',
+            'user_id'           => $host->id,
+            'title'             => 'Live Room',
+            'livekit_room_name' => 'test_room',
+            'status'            => GatedRoomStatus::Scheduled,
         ]);
 
         Sanctum::actingAs($host);
@@ -82,27 +88,55 @@ class GatedRoomTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('room.status', 'live');
 
-        // End
+        // End - Mock LiveKit config to avoid error in endRoom
+        config(['services.livekit.url' => 'http://localhost', 'services.livekit.api_key' => 'key', 'services.livekit.api_secret' => 'secret']);
+        
         $this->postJson("/api/v1/rooms/{$room->id}/end")
             ->assertStatus(200)
             ->assertJsonPath('room.status', 'ended');
     }
 
-    public function test_user_cannot_join_ended_room()
+    public function test_user_cannot_join_ended_room_without_replay()
     {
         $host = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create(['drops_balance' => 1000]);
         
         $room = GatedRoom::create([
-            'user_id' => $host->id,
-            'title'   => 'Ended Session',
-            'status'  => 'ended',
+            'user_id'           => $host->id,
+            'title'             => 'Ended Session',
+            'livekit_room_name' => 'test_room',
+            'status'            => GatedRoomStatus::Ended,
+            'is_replay_enabled' => false,
         ]);
 
         Sanctum::actingAs($participant);
 
         $response = $this->postJson("/api/v1/rooms/{$room->id}/join");
 
+        // Policy should block this
         $response->assertStatus(403);
+    }
+
+    public function test_user_can_join_ended_room_with_replay()
+    {
+        config(['services.livekit.api_key' => 'test_key', 'services.livekit.api_secret' => 'a_very_long_secret_key_for_testing_purposes_only']);
+
+        $host = User::factory()->create(['role' => UserRole::Pro]);
+        $participant = User::factory()->create(['drops_balance' => 1000]);
+        
+        $room = GatedRoom::create([
+            'user_id'           => $host->id,
+            'title'             => 'Ended Session',
+            'livekit_room_name' => 'test_room',
+            'status'            => GatedRoomStatus::Ended,
+            'is_replay_enabled' => true,
+        ]);
+
+        Sanctum::actingAs($participant);
+
+        $response = $this->postJson("/api/v1/rooms/{$room->id}/join");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure(['success', 'token']);
     }
 }

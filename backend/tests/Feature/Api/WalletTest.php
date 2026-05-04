@@ -132,8 +132,20 @@ class WalletTest extends TestCase
         $proUser = User::factory()->create(['role' => \App\Enums\UserRole::Pro]);
         $studioUser = User::factory()->create(['role' => \App\Enums\UserRole::Studio]);
 
-        $this->assertEquals(15, $service->calculatePlatformFee($freeUser, 100, DropsTransactionType::Spend));
-        $this->assertEquals(10, $service->calculatePlatformFee($proUser, 100, DropsTransactionType::Spend));
-        $this->assertEquals(7, $service->calculatePlatformFee($studioUser, 100, DropsTransactionType::Spend));
+        // 1. Gated Room Entry (Always 15% regardless of role)
+        $this->assertEquals(15, $service->calculatePlatformFee(100, DropsTransactionType::GatedRoomEntry, $freeUser));
+        $this->assertEquals(15, $service->calculatePlatformFee(100, DropsTransactionType::GatedRoomEntry, $proUser));
+        $this->assertEquals(15, $service->calculatePlatformFee(100, DropsTransactionType::GatedRoomEntry, $studioUser));
+
+        // 2. Circle Subscription (Tiered)
+        $this->assertEquals(15, $service->calculatePlatformFee(100, DropsTransactionType::CircleSubscription, $freeUser));
+        $this->assertEquals(10, $service->calculatePlatformFee(100, DropsTransactionType::CircleSubscription, $proUser));
+        $this->assertEquals(7, $service->calculatePlatformFee(100, DropsTransactionType::CircleSubscription, $studioUser));
+
+        // 3. Challenge Prize (Always 5%)
+        $this->assertEquals(5, $service->calculatePlatformFee(100, DropsTransactionType::Release, $freeUser));
+        
+        // 4. Gifts (Always 15%)
+        $this->assertEquals(15, $service->calculatePlatformFee(100, DropsTransactionType::Gift, $studioUser));
     }
 }

@@ -10,6 +10,7 @@ interface WaveRepositoryInterface
 {
     public function getFeed(int $perPage = 15): CursorPaginator;
     public function getFollowedFeed(User $user, int $perPage = 15): CursorPaginator;
+    public function getCircleFeed(string $circleId, int $perPage = 15): CursorPaginator;
     public function getByUser(string $userId, int $perPage = 15): CursorPaginator;
     public function findById(string $id): ?Wave;
     public function create(array $data): Wave;

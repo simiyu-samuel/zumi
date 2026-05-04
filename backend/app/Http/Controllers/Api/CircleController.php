@@ -106,4 +106,48 @@ class CircleController extends Controller
 
         return response()->json($insights);
     }
+
+    public function feed(Request $request, Circle $circle)
+    {
+        $this->authorize('viewContent', $circle);
+
+        $waves = $this->circleService->getFeed(
+            $circle,
+            $request->input('per_page', 15)
+        );
+
+        return \App\Http\Resources\WaveResource::collection($waves);
+    }
+
+    public function messages(Request $request, Circle $circle)
+    {
+        $this->authorize('chat', $circle);
+
+        $messages = $this->circleService->getMessages(
+            $circle,
+            $request->input('per_page', 50)
+        );
+
+        return response()->json($messages); // Or use a resource
+    }
+
+    public function sendMessage(Request $request, Circle $circle)
+    {
+        $this->authorize('chat', $circle);
+
+        $request->validate([
+            'content' => 'required|string|max:5000',
+        ]);
+
+        $message = $this->circleService->sendMessage(
+            $request->user(),
+            $circle,
+            $request->input('content')
+        );
+
+        return response()->json([
+            'message' => 'Message sent',
+            'data'    => $message->load('user'),
+        ], Response::HTTP_CREATED);
+    }
 }

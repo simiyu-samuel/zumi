@@ -62,7 +62,7 @@ class CircleService
                     $user,
                     $circle->owner,
                     $circle->monthly_drops_price,
-                    DropsTransactionType::Spend,
+                    DropsTransactionType::CircleSubscription,
                     $circle,
                     ['title' => 'Circle subscription: ' . $circle->name],
                 );
@@ -78,6 +78,7 @@ class CircleService
         $this->flowScoreService->award($circle->owner, 'circle_joined');
     }
 
+    
     /**
      * Create a pending join request for a private circle.
      */
@@ -126,6 +127,48 @@ class CircleService
     public function getPendingRequests(Circle $circle, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->circleRepository->getPendingJoinRequests($circle, $perPage);
+    }
+
+    /**
+     * Get paginated feed for a circle.
+     */
+    public function getFeed(Circle $circle, int $perPage = 15): \Illuminate\Contracts\Pagination\CursorPaginator
+    {
+        return $this->waveRepository->getCircleFeed($circle->id, $perPage);
+    }
+
+    /**
+     * Send a real-time message to a circle.
+     */
+    public function sendMessage(User $user, Circle $circle, string $content): \App\Models\CircleMessage
+    {
+        // 1. Ensure user is a member
+        if (!$circle->members()->where('user_id', $user->id)->exists()) {
+            throw new \DomainException('You must be a member of this Circle to send messages.');
+        }
+
+        // 2. Create message
+        $message = \App\Models\CircleMessage::create([
+            'circle_id' => $circle->id,
+            'user_id'   => $user->id,
+            'content'   => $content,
+        ]);
+
+        // 3. Broadcast
+        broadcast(new \App\Events\ChatMessageSent($message->load('user')))->toOthers();
+
+        return $message;
+    }
+
+    /**
+     * Get paginated messages for a circle.
+     */
+    public function getMessages(Circle $circle, int $perPage = 50): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return \App\Models\CircleMessage::with('user')
+            ->where('circle_id', $circle->id)
+            ->latest()
+            ->paginate($perPage);
     }
 
     public function leaveCircle(User $user, Circle $circle): void

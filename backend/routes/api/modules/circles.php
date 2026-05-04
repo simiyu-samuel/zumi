@@ -16,4 +16,9 @@ Route::middleware('auth:sanctum')->prefix('circles')->group(function () {
     Route::get('/{circle}/requests', [CircleController::class, 'requests']);
     Route::post('/requests/{requestId}/approve', [CircleController::class, 'approveRequest']);
     Route::post('/requests/{requestId}/decline', [CircleController::class, 'declineRequest']);
+
+    // Chat & Feed
+    Route::get('/{circle}/feed', [CircleController::class, 'feed']);
+    Route::get('/{circle}/messages', [CircleController::class, 'messages']);
+    Route::post('/{circle}/messages', [CircleController::class, 'sendMessage']);
 });

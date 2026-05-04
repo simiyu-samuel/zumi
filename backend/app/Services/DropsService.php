@@ -105,7 +105,7 @@ class DropsService
             );
 
             // 2. Calculate platform fee
-            $feeAmount = $this->calculatePlatformFee($receiver, $amount, $type);
+            $feeAmount = $this->calculatePlatformFee($amount, $type, $receiver);
             $netAmount = $amount - $feeAmount;
 
             // 3. Credit receiver (Net amount)
@@ -194,7 +194,7 @@ class DropsService
             ]);
 
             // Calculate platform fee on release
-            $feeAmount = $this->calculatePlatformFee($receiver, $amount, DropsTransactionType::Release);
+            $feeAmount = $this->calculatePlatformFee($amount, DropsTransactionType::Release, $receiver);
             $netAmount = $amount - $feeAmount;
 
             // Credit winner (Net amount)
@@ -240,27 +240,51 @@ class DropsService
 
     /**
      * Calculate platform fee based on the transaction type and user's context.
+     * 
+     * Gated Room Entry: 15%
+     * Circle Subscription: 7% (Studio), 10% (Pro), 15% (Default)
+     * Gift/Spend/SkillDrop: 15%
+     * Flow Market: 10%
+     * Release (Challenge): 5%
      */
-    public function calculatePlatformFee(User $user, int $amount, ?DropsTransactionType $type = null): int
+    public function calculatePlatformFee(int $amount, DropsTransactionType $type, ?User $receiver = null): int
     {
         $fees = config('zumi.drops.fees', []);
         
-        // 1. Fixed fees for specific types
-        if ($type === DropsTransactionType::Release) {
-            $rate = $fees['challenge_prize'] ?? 0.05;
-            return (int) floor($amount * $rate);
-        }
-
-        // 2. Tiered fees based on receiver's role
-        if ($user->isStudio()) {
-            $rate = $fees['circle_subscription']['studio'] ?? 0.07;
-        } elseif ($user->isPro()) {
-            $rate = $fees['circle_subscription']['pro'] ?? 0.10;
-        } else {
-            $rate = $fees['default'] ?? 0.15;
-        }
+        $rate = match($type) {
+            DropsTransactionType::GatedRoomEntry    => $fees['gated_room'] ?? 0.15,
+            DropsTransactionType::SkillDropPurchase => $fees['skill_drop'] ?? 0.15,
+            DropsTransactionType::FlowMarketPayment => $fees['flow_market'] ?? 0.10,
+            DropsTransactionType::Release           => $fees['challenge_prize'] ?? 0.05,
+            DropsTransactionType::Gift, 
+            DropsTransactionType::Spend             => $fees['wave_gift'] ?? 0.15,
+            
+            DropsTransactionType::CircleSubscription => $this->getCircleSubscriptionRate($receiver, $fees),
+            
+            default => $fees['default'] ?? 0.15,
+        };
 
         return (int) floor($amount * $rate);
+    }
+
+    /**
+     * Determine Circle subscription rate based on creator's role.
+     */
+    protected function getCircleSubscriptionRate(?User $receiver, array $fees): float
+    {
+        if (!$receiver) {
+            return $fees['circle_subscription']['default'] ?? 0.15;
+        }
+
+        if ($receiver->isStudio()) {
+            return $fees['circle_subscription']['studio'] ?? 0.07;
+        }
+
+        if ($receiver->isPro()) {
+            return $fees['circle_subscription']['pro'] ?? 0.10;
+        }
+
+        return $fees['circle_subscription']['default'] ?? 0.15;
     }
 
     /**

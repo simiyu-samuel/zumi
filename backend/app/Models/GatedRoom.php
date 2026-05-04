@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GatedRoomStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,19 +19,24 @@ class GatedRoom extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'livekit_room_name',
         'description',
         'entry_fee_drops',
         'status',
+        'is_replay_enabled',
+        'replay_url',
         'scheduled_at',
         'started_at',
         'ended_at',
     ];
 
     protected $casts = [
-        'entry_fee_drops' => 'integer',
-        'scheduled_at'    => 'datetime',
-        'started_at'      => 'datetime',
-        'ended_at'        => 'datetime',
+        'entry_fee_drops'   => 'integer',
+        'status'            => GatedRoomStatus::class,
+        'is_replay_enabled' => 'boolean',
+        'scheduled_at'      => 'datetime',
+        'started_at'        => 'datetime',
+        'ended_at'          => 'datetime',
     ];
 
     /**

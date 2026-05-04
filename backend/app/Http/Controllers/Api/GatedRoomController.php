@@ -63,7 +63,7 @@ class GatedRoomController extends Controller
             return response()->json(['message' => $result['message']], Response::HTTP_BAD_REQUEST);
         }
 
-        return response()->json(['message' => 'Successfully joined the room']);
+        return response()->json($result);
     }
 
     public function start(GatedRoom $gatedRoom): JsonResponse
