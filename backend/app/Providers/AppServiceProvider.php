@@ -73,5 +73,18 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('view-wallet', [\App\Policies\DropsPolicy::class, 'viewWallet']);
         Gate::define('gift-drops', [\App\Policies\DropsPolicy::class, 'viewWallet']); // Reuse for now
+
+        $this->configureRateLimiting();
+    }
+
+    protected function configureRateLimiting(): void
+    {
+        \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        \Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
+        });
     }
 }

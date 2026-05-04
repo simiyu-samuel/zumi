@@ -13,7 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->api(append: [
+            \Illuminate\Http\Middleware\SetCacheHeaders::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+        ]);
+        
+        $middleware->alias([
+            'throttle.auth' => \Illuminate\Routing\Middleware\ThrottleRequests::class.':auth',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // DomainExceptions from the service layer return 422
