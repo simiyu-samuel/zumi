@@ -9,6 +9,7 @@
         "php": "^8.2",
         "agence104/livekit-server-sdk": "*",
         "filament/filament": "^3.2",
+        "http-interop/http-factory-guzzle": "*",
         "laravel/cashier": "^16.5",
         "laravel/framework": "^11.31",
         "laravel/horizon": "^5.46",
@@ -20,6 +21,7 @@
         "laravel/telescope": "^5.20",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.0",
+        "meilisearch/meilisearch-php": "*",
         "predis/predis": "^3.4",
         "spatie/laravel-medialibrary": "^11.22",
         "spatie/laravel-permission": "^6.25"

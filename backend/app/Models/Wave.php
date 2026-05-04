@@ -7,6 +7,7 @@ use App\Enums\WaveVisibility;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -16,7 +17,21 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Wave extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia, HasUuids;
+    use HasFactory, SoftDeletes, InteractsWithMedia, HasUuids, Searchable;
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id'          => (string) $this->id,
+            'title'       => $this->title,
+            'description' => $this->description,
+        ];
+    }
 
     const RELATION_USER = 'user';
     const RELATION_LIKES = 'likes';
