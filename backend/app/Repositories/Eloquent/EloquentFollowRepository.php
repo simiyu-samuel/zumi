@@ -11,12 +11,12 @@ class EloquentFollowRepository implements FollowRepositoryInterface
 {
     public function follow(User $follower, User $following): void
     {
-        $follower->following()->attach($following->id, ['id' => Str::uuid()]);
+        $follower->following()->attach($following);
     }
 
     public function unfollow(User $follower, User $following): void
     {
-        $follower->following()->detach($following->id);
+        $follower->following()->detach($following);
     }
 
     public function isFollowing(User $follower, User $following): bool

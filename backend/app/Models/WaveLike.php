@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WaveLike extends Model
 {
     use HasFactory, HasUuids;
+
     protected $fillable = ['user_id', 'wave_id'];
 
     public function user(): BelongsTo

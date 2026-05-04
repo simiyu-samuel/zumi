@@ -63,9 +63,9 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function completeOnboarding(Request $request)
+    public function completeOnboarding(\App\Http\Requests\Profile\CompleteOnboardingRequest $request)
     {
-        $user = $this->profileService->updateProfile($request->user(), ['onboarding_completed' => true]);
+        $user = $this->profileService->handleOnboarding($request->user(), $request->validated());
 
         return response()->json([
             'message' => 'Onboarding completed',
@@ -98,5 +98,16 @@ class ProfileController extends Controller
             'message' => 'Notification preferences updated successfully.',
             'notification_settings' => $user->notification_settings,
         ]);
+    }
+
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $request->user()->update(['fcm_token' => $request->fcm_token]);
+
+        return response()->json(['message' => 'FCM token updated successfully.']);
     }
 }

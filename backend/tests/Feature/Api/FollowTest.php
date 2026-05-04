@@ -44,7 +44,7 @@ class FollowTest extends TestCase
         $user = User::factory()->create(['username' => 'user']);
         $otherUser = User::factory()->create(['username' => 'other']);
         
-        $user->following()->attach($otherUser->id, ['id' => \Illuminate\Support\Str::uuid()]);
+        $user->following()->attach($otherUser->id);
 
         // Followers list
         $response = $this->getJson("/api/v1/users/{$otherUser->id}/followers");

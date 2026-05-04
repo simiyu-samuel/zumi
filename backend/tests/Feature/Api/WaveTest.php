@@ -132,7 +132,7 @@ class WaveTest extends TestCase
         $following = User::factory()->create();
         
         // Follow the user
-        $user->following()->attach($following->id, ['id' => \Illuminate\Support\Str::uuid()]);
+        $user->following()->attach($following->id);
 
         Wave::factory()->count(3)->create([
             'user_id'    => $following->id,

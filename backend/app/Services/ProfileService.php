@@ -22,6 +22,24 @@ class ProfileService
         return $user->fresh();
     }
 
+    public function handleOnboarding(User $user, array $data): User
+    {
+        $updateData = [
+            'onboarding_completed' => true,
+            'interests'            => $data['interests'] ?? $user->interests,
+        ];
+
+        $this->userRepository->update($user, $updateData);
+
+        if (!empty($data['suggested_follows'])) {
+            foreach ($data['suggested_follows'] as $followId) {
+                $user->following()->syncWithoutDetaching([$followId]);
+            }
+        }
+
+        return $user->fresh();
+    }
+
     public function uploadMedia(User $user, $file, string $collection)
     {
         $user->addMedia($file)->toMediaCollection($collection);

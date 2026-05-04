@@ -85,6 +85,8 @@ class User extends Authenticatable implements HasMedia
         'stripe_connect_id',
         'stripe_onboarding_completed',
         'notification_settings',
+        'interests',
+        'fcm_token',
     ];
 
     /**
@@ -115,6 +117,7 @@ class User extends Authenticatable implements HasMedia
             'status' => UserStatus::class,
             'stripe_onboarding_completed' => 'boolean',
             'notification_settings' => 'array',
+            'interests' => 'array',
         ];
     }
 

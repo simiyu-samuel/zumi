@@ -22,4 +22,5 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Notification Preferences
     Route::patch('/users/me/notifications', [ProfileController::class, 'updateNotificationSettings']);
+    Route::post('/user/fcm-token', [ProfileController::class, 'updateFcmToken']);
 });
