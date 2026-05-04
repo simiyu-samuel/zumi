@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\UserRole;
 use App\Models\SkillDrop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,7 +15,7 @@ class SkillDropTest extends TestCase
 
     public function test_user_can_create_skill_drop()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Pro]);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/skill-drops', [
@@ -36,7 +37,7 @@ class SkillDropTest extends TestCase
 
     public function test_user_can_purchase_skill_drop()
     {
-        $creator = User::factory()->create();
+        $creator = User::factory()->create(['role' => UserRole::Pro]);
         $buyer = User::factory()->create(['drops_balance' => 1000]);
         
         $skillDrop = SkillDrop::create([
@@ -56,9 +57,9 @@ class SkillDropTest extends TestCase
         $buyer->refresh();
         $creator->refresh();
 
-        // 500 drops spent. 15% fee = 75. Creator gets 425.
+        // 500 drops spent. 10% fee = 50. Creator gets 450.
         $this->assertEquals(500, $buyer->drops_balance);
-        $this->assertEquals(425, $creator->drops_balance);
+        $this->assertEquals(450, $creator->drops_balance);
 
         $this->assertDatabaseHas('skill_drop_purchases', [
             'user_id'       => $buyer->id,
@@ -69,7 +70,7 @@ class SkillDropTest extends TestCase
 
     public function test_only_purchasers_can_see_content_url()
     {
-        $creator = User::factory()->create();
+        $creator = User::factory()->create(['role' => UserRole::Pro]);
         $buyer = User::factory()->create(['drops_balance' => 1000]);
         $guest = User::factory()->create();
         
@@ -101,7 +102,7 @@ class SkillDropTest extends TestCase
 
     public function test_user_can_view_purchased_library()
     {
-        $creator = User::factory()->create();
+        $creator = User::factory()->create(['role' => UserRole::Pro]);
         $buyer = User::factory()->create(['drops_balance' => 2000]);
         
         $sd1 = SkillDrop::create(['user_id' => $creator->id, 'title' => 'Drop 1', 'slug' => 'd1', 'price_drops' => 100]);

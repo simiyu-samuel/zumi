@@ -64,12 +64,12 @@ return [
             'pro' => [
                 'price_id' => env('STRIPE_PRO_PRICE_ID', 'price_dummy_pro'),
                 'name'     => 'Pro',
-                'amount'   => 2500, // $25.00
+                'amount'   => 999, // $9.99
             ],
             'studio' => [
                 'price_id' => env('STRIPE_STUDIO_PRICE_ID', 'price_dummy_studio'),
                 'name'     => 'Studio',
-                'amount'   => 9900, // $99.00
+                'amount'   => 2499, // $24.99
             ],
         ],
     ],

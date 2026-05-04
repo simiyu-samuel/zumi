@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\UserRole;
 use App\Models\Challenge;
 use App\Models\User;
 use App\Models\Wave;
@@ -16,7 +17,10 @@ class ChallengeTest extends TestCase
 
     public function test_user_can_create_challenge_with_escrow()
     {
-        $user = User::factory()->create(['drops_balance' => 10000]);
+        $user = User::factory()->create([
+            'drops_balance' => 10000,
+            'role' => UserRole::Pro
+        ]);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/challenges', [
@@ -50,7 +54,7 @@ class ChallengeTest extends TestCase
 
     public function test_user_can_join_challenge()
     {
-        $creator = User::factory()->create();
+        $creator = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create();
         $challenge = Challenge::factory()->create(['user_id' => $creator->id]);
         $wave = Wave::factory()->create(['user_id' => $participant->id]);
@@ -71,7 +75,7 @@ class ChallengeTest extends TestCase
 
     public function test_user_can_vote_for_participation()
     {
-        $creator = User::factory()->create();
+        $creator = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create();
         $voter = User::factory()->create();
         
@@ -94,7 +98,7 @@ class ChallengeTest extends TestCase
 
     public function test_creator_can_close_challenge_and_release_prize()
     {
-        $creator = User::factory()->create();
+        $creator = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create(['drops_balance' => 0]);
         
         $challenge = Challenge::factory()->create([

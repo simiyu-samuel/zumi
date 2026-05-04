@@ -16,21 +16,28 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create Roles
+        // Create Roles (Aligned with UserRole Enum)
         Role::updateOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         Role::updateOrCreate(['name' => 'studio', 'guard_name' => 'web']);
         Role::updateOrCreate(['name' => 'pro', 'guard_name' => 'web']);
-        Role::updateOrCreate(['name' => 'creator', 'guard_name' => 'web']);
         Role::updateOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
-        // Define basic permissions (example)
+        // Define permissions
         Permission::updateOrCreate(['name' => 'upload waves', 'guard_name' => 'web']);
         Permission::updateOrCreate(['name' => 'manage drops', 'guard_name' => 'web']);
         Permission::updateOrCreate(['name' => 'view analytics', 'guard_name' => 'web']);
+        Permission::updateOrCreate(['name' => 'create circles', 'guard_name' => 'web']);
 
-        // Assign permissions to creator
-        $creatorRole = Role::findByName('creator');
-        $creatorRole->givePermissionTo(['upload waves', 'view analytics']);
+        // Assign basic permissions to all users
+        $userRole = Role::findByName('user');
+        $userRole->givePermissionTo(['upload waves']);
+
+        // Assign premium permissions to Pro and Studio
+        $proRole = Role::findByName('pro');
+        $proRole->givePermissionTo(['upload waves', 'view analytics', 'create circles']);
+
+        $studioRole = Role::findByName('studio');
+        $studioRole->givePermissionTo(['upload waves', 'view analytics', 'create circles']);
 
         // Assign everything to admin
         $adminRole = Role::findByName('admin');

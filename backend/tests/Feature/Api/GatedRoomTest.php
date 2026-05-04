@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\UserRole;
 use App\Models\GatedRoom;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,7 +15,7 @@ class GatedRoomTest extends TestCase
 
     public function test_user_can_create_gated_room()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Pro]);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/v1/rooms', [
@@ -35,7 +36,7 @@ class GatedRoomTest extends TestCase
 
     public function test_user_can_join_gated_room_with_drops()
     {
-        $host = User::factory()->create();
+        $host = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create(['drops_balance' => 1000]);
         
         $room = GatedRoom::create([
@@ -54,9 +55,9 @@ class GatedRoomTest extends TestCase
         $participant->refresh();
         $host->refresh();
 
-        // 300 drops spent. 15% fee = 45. Host gets 255.
+        // 300 drops spent. 10% fee = 30. Host gets 270.
         $this->assertEquals(700, $participant->drops_balance);
-        $this->assertEquals(255, $host->drops_balance);
+        $this->assertEquals(270, $host->drops_balance);
 
         $this->assertDatabaseHas('gated_room_participants', [
             'user_id'       => $participant->id,
@@ -67,7 +68,7 @@ class GatedRoomTest extends TestCase
 
     public function test_host_can_start_and_end_room()
     {
-        $host = User::factory()->create();
+        $host = User::factory()->create(['role' => UserRole::Pro]);
         $room = GatedRoom::create([
             'user_id'         => $host->id,
             'title'           => 'Live Room',
@@ -89,7 +90,7 @@ class GatedRoomTest extends TestCase
 
     public function test_user_cannot_join_ended_room()
     {
-        $host = User::factory()->create();
+        $host = User::factory()->create(['role' => UserRole::Pro]);
         $participant = User::factory()->create(['drops_balance' => 1000]);
         
         $room = GatedRoom::create([
