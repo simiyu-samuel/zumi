@@ -1,63 +1,46 @@
-# Zumi Backend API
+# Zumi Backend API (v1.0 MVP)
 
 The core API and administrative dashboard for the Zumi platform, built with Laravel 11.
 
-## Tech Stack
-- **Framework**: [Laravel 11](https://laravel.com/)
-- **PHP Version**: 8.4+
-- **Database**: PostgreSQL (Production), SQLite (Local)
-- **Monitoring**: 
-  - [Laravel Horizon](https://laravel.com/docs/horizon) (Queue Management)
-  - [Laravel Pulse](https://laravel.com/docs/pulse) (Health Monitoring)
-  - [Laravel Telescope](https://laravel.com/docs/telescope) (Debug Assistant)
-- **Admin Panel**: [Filament v3](https://filamentphp.com/)
-
-## Key Features Implemented
+## 🚀 Key Features
 - **Monetary System**: Drops ledger (immutable transaction history).
-- **ACL**: Role-based access control via Spatie Permission.
-- **Media**: Robust file handling via Spatie MediaLibrary.
-- **Search**: Algolia/Meilisearch integration via Laravel Scout.
-- **Billing**: Stripe integration via Laravel Cashier.
+- **Social Engine**: Waves (video), Circles (communities), and Nested Comments.
+- **Monetization**: Gated content, Skill Drops, and Premium Subscriptions (Stripe).
+- **Security**: Rate limiting, UUIDs, and 100% Policy-based authorization.
+- **Trust & Safety**: Integrated reporting and automated moderation.
+- **Live Interaction**: Gated Live Rooms with entry fees.
 
-## Getting Started
+## 🛠 Tech Stack
+- **Framework**: [Laravel 11](https://laravel.com/)
+- **Database**: PostgreSQL 15+ (Required)
+- **Real-time**: Laravel Reverb
+- **Search**: Meilisearch / Algolia
+- **Queue**: Laravel Horizon
+- **Monitoring**: Laravel Pulse & Telescope
 
-### Prerequisites
-- PHP 8.4+
-- Composer
-- SQLite (for local dev) or PostgreSQL
+## 📦 Getting Started
 
 ### Installation
-1. Clone the repository and navigate to the backend:
-   ```bash
-   cd zumi/backend
-   ```
-2. Install dependencies:
-   ```bash
-   composer install
-   ```
-3. Set up environment:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-4. Run migrations:
-   ```bash
-   php artisan migrate
-   ```
-5. Create an admin user for Filament:
-   ```bash
-   php artisan make:filament-user
-   ```
+1.  **Dependencies**: `composer install`
+2.  **Environment**: `cp .env.example .env` (Configure DB_DATABASE and STRIPE keys)
+3.  **Migration**: `php artisan migrate --seed`
+4.  **Admin**: `php artisan make:filament-user`
 
-### Running Locally
-Start the development server:
+### Running
 ```bash
 php artisan serve
+php artisan horizon
 ```
 
-## Architecture
-This backend follows a **Domain-Driven** architecture:
-- `app/Domain`: Core domain logic and business rules.
-- `app/Services`: Business logic orchestration.
-- `app/Repositories`: Data access abstraction.
-- `app/Enums`: Single source of truth for fixed values.
+## 🧪 Testing
+The backend is protected by a comprehensive suite of 83+ feature tests.
+```bash
+php artisan test
+```
+
+## 📄 API Documentation
+A full Postman collection is available in the root directory: `Zumi_API_Collection.json`.
+For a detailed technical breakdown, see `BACKEND_DOCUMENTATION.md`.
+
+---
+**Build with ❤️ for the Creator Economy.**

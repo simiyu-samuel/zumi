@@ -1,0 +1,477 @@
+{
+	"info": {
+		"_postman_id": "zumi-api-v1",
+		"name": "Zumi API v1",
+		"description": "Full Postman collection for Zumi Backend (MVP).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"username\": \"testuser\",\n    \"email\": \"test@zumi.app\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@zumi.app\",\n    \"password\": \"password\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+					}
+				},
+				{
+					"name": "Get Authenticated User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/user", "host": ["{{base_url}}"], "path": ["user"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "1. User Profile",
+			"item": [
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"bio\": \"New bio for Zumi!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"] }
+					}
+				},
+				{
+					"name": "Complete Onboarding",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"interests\": [\"tech\", \"music\"],\n    \"follows\": []\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/user/onboarding", "host": ["{{base_url}}"], "path": ["user", "onboarding"] }
+					}
+				},
+				{
+					"name": "Update FCM Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fcm_token\": \"fcm_sample_token_123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/user/fcm-token", "host": ["{{base_url}}"], "path": ["user", "fcm-token"] }
+					}
+				},
+				{
+					"name": "Update Notification Settings",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"settings\": {\n        \"new_follower\": true,\n        \"wave_liked\": false\n    }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/users/me/notifications", "host": ["{{base_url}}"], "path": ["users", "me", "notifications"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Waves & Comments",
+			"item": [
+				{
+					"name": "List Waves (Discovery)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{base_url}}/waves", "host": ["{{base_url}}"], "path": ["waves"] }
+					}
+				},
+				{
+					"name": "Followed Feed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/waves/followed", "host": ["{{base_url}}"], "path": ["waves", "followed"] }
+					}
+				},
+				{
+					"name": "Initialize Upload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"size_bytes\": 1048576,\n    \"title\": \"My New Wave\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/waves/initialize-upload", "host": ["{{base_url}}"], "path": ["waves", "initialize-upload"] }
+					}
+				},
+				{
+					"name": "Create Wave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Epic Wave\",\n    \"description\": \"Check this out!\",\n    \"cloudflare_id\": \"sample_cf_id\",\n    \"visibility\": \"public\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/waves", "host": ["{{base_url}}"], "path": ["waves"] }
+					}
+				},
+				{
+					"name": "Like Wave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/waves/{{wave_id}}/like", "host": ["{{base_url}}"], "path": ["waves", "{{wave_id}}", "like"] }
+					}
+				},
+				{
+					"name": "Purchase Gated Wave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/waves/{{wave_id}}/purchase", "host": ["{{base_url}}"], "path": ["waves", "{{wave_id}}", "purchase"] }
+					}
+				},
+				{
+					"name": "Add Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Great video!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/waves/{{wave_id}}/comments", "host": ["{{base_url}}"], "path": ["waves", "{{wave_id}}", "comments"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Circles",
+			"item": [
+				{
+					"name": "List Circles",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{base_url}}/circles", "host": ["{{base_url}}"], "path": ["circles"] }
+					}
+				},
+				{
+					"name": "Create Circle",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Tech Enthusiasts\",\n    \"description\": \"A place for tech geeks\",\n    \"type\": \"public\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/circles", "host": ["{{base_url}}"], "path": ["circles"] }
+					}
+				},
+				{
+					"name": "Join Circle",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/circles/{{circle_id}}/join", "host": ["{{base_url}}"], "path": ["circles", "{{circle_id}}", "join"] }
+					}
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Hello circle!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/circles/{{circle_id}}/messages", "host": ["{{base_url}}"], "path": ["circles", "{{circle_id}}", "messages"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Wallet & Drops",
+			"item": [
+				{
+					"name": "Get Wallet Balance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/wallet", "host": ["{{base_url}}"], "path": ["wallet"] }
+					}
+				},
+				{
+					"name": "Gift Drops",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"receiver_id\": \"{{user_id}}\",\n    \"amount\": 100\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/drops/gift", "host": ["{{base_url}}"], "path": ["drops", "gift"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Challenges",
+			"item": [
+				{
+					"name": "Create Challenge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Dance Challenge\",\n    \"description\": \"Show us your moves!\",\n    \"prize_drops\": 1000,\n    \"ends_at\": \"2026-12-31 23:59:59\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/challenges", "host": ["{{base_url}}"], "path": ["challenges"] }
+					}
+				},
+				{
+					"name": "Join Challenge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wave_id\": \"{{wave_id}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/challenges/{{challenge_id}}/join", "host": ["{{base_url}}"], "path": ["challenges", "{{challenge_id}}", "join"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Skill Drops",
+			"item": [
+				{
+					"name": "List Skill Drops",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{base_url}}/skill-drops", "host": ["{{base_url}}"], "path": ["skill-drops"] }
+					}
+				},
+				{
+					"name": "Purchase Skill Drop",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/skill-drops/{{skill_drop_id}}/purchase", "host": ["{{base_url}}"], "path": ["skill-drops", "{{skill_drop_id}}", "purchase"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Gated Rooms (Live)",
+			"item": [
+				{
+					"name": "Create Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Live Jam Session\",\n    \"description\": \"Come join the music!\",\n    \"entry_fee_drops\": 50\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/rooms", "host": ["{{base_url}}"], "path": ["rooms"] }
+					}
+				},
+				{
+					"name": "Join Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/rooms/{{room_id}}/join", "host": ["{{base_url}}"], "path": ["rooms", "{{room_id}}", "join"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Payouts & Stripe",
+			"item": [
+				{
+					"name": "Stripe Onboarding",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{base_url}}/payouts/onboard", "host": ["{{base_url}}"], "path": ["payouts", "onboard"] }
+					}
+				},
+				{
+					"name": "Withdraw",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 5000\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/payouts/withdraw", "host": ["{{base_url}}"], "path": ["payouts", "withdraw"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Moderation",
+			"item": [
+				{
+					"name": "Report Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reportable_type\": \"wave\",\n    \"reportable_id\": \"{{wave_id}}\",\n    \"reason\": \"Inappropriate\",\n    \"description\": \"Violates guidelines.\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/reports", "host": ["{{base_url}}"], "path": ["reports"] }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:8000/api/v1", "type": "string" },
+		{ "key": "token", "value": "", "type": "string" },
+		{ "key": "wave_id", "value": "", "type": "string" },
+		{ "key": "user_id", "value": "", "type": "string" },
+		{ "key": "circle_id", "value": "", "type": "string" },
+		{ "key": "room_id", "value": "", "type": "string" },
+		{ "key": "challenge_id", "value": "", "type": "string" },
+		{ "key": "skill_drop_id", "value": "", "type": "string" }
+	]
+}
