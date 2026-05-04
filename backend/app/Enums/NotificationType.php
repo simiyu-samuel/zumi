@@ -10,4 +10,5 @@ enum NotificationType: string
     case CircleApproved = 'circle_approved';
     case WaveLiked = 'wave_liked';
     case NewComment = 'new_comment';
+    case DropsReceived = 'drops_received';
 }

@@ -142,6 +142,9 @@ class DropsService
         try {
             $this->transfer($sender, $receiver, $amount, DropsTransactionType::Gift, $reference);
             
+            // Notify receiver
+            $receiver->notify(new \App\Notifications\DropsReceivedNotification($sender, $amount, $reference));
+
             return ['success' => true];
         } catch (\Exception $e) {
             return [
