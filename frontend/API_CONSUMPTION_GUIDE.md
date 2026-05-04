@@ -368,3 +368,157 @@ This document provides exact JSON examples for Request Payloads and Response Obj
     "message": "Insufficient Drops balance."
 }
 ```
+---
+
+## 8. Gated Rooms (Live Content)
+
+### **POST** `/rooms`
+**Request Payload:**
+```json
+{
+    "title": "Unplugged Acoustic Session",
+    "description": "Live music and Q&A",
+    "entry_fee_drops": 100,
+    "scheduled_at": "2026-06-01 19:00:00"
+}
+```
+**Response (201 Created):**
+```json
+{
+    "id": "room-uuid-456",
+    "title": "Unplugged Acoustic Session",
+    "host_id": "your-uuid",
+    "entry_fee_drops": 100,
+    "status": "scheduled",
+    "live_stream_url": "https://stream.zumi.app/live/..."
+}
+```
+
+### **POST** `/rooms/{id}/join`
+**Response (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Joined room successfully. Entry fee deducted.",
+    "new_balance": 900
+}
+```
+
+---
+
+## 9. Wave Challenges
+
+### **POST** `/challenges`
+**Request Payload:**
+```json
+{
+    "title": "Best Travel Vlog",
+    "description": "Show us your best travel moments!",
+    "type": "open",
+    "prize_pool": 2000,
+    "ends_at": "2026-07-15 23:59:59"
+}
+```
+**Response (201 Created):**
+```json
+{
+    "id": "challenge-uuid-789",
+    "title": "Best Travel Vlog",
+    "prize_pool": 2000,
+    "status": "active",
+    "ends_at": "2026-07-15T23:59:59Z"
+}
+```
+
+### **POST** `/challenges/{id}/join`
+**Request Payload:**
+```json
+{
+    "wave_id": "your-wave-uuid-123"
+}
+```
+**Response (200 OK):**
+```json
+{
+    "message": "Joined challenge successfully"
+}
+```
+
+---
+
+## 10. Skill Drops (Digital Products)
+
+### **POST** `/skill-drops`
+**Request Payload:**
+```json
+{
+    "title": "Mastering Laravel 11 (PDF)",
+    "description": "Comprehensive guide for experts.",
+    "price_drops": 1500,
+    "content_url": "https://storage.zumi.app/files/course.pdf"
+}
+```
+**Response (201 Created):**
+```json
+{
+    "id": "skill-drop-uuid-000",
+    "title": "Mastering Laravel 11 (PDF)",
+    "price_drops": 1500,
+    "creator_id": "your-uuid"
+}
+```
+
+### **POST** `/skill-drops/{id}/purchase`
+**Response (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Purchased successfully",
+    "content_url": "https://storage.zumi.app/files/course.pdf"
+}
+```
+
+---
+
+## 11. Advanced Circle Management
+
+### **POST** `/circles/requests/{id}/approve`
+**Response (200 OK):**
+```json
+{
+    "message": "Member approved successfully"
+}
+```
+
+### **GET** `/circles/{id}/insights`
+**Response (200 OK):**
+```json
+{
+    "total_members": 450,
+    "active_members_24h": 120,
+    "total_drops_earned": 15000,
+    "monthly_growth": "12%"
+}
+```
+
+---
+
+## 12. Moderation & Reporting
+
+### **POST** `/reports`
+**Request Payload:**
+```json
+{
+    "reportable_type": "user",
+    "reportable_id": "offending-user-uuid",
+    "reason": "Harassment",
+    "description": "User is sending spam messages."
+}
+```
+**Response (201 Created):**
+```json
+{
+    "message": "Report submitted successfully. Our team will review it.",
+    "report_id": "report-uuid-abc"
+}
+```
