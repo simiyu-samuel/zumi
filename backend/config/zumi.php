@@ -62,12 +62,12 @@ return [
     'subscriptions' => [
         'plans' => [
             'pro' => [
-                'price_id' => env('STRIPE_PRO_PRICE_ID', 'price_dummy_pro'),
+                'price_id' => env('STRIPE_PRO_PRICE_ID') ?: 'price_dummy_pro',
                 'name'     => 'Pro',
                 'amount'   => 999, // $9.99
             ],
             'studio' => [
-                'price_id' => env('STRIPE_STUDIO_PRICE_ID', 'price_dummy_studio'),
+                'price_id' => env('STRIPE_STUDIO_PRICE_ID') ?: 'price_dummy_studio',
                 'name'     => 'Studio',
                 'amount'   => 2499, // $24.99
             ],

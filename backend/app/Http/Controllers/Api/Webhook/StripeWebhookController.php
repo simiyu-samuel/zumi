@@ -68,9 +68,12 @@ class StripeWebhookController extends Controller
         $priceId = $stripeSubscription->items->data[0]->price->id;
         $plans = config('zumi.subscriptions.plans');
 
-        if ($priceId === ($plans['studio']['price_id'] ?? null)) {
+        $studioPriceId = $plans['studio']['price_id'] ?? null;
+        $proPriceId = $plans['pro']['price_id'] ?? null;
+
+        if ($studioPriceId && $priceId === $studioPriceId) {
             $user->update(['role' => \App\Enums\UserRole::Studio]);
-        } elseif ($priceId === ($plans['pro']['price_id'] ?? null)) {
+        } elseif ($proPriceId && $priceId === $proPriceId) {
             $user->update(['role' => \App\Enums\UserRole::Pro]);
         } else {
             // Default to User if price doesn't match Pro/Studio
