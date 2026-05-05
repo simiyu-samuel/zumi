@@ -83,9 +83,14 @@ export default function FeedPage() {
           w.id === waveId ? { ...w, shares_count: res.shares_count ?? w.shares_count + 1 } : w
         )
       );
+      alert("Link copied to clipboard! (Share recorded)");
     } catch (err) {
       console.error("Share error:", err);
     }
+  };
+
+  const handleComment = (waveId: string) => {
+    alert("Comments feature is coming soon! Share your thoughts in the next update.");
   };
 
   const handleGift = async (waveId: string, amount: number) => {
@@ -203,6 +208,7 @@ export default function FeedPage() {
                 wave={wave}
                 onLike={handleLike}
                 onShare={handleShare}
+                onComment={handleComment}
                 onGift={handleGift}
               />
             ))}
@@ -217,11 +223,13 @@ function WaveCard({
   wave,
   onLike,
   onShare,
+  onComment,
   onGift,
 }: {
   wave: Wave;
   onLike: (id: string) => void;
   onShare: (id: string) => void;
+  onComment: (id: string) => void;
   onGift: (id: string, amount: number) => void;
 }) {
   return (
@@ -314,7 +322,10 @@ function WaveCard({
           </button>
 
           {/* Comment */}
-          <div className="flex flex-col items-center gap-1 group/action cursor-pointer">
+          <div 
+            onClick={() => onComment(wave.id)}
+            className="flex flex-col items-center gap-1 group/action cursor-pointer"
+          >
             <div className="w-12 h-12 rounded-full glass flex items-center justify-center group-hover/action:text-teal transition-all">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

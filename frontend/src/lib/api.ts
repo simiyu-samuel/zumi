@@ -101,11 +101,11 @@ export function getSuggestedUsers(limit = 5) {
 }
 
 export function followUser(userId: string) {
-  return apiFetch(`/follow/${userId}`, { method: "POST" });
+  return apiFetch(`/users/${userId}/follow`, { method: "POST" });
 }
 
 export function unfollowUser(userId: string) {
-  return apiFetch(`/follow/${userId}`, { method: "DELETE" });
+  return apiFetch(`/users/${userId}/unfollow`, { method: "POST" });
 }
 
 export function likeWave(waveId: string) {

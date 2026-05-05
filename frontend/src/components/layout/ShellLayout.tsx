@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Sidebar, BottomNav } from "./Navigation";
 import { getSuggestedUsers, followUser, getGatedRooms, type SuggestedUser, type GatedRoom } from "@/lib/api";
@@ -73,17 +74,23 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
               const isFollowed = followedIds.has(u.id);
               return (
                 <div key={u.id} className="flex items-center gap-3 group">
-                  <div className="w-11 h-11 rounded-full bg-teal/20 border border-teal/30 overflow-hidden flex items-center justify-center font-bold text-teal text-sm ring-2 ring-transparent group-hover:ring-teal/30 transition-all">
-                    {u.avatar_url ? (
-                      <img src={u.avatar_url} alt={u.name} className="w-full h-full object-cover" />
-                    ) : (
-                      u.name.charAt(0)
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-bold text-white truncate">{u.name}</div>
-                    <div className="text-[12px] text-slate-500 truncate">@{u.username}</div>
-                  </div>
+                  <Link href={`/profile/${u.username}`} className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-11 h-11 rounded-full bg-teal/20 border border-teal/30 overflow-hidden flex items-center justify-center font-bold text-teal text-sm ring-2 ring-transparent group-hover:ring-teal/30 transition-all shrink-0">
+                      {u.avatar_url ? (
+                        <img src={u.avatar_url} alt={u.name} className="w-full h-full object-cover" />
+                      ) : (
+                        u.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[14px] font-bold text-white truncate group-hover:text-teal transition-colors">
+                        {u.name}
+                      </div>
+                      <div className="text-[12px] text-slate-500 truncate">
+                        @{u.username}
+                      </div>
+                    </div>
+                  </Link>
                   <button
                     onClick={() => handleFollow(u.id)}
                     disabled={isFollowed}

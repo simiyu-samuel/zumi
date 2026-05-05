@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -64,7 +64,8 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
     <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 px-8 py-10">
@@ -105,25 +106,40 @@ export function Sidebar() {
                  <span className="text-[13px] font-bold text-teal">DROPS</span>
               </div>
            </div>
-           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                 <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-           </div>
         </div>
 
-        <div className="flex items-center gap-4 px-2 group cursor-pointer">
-          <div className="w-12 h-12 rounded-full bg-teal/20 border border-teal/30 flex items-center justify-center font-bold text-teal uppercase text-lg transition-transform group-hover:scale-105">
-            {user?.name?.charAt(0) || "U"}
-          </div>
-          <div className="min-w-0">
-            <div className="text-[15px] font-bold text-white truncate">{user?.name}</div>
-            <div className="text-[13px] text-slate-500 truncate">@{user?.username}</div>
-          </div>
-          <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-             <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-             </svg>
+        {/* User Profile Section */}
+        <div className="pt-6 border-t border-white/5 relative">
+          {showProfileMenu && (
+            <div className="absolute bottom-full left-0 w-full mb-4 glass border border-white/10 rounded-r16 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <button 
+                onClick={() => logout()}
+                className="w-full flex items-center gap-3 px-5 py-4 text-red-400 hover:bg-white/5 transition-colors font-bold text-sm"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout session
+              </button>
+            </div>
+          )}
+
+          <div 
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="flex items-center gap-4 px-2 group cursor-pointer"
+          >
+            <div className="w-12 h-12 rounded-full bg-teal/20 border border-teal/30 flex items-center justify-center font-bold text-teal uppercase text-lg transition-transform group-hover:scale-105">
+              {user?.name?.charAt(0) || "U"}
+            </div>
+            <div className="min-w-0">
+              <div className="text-[15px] font-bold text-white truncate">{user?.name}</div>
+              <div className="text-[13px] text-slate-500 truncate">@{user?.username}</div>
+            </div>
+            <div className="ml-auto">
+               <svg className={`w-5 h-5 text-slate-600 transition-transform duration-300 ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+               </svg>
+            </div>
           </div>
         </div>
       </div>
