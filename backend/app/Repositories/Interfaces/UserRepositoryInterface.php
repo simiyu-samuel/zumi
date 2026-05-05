@@ -13,4 +13,5 @@ interface UserRepositoryInterface
     public function create(array $data): User;
     public function update(User $user, array $data): bool;
     public function search(string $query, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
+    public function getSuggestedUsers(?string $excludeUserId, int $limit = 5): Collection;
 }

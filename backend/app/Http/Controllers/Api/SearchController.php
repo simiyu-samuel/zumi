@@ -73,4 +73,14 @@ class SearchController extends Controller
 
         return response()->json($circles);
     }
+
+    public function suggestedUsers(Request $request): JsonResponse
+    {
+        $limit = (int) $request->get('limit', 5);
+        $users = $this->searchService->getSuggestedUsers($limit);
+
+        return response()->json([
+            'data' => \App\Http\Resources\UserResource::collection($users),
+        ]);
+    }
 }

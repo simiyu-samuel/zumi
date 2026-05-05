@@ -39,4 +39,19 @@ class UserRepository implements UserRepositoryInterface
             ->orWhere('username', 'like', "%{$query}%")
             ->paginate($perPage);
     }
+
+    public function getSuggestedUsers(?string $excludeUserId, int $limit = 5): Collection
+    {
+        return User::query()
+            ->withCount(['followers', 'following'])
+            ->where('role', '!=', \App\Enums\UserRole::Admin)
+            ->when($excludeUserId, fn($q) => $q->where('id', '!=', $excludeUserId))
+            ->when($excludeUserId, function ($q) use ($excludeUserId) {
+                // Exclude users already followed
+                $q->whereDoesntHave('followers', fn($sub) => $sub->where('follower_id', $excludeUserId));
+            })
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+    }
 }

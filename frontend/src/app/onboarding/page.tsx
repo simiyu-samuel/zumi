@@ -2,20 +2,20 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { DeviceFrame, StatusBar } from "@/components/DeviceFrame";
+import { DeviceFrame } from "@/components/DeviceFrame";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 const INTERESTS = [
-  { id: "tech", label: "Tech", icon: "💻" },
-  { id: "music", label: "Music", icon: "🎵" },
-  { id: "dance", label: "Dance", icon: "💃" },
-  { id: "art", label: "Art", icon: "🎨" },
-  { id: "gaming", label: "Gaming", icon: "🎮" },
-  { id: "sports", label: "Sports", icon: "⚽" },
-  { id: "crypto", label: "Crypto", icon: "₿" },
-  { id: "fashion", label: "Fashion", icon: "✨" },
-  { id: "food", label: "Food", icon: "🍔" },
+  { id: "tech", label: "Tech", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
+  { id: "music", label: "Music", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> },
+  { id: "dance", label: "Dance", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a1 1 0 0 1 1 1v11l5-2V5a1 1 0 0 1 1-1h2"/><path d="M18 17a3 3 0 1 1-3-3"/><path d="M12 14l-4 3"/><path d="M7 21a3 3 0 1 1-3-3"/></svg> },
+  { id: "art", label: "Art", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg> },
+  { id: "gaming", label: "Gaming", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/></svg> },
+  { id: "sports", label: "Sports", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
+  { id: "crypto", label: "Crypto", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg> },
+  { id: "fashion", label: "Fashion", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg> },
+  { id: "food", label: "Food", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> },
 ];
 
 const PILLS = ["AI", "Web3", "Startups", "Vlog", "ASMR", "Fitness", "Travel", "Comedy", "Education", "News", "Business", "Movies", "Anime", "Photography"];
@@ -118,14 +118,14 @@ export default function OnboardingPage() {
 
             <div className="ob-header px-6 pb-5">
               <div className="ob-step-label text-[11px] font-bold text-teal tracking-[0.08em] uppercase mb-1">Step 1 of 3 — Discover</div>
-              <h2 className="ob-title font-head text-[24px] font-extrabold text-dark tracking-tight leading-[1.15] mb-1.5">What&apos;s your world<br/>made of?</h2>
+              <h2 className="ob-title font-head text-[24px] font-extrabold text-dark tracking-tight leading-[1.15] mb-1.5">What&apos;s your world<br />made of?</h2>
               <p className="ob-sub text-sm text-slate-600 leading-relaxed">Pick your interests so we can build a feed worth opening. Select at least 3.</p>
             </div>
 
             <div className="flex-1 overflow-y-auto">
               <div className="interests-grid grid grid-cols-3 gap-2.5 px-6">
                 {INTERESTS.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     onClick={() => toggleInterest(item.id)}
                     className={`interest-chip relative flex flex-col items-center justify-center gap-1.5 p-[14px_8px] border-2 rounded-r16 cursor-pointer transition-all ${selectedInterests.includes(item.id) ? 'border-teal bg-teal-light' : 'border-slate-100 bg-white hover:border-teal/30 hover:bg-teal-light'}`}
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
                     <span className="chip-label text-[12px] font-semibold text-dark">{item.label}</span>
                     {selectedInterests.includes(item.id) && (
                       <div className="chip-check absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-teal flex items-center justify-center">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                       </div>
                     )}
                   </div>
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
               <div className="px-6 pt-4 pb-2 text-[11px] font-bold text-slate-400 tracking-[0.05em] uppercase">More</div>
               <div className="more-interests flex flex-wrap gap-2 px-6 pb-8">
                 {PILLS.map((pill) => (
-                  <button 
+                  <button
                     key={pill}
                     onClick={() => toggleInterest(pill.toLowerCase())}
                     className={`more-chip p-[8px_14px] rounded-rpill border-[1.5px] text-[13px] font-medium transition-all ${selectedInterests.includes(pill.toLowerCase()) ? 'border-teal bg-teal-light text-teal-dark font-bold' : 'border-slate-100 bg-white text-slate-600 hover:border-teal/40 hover:text-teal'}`}
@@ -165,13 +165,13 @@ export default function OnboardingPage() {
                   <><span className="text-teal font-semibold">{selectedInterests.length}</span> selected</>
                 )}
               </div>
-              <button 
+              <button
                 onClick={() => setStep(2)}
                 disabled={selectedInterests.length < 3}
                 className={`btn btn-primary w-full p-[15px] rounded-r12 bg-teal text-white font-semibold text-[15px] transition-all flex items-center justify-center gap-2 ${selectedInterests.length < 3 ? 'opacity-40 pointer-events-none' : ''}`}
               >
                 Continue
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
               </button>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function OnboardingPage() {
                       </div>
                     )}
                     <div className="avatar-verified absolute bottom-[-1px] right-[-1px] w-4 h-4 rounded-full bg-teal border-2 border-white flex items-center justify-center">
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     </div>
                   </div>
                   <div className="follow-info flex-1 min-w-0">
@@ -215,13 +215,13 @@ export default function OnboardingPage() {
                     <div className="follow-meta flex items-center gap-1.5 mt-1">
                       <span className="follow-tag text-[10px] font-bold px-1.5 py-0.5 rounded-rpill bg-teal-light text-teal-dark">CREATOR</span>
                       <span className="follow-followers text-[11px] text-slate-400">
-                        {creator.followers_count >= 1000 
-                          ? `${(creator.followers_count / 1000).toFixed(1)}k` 
+                        {creator.followers_count >= 1000
+                          ? `${(creator.followers_count / 1000).toFixed(1)}k`
                           : creator.followers_count} followers
                       </span>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => toggleFollow(creator.id)}
                     className={`follow-btn p-[8px_16px] rounded-rpill border-[1.5px] font-bold text-[13px] transition-all whitespace-nowrap ${selectedFollows.includes(creator.id) ? 'bg-teal border-teal text-white' : 'border-teal bg-transparent text-teal hover:bg-teal hover:text-white'}`}
                   >
@@ -239,13 +239,13 @@ export default function OnboardingPage() {
                   <><span className="text-teal font-semibold">{selectedFollows.length}</span> followed</>
                 )}
               </div>
-              <button 
+              <button
                 onClick={handleComplete}
                 disabled={selectedFollows.length < 3}
                 className={`btn btn-primary w-full p-[15px] rounded-r12 bg-teal text-white font-semibold text-[15px] transition-all flex items-center justify-center gap-2 ${selectedFollows.length < 3 ? 'opacity-40 pointer-events-none' : ''}`}
               >
                 Complete Setup
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17 4 12"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17 4 12" /></svg>
               </button>
             </div>
           </div>
@@ -259,11 +259,11 @@ export default function OnboardingPage() {
               <div className="loading-logo font-head text-[42px] font-extrabold text-white tracking-[-1.5px] mb-10">
                 zu<span className="text-teal">mi</span>
               </div>
-              
+
               <div className="loading-ring w-20 h-20 mx-auto mb-8 relative">
                 <svg viewBox="0 0 80 80" className="animate-spin duration-[1.4s]">
-                  <circle className="fill-none stroke-white/10 stroke-[4px]" cx="40" cy="40" r="34"/>
-                  <circle className="fill-none stroke-teal stroke-[4px] stroke-linecap-round animate-[ring-dash_1.4s_ease-in-out_infinite]" cx="40" cy="40" r="34" strokeDasharray="180" strokeDashoffset="60"/>
+                  <circle className="fill-none stroke-white/10 stroke-[4px]" cx="40" cy="40" r="34" />
+                  <circle className="fill-none stroke-teal stroke-[4px] stroke-linecap-round animate-[ring-dash_1.4s_ease-in-out_infinite]" cx="40" cy="40" r="34" strokeDasharray="180" strokeDashoffset="60" />
                 </svg>
               </div>
 
@@ -276,7 +276,7 @@ export default function OnboardingPage() {
                   <div key={item.id} className={`loading-step flex items-center gap-3 transition-all duration-400 ${completedSteps.includes(item.id) ? 'opacity-100 translate-x-0' : 'opacity-35 -translate-x-1.5'}`}>
                     <div className={`step-dot w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${completedSteps.includes(item.id) ? 'bg-teal/20 border-teal' : 'border-white/15'}`}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={completedSteps.includes(item.id) ? "var(--color-teal)" : "rgba(255,255,255,0.4)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
+                        <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
                     <span className={`step-label text-sm transition-colors ${completedSteps.includes(item.id) ? 'text-white font-medium' : 'text-white/70'}`}>

@@ -5,11 +5,16 @@ namespace App\Services;
 use App\Models\Circle;
 use App\Models\User;
 use App\Models\Wave;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class SearchService
 {
+    public function __construct(
+        protected UserRepositoryInterface $userRepository
+    ) {}
+
     /**
      * Perform a global search across Users, Waves, and Circles.
      */
@@ -58,5 +63,13 @@ class SearchService
     {
         $perPage = $perPage ?? config('zumi.pagination.default_per_page', 15);
         return Circle::search($query)->paginate($perPage);
+    }
+
+    /**
+     * Get suggested users for discovery.
+     */
+    public function getSuggestedUsers(int $limit = 5): Collection
+    {
+        return $this->userRepository->getSuggestedUsers(auth()->id(), $limit);
     }
 }
