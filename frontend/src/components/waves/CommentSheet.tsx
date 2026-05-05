@@ -31,27 +31,42 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
     }
     load();
 
-    // Listen for real-time updates
-    const channel = echo.channel(`waves.${waveId}.comments`);
-    
+    // Listen for real-time updates (only if echo is available and working)
+    if (!echo) return;
+
+    let channel: ReturnType<typeof echo.channel> | null = null;
+    try {
+      channel = echo.channel(`waves.${waveId}.comments`);
+    } catch (err) {
+      console.warn('Echo channel subscription failed:', err);
+      return;
+    }
+
     channel.listen('.comment.posted', (data: { comment: Comment }) => {
       setComments((prev) => {
-        // Prevent duplicate if current user was the sender (optimistic update already handled it)
-        if (prev.some(c => c.id === data.comment.id)) return prev;
+        // Deep duplicate check — scan top-level AND nested replies
+        const isDuplicate = (items: Comment[]): boolean => {
+          return items.some(c => {
+            if (c.id === data.comment.id) return true;
+            if (c.replies?.length) return isDuplicate(c.replies);
+            return false;
+          });
+        };
+        if (isDuplicate(prev)) return prev;
 
         if (data.comment.parent_id) {
-          const updateReplies = (items: Comment[]): Comment[] => {
+          const addReply = (items: Comment[]): Comment[] => {
             return items.map(c => {
               if (c.id === data.comment.parent_id) {
                 return { ...c, replies: [...(c.replies || []), data.comment] };
               }
-              if (c.replies) {
-                return { ...c, replies: updateReplies(c.replies) };
+              if (c.replies?.length) {
+                return { ...c, replies: addReply(c.replies) };
               }
               return c;
             });
           };
-          return updateReplies(prev);
+          return addReply(prev);
         }
         return [data.comment, ...prev];
       });
@@ -64,7 +79,7 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
             if (c.id === data.id) {
               return { ...c, likes_count: data.likes_count };
             }
-            if (c.replies) {
+            if (c.replies?.length) {
               return { ...c, replies: updateLikes(c.replies) };
             }
             return c;
@@ -75,7 +90,7 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
     });
 
     return () => {
-      echo.leaveChannel(`waves.${waveId}.comments`);
+      try { echo!.leaveChannel(`waves.${waveId}.comments`); } catch (_) {}
     };
   }, [waveId]);
 

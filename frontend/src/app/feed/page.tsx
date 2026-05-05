@@ -13,6 +13,8 @@ import {
   type Wave,
 } from "@/lib/api";
 import { CommentSheet } from "@/components/waves/CommentSheet";
+import { ShareSheet } from "@/components/waves/ShareSheet";
+import { GiftSheet } from "@/components/waves/GiftSheet";
 
 type FeedTab = "for-you" | "following";
 
@@ -29,6 +31,8 @@ export default function FeedPage() {
   const [gatedRooms, setGatedRooms] = useState<GatedRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCommentWaveId, setActiveCommentWaveId] = useState<string | null>(null);
+  const [activeShareWaveId, setActiveShareWaveId] = useState<string | null>(null);
+  const [activeGiftWaveId, setActiveGiftWaveId] = useState<string | null>(null);
 
   const fetchFeed = useCallback(async () => {
     setLoading(true);
@@ -58,8 +62,10 @@ export default function FeedPage() {
   }, [fetchFeed]);
 
   useEffect(() => {
-    fetchRooms();
-  }, [fetchRooms]);
+    if (token) {
+      fetchRooms();
+    }
+  }, [fetchRooms, token]);
 
   const handleLike = async (waveId: string) => {
     try {
@@ -76,34 +82,34 @@ export default function FeedPage() {
     }
   };
 
-  const handleShare = async (waveId: string) => {
-    try {
-      const res = await shareWave(waveId);
+  const handleShare = (waveId: string) => {
+    setActiveShareWaveId(waveId);
+    // Optionally call API to record share count
+    shareWave(waveId).then((res) => {
       setWaves((prev) =>
         prev.map((w) =>
           w.id === waveId ? { ...w, shares_count: res.shares_count ?? w.shares_count + 1 } : w
         )
       );
-      alert("Link copied to clipboard! (Share recorded)");
-    } catch (err) {
-      console.error("Share error:", err);
-    }
+    });
   };
 
   const handleComment = (waveId: string) => {
     setActiveCommentWaveId(waveId);
   };
 
-  const handleGift = async (waveId: string, amount: number) => {
+  const handleGift = (waveId: string) => {
+    setActiveGiftWaveId(waveId);
+  };
+
+  const handleUnlock = async (waveId: string, amount: number) => {
     try {
       await purchaseWave(waveId);
-      // Update wave as unlocked
       setWaves((prev) =>
         prev.map((w) =>
           w.id === waveId ? { ...w, is_unlocked: true } : w
         )
       );
-      alert(`Successfully unlocked!`);
     } catch (err: any) {
       alert(err.message || "Failed to unlock wave");
     }
@@ -118,6 +124,22 @@ export default function FeedPage() {
         <CommentSheet 
           waveId={activeCommentWaveId} 
           onClose={() => setActiveCommentWaveId(null)} 
+        />
+      )}
+
+      {/* Share Sheet Modal */}
+      {activeShareWaveId && (
+        <ShareSheet 
+          waveId={activeShareWaveId} 
+          onClose={() => setActiveShareWaveId(null)} 
+        />
+      )}
+
+      {/* Gift Sheet Modal */}
+      {activeGiftWaveId && (
+        <GiftSheet 
+          waveId={activeGiftWaveId} 
+          onClose={() => setActiveGiftWaveId(null)} 
         />
       )}
 
@@ -219,6 +241,7 @@ export default function FeedPage() {
                 onShare={handleShare}
                 onComment={handleComment}
                 onGift={handleGift}
+                onUnlock={handleUnlock}
               />
             ))}
           </div>
@@ -234,12 +257,14 @@ function WaveCard({
   onShare,
   onComment,
   onGift,
+  onUnlock,
 }: {
   wave: Wave;
   onLike: (id: string) => void;
   onShare: (id: string) => void;
   onComment: (id: string) => void;
-  onGift: (id: string, amount: number) => void;
+  onGift: (id: string) => void;
+  onUnlock: (id: string, amount: number) => void;
 }) {
   return (
     <div className="relative aspect-[4/5] w-full max-h-[600px] mx-auto rounded-r24 overflow-hidden bg-slate-900 group shadow-2xl">
@@ -261,7 +286,7 @@ function WaveCard({
       <div className="absolute bottom-0 left-0 right-0 p-6 z-20 flex justify-between items-end">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full border-2 border-teal/50 p-0.5 overflow-hidden">
+            <div className="w-12 h-12 rounded-full border-2 border-teal/50 p-0.5 overflow-hidden text-center">
               {wave.user.avatar_url ? (
                 <img src={wave.user.avatar_url} alt={wave.user.name} className="w-full h-full rounded-full object-cover" />
               ) : (
@@ -287,7 +312,7 @@ function WaveCard({
               </div>
               <p className="text-white font-bold text-lg mb-4">Unlock this wave for {wave.gated_drops} Drops</p>
               <button 
-                onClick={() => onGift(wave.id, wave.gated_drops)}
+                onClick={() => onUnlock(wave.id, wave.gated_drops)}
                 className="w-full py-3 rounded-full bg-teal text-white font-black uppercase tracking-wider hover:bg-teal-dark transition-colors shadow-lg shadow-teal/20"
               >
                 Unlock Now
@@ -301,7 +326,7 @@ function WaveCard({
 
               {/* Gift Drops Button */}
               <button 
-                onClick={() => onGift(wave.id, 100)} // Default gift 100
+                onClick={() => onGift(wave.id)} 
                 className="flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all group/gift"
               >
                 <div className="p-1.5 rounded-full bg-teal/20 text-teal group-hover/gift:bg-teal group-hover/gift:text-white transition-colors">

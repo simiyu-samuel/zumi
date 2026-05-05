@@ -119,6 +119,14 @@ export function shareWave(waveId: string) {
 export function purchaseWave(waveId: string) {
   return apiFetch(`/waves/${waveId}/purchase`, { method: "POST" });
 }
+
+export function giftWave(waveId: string, amount: number) {
+  return apiFetch(`/waves/${waveId}/gift`, {
+    method: "POST",
+    body: JSON.stringify({ amount }),
+  });
+}
+
 export interface Comment {
   id: string;
   content: string;
