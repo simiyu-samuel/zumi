@@ -30,7 +30,7 @@ export default function FeedPage() {
   const [waves, setWaves] = useState<Wave[]>([]);
   const [gatedRooms, setGatedRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const observerTarget = React.useRef(null);
@@ -39,23 +39,29 @@ export default function FeedPage() {
   const [activeShareWaveId, setActiveShareWaveId] = useState<string | null>(null);
   const [activeGiftWaveId, setActiveGiftWaveId] = useState<string | null>(null);
 
-  const fetchFeed = useCallback(async (pageNum: number, append = false) => {
+  const fetchFeed = useCallback(async (cursor?: string | null, append = false) => {
     if (!token) return;
-    if (pageNum === 1) setLoading(true);
+    if (!append) setLoading(true);
     else setLoadingMore(true);
 
     try {
       const fetcher = activeTab === "for-you" ? getDiscoveryFeed : getFollowedFeed;
-      const res = await fetcher(pageNum, 15);
+      const res = await fetcher(cursor || undefined, 15);
       const items = res.data || [];
       
       if (append) {
-        setWaves(prev => [...prev, ...items]);
+        setWaves(prev => {
+          // Robust duplicate prevention
+          const existingIds = new Set(prev.map(w => w.id));
+          const newItems = items.filter((w: Wave) => !existingIds.has(w.id));
+          return [...prev, ...newItems];
+        });
       } else {
         setWaves(items);
       }
       
-      setHasMore(items.length >= 15);
+      setNextCursor(res.next_cursor || null);
+      setHasMore(!!res.next_cursor);
     } catch (err) {
       console.error("Feed fetch error:", err);
     } finally {
@@ -65,8 +71,7 @@ export default function FeedPage() {
   }, [activeTab, token]);
 
   useEffect(() => {
-    setPage(1);
-    fetchFeed(1, false);
+    fetchFeed(null, false);
   }, [activeTab, fetchFeed]);
 
   // Infinite Scroll Observer
@@ -76,18 +81,16 @@ export default function FeedPage() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchFeed(nextPage, true);
+        if (entries[0].isIntersecting && !loadingMore) {
+          fetchFeed(nextCursor, true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '200px' }
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [loading, hasMore, loadingMore, page, fetchFeed]);
+  }, [loading, hasMore, loadingMore, nextCursor, fetchFeed]);
 
   const fetchRooms = useCallback(async () => {
     if (!token) return;

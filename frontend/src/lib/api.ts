@@ -84,12 +84,14 @@ export interface SuggestedUser {
   followers_count: number | null;
 }
 
-export function getDiscoveryFeed(page = 1, perPage = 10) {
-  return apiFetch<{ data: Wave[] }>(`/waves?page=${page}&per_page=${perPage}`);
+export function getDiscoveryFeed(cursor?: string, perPage = 15) {
+  const url = cursor ? `/waves?cursor=${cursor}&per_page=${perPage}` : `/waves?per_page=${perPage}`;
+  return apiFetch<any>(url);
 }
 
-export function getFollowedFeed(page = 1, perPage = 10) {
-  return apiFetch<{ data: Wave[] }>(`/waves/followed?page=${page}&per_page=${perPage}`);
+export function getFollowedFeed(cursor?: string, perPage = 15) {
+  const url = cursor ? `/waves/followed?cursor=${cursor}&per_page=${perPage}` : `/waves/followed?per_page=${perPage}`;
+  return apiFetch<any>(url);
 }
 
 export function getGatedRooms() {
