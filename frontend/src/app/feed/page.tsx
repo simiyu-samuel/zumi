@@ -11,8 +11,8 @@ import {
   shareWave,
   purchaseWave,
   type Wave,
-  type GatedRoom,
 } from "@/lib/api";
+import { CommentSheet } from "@/components/waves/CommentSheet";
 
 type FeedTab = "for-you" | "following";
 
@@ -28,6 +28,7 @@ export default function FeedPage() {
   const [waves, setWaves] = useState<Wave[]>([]);
   const [gatedRooms, setGatedRooms] = useState<GatedRoom[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCommentWaveId, setActiveCommentWaveId] = useState<string | null>(null);
 
   const fetchFeed = useCallback(async () => {
     setLoading(true);
@@ -90,7 +91,7 @@ export default function FeedPage() {
   };
 
   const handleComment = (waveId: string) => {
-    alert("Comments feature is coming soon! Share your thoughts in the next update.");
+    setActiveCommentWaveId(waveId);
   };
 
   const handleGift = async (waveId: string, amount: number) => {
@@ -112,6 +113,14 @@ export default function FeedPage() {
 
   return (
     <ShellLayout>
+      {/* Comment Sheet Modal */}
+      {activeCommentWaveId && (
+        <CommentSheet 
+          waveId={activeCommentWaveId} 
+          onClose={() => setActiveCommentWaveId(null)} 
+        />
+      )}
+
       {/* Sticky Header */}
       <header className="px-8 py-5 flex justify-between items-center sticky top-0 bg-black/40 backdrop-blur-xl z-30 border-b border-white/5">
         <div className="flex gap-8">

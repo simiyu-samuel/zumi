@@ -119,3 +119,28 @@ export function shareWave(waveId: string) {
 export function purchaseWave(waveId: string) {
   return apiFetch(`/waves/${waveId}/purchase`, { method: "POST" });
 }
+export interface Comment {
+  id: string;
+  content: string;
+  user: WaveUser;
+  parent_id: string | null;
+  replies?: Comment[];
+  likes_count: number;
+  is_liked: boolean;
+  created_at: string;
+}
+
+export function getComments(waveId: string) {
+  return apiFetch<{ data: Comment[] }>(`/waves/${waveId}/comments`);
+}
+
+export function postComment(waveId: string, content: string, parentId?: string) {
+  return apiFetch<Comment>(`/waves/${waveId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ content, parent_id: parentId }),
+  });
+}
+
+export function likeComment(commentId: string) {
+  return apiFetch(`/comments/${commentId}/like`, { method: "POST" });
+}
