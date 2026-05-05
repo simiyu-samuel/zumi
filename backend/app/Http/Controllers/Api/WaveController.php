@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Wave\InitializeUploadRequest;
 use App\Http\Requests\Wave\StoreWaveRequest;
 use App\Http\Requests\Wave\UpdateWaveRequest;
+use App\Http\Requests\Wave\GiftWaveRequest;
 use App\Http\Resources\WaveResource;
 use App\Models\Wave;
 use App\Services\WaveService;
@@ -160,5 +161,19 @@ class WaveController extends Controller
         );
 
         return response()->json(WaveResource::collection($waves)->response()->getData(true));
+    }
+
+    public function gift(GiftWaveRequest $request, Wave $wave): JsonResponse
+    {
+        $result = $this->waveService->giftWave($request->user(), $wave, $request->amount);
+
+        if (!$result['success']) {
+            return response()->json(['message' => $result['message']], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([
+            'message' => 'Gift sent successfully!',
+            'balance' => $request->user()->fresh()->drops_balance,
+        ]);
     }
 }

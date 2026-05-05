@@ -148,4 +148,20 @@ class WaveService
     {
         return $this->waveRepository->getBookmarks($user, $perPage);
     }
+
+    public function giftWave(User $sender, Wave $wave, int $amount): array
+    {
+        $dropsService = app(DropsService::class);
+        $result = $dropsService->gift($sender, $wave->user, $amount, $wave);
+
+        if ($result['success']) {
+            // Award Flow Score to the giver
+            $this->flowScoreService->award($sender, 'wave_gifted');
+            
+            // Track total gifts on the wave (optional, but good for ranking)
+            // $wave->increment('total_gifts_amount', $amount);
+        }
+
+        return $result;
+    }
 }
