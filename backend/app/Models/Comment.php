@@ -16,6 +16,7 @@ class Comment extends Model
 
     const RELATION_USER = 'user';
     const RELATION_REPLIES = 'replies';
+    const RELATION_LIKES = 'likes';
 
     const DEFAULT_EAGER_LOAD = [
         self::RELATION_USER,
@@ -23,8 +24,10 @@ class Comment extends Model
 
     const RECURSIVE_EAGER_LOAD = [
         self::RELATION_USER,
-        'replies.user',
+        self::RELATION_REPLIES . '.' . self::RELATION_USER,
     ];
+
+    protected $withCount = ['likes'];
 
     protected $fillable = [
         'user_id',
@@ -48,5 +51,18 @@ class Comment extends Model
     public function replies(): HasMany
     {
         return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(CommentLike::class);
+    }
+
+    /**
+     * Check if the comment is liked by a specific user.
+     */
+    public function isLikedBy(string $userId): bool
+    {
+        return $this->likes()->where('user_id', $userId)->exists();
     }
 }

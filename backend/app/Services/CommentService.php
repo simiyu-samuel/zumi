@@ -37,7 +37,9 @@ class CommentService
             $owner->notify(new \App\Notifications\NewCommentNotification($comment, $user));
         }
 
-        return $comment;
+        broadcast(new \App\Events\CommentPosted($comment))->toOthers();
+
+        return $comment->load(Comment::RELATION_USER);
     }
 
     /**
@@ -46,6 +48,33 @@ class CommentService
     public function getComments(Model $commentable, int $perPage = 15)
     {
         return $this->commentRepository->getForModel($commentable, $perPage);
+    }
+
+    /**
+     * Like/Unlike a comment.
+     */
+    public function toggleLike(User $user, Comment $comment): bool
+    {
+        $like = $this->commentRepository->findLike($comment, $user->id);
+
+        if ($like) {
+            $this->commentRepository->removeLike($comment, $like);
+            $liked = false;
+        } else {
+            $this->commentRepository->addLike($comment, $user->id);
+
+            // Award Flow Score and notify comment owner (not for self-likes)
+            if ($comment->user_id !== $user->id) {
+                $commentOwner = $comment->user ?? $comment->load(Comment::RELATION_USER)->user;
+                $this->flowScoreService->award($commentOwner, 'comment_liked');
+                // You could add a CommentLikedNotification here if needed
+            }
+            $liked = true;
+        }
+
+        broadcast(new \App\Events\CommentLiked($comment->fresh()))->toOthers();
+
+        return $liked;
     }
 
     /**

@@ -59,4 +59,17 @@ class CommentController extends Controller
             'message' => 'Comment deleted successfully.',
         ], Response::HTTP_OK);
     }
+
+    /**
+     * Like/Unlike a comment.
+     */
+    public function like(Request $request, Comment $comment): JsonResponse
+    {
+        $liked = $this->commentService->toggleLike($request->user(), $comment);
+
+        return response()->json([
+            'liked' => $liked,
+            'likes_count' => $comment->fresh()->likes_count,
+        ]);
+    }
 }
