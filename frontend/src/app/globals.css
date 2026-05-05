@@ -1,26 +1,139 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-head: "Syne", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-teal: #1a9e75;
+  --color-teal-dark: #107a58;
+  --color-teal-light: #e6f7f2;
+  --color-violet: #6c63ff;
+  --color-violet-light: #efeefd;
+  --color-dark: #0f172a;
+  --color-slate-800: #1e293b;
+  --color-slate-600: #475569;
+  --color-slate-400: #94a3b8;
+  --color-slate-100: #f1f5f9;
+  --color-slate-50: #f8fafc;
+
+  --radius-r4: 4px;
+  --radius-r8: 8px;
+  --radius-r12: 12px;
+  --radius-r16: 16px;
+  --radius-r24: 24px;
+  --radius-rpill: 100px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  @keyframes orb-pulse {
+    0%, 100% {
+      transform: translateX(-50%) scale(1);
+    }
+    50% {
+      transform: translateX(-50%) scale(1.08);
+    }
+  }
+
+  @keyframes ring-dash {
+    0% {
+      stroke-dashoffset: 200;
+    }
+    50% {
+      stroke-dashoffset: 30;
+    }
+    100% {
+      stroke-dashoffset: 200;
+    }
+  }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1120;
+    --foreground: #f8fafc;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: #0b1120;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+}
+
+.welcome-bg {
+  background: radial-gradient(
+      ellipse 70% 50% at 50% 0%,
+      rgba(26, 158, 117, 0.35) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 80% 30%,
+      rgba(108, 99, 255, 0.2) 0%,
+      transparent 60%
+    ),
+    #0f172a;
+}
+
+.loading-bg {
+  background: radial-gradient(
+      ellipse 80% 60% at 50% 30%,
+      rgba(26, 158, 117, 0.25) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 70% 70%,
+      rgba(108, 99, 255, 0.15) 0%,
+      transparent 60%
+    ),
+    #0f172a;
+}
+
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-teal) transparent;
+}
+
+/* Custom Scrollbar for Webkit */
+.screen::-webkit-scrollbar, 
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.screen::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.screen::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(26, 158, 117, 0.3);
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.screen::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-teal);
+}
+
+/* Hide scrollbar but keep functionality for specific containers if needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

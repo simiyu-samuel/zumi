@@ -5,24 +5,16 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Role;
 use App\Models\Permission;
+use App\Enums\UserRole;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create Roles (Aligned with UserRole Enum)
-        Role::updateOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        Role::updateOrCreate(['name' => 'studio', 'guard_name' => 'web']);
-        Role::updateOrCreate(['name' => 'pro', 'guard_name' => 'web']);
-        Role::updateOrCreate(['name' => 'user', 'guard_name' => 'web']);
-
-        // Define Permissions
+        // 1. Create Permissions
         $permissions = [
             // Basic User Features
             'upload waves',
@@ -47,32 +39,15 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::updateOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // Assign permissions to 'user' (Free)
-        $userRole = Role::findByName('user');
-        $userRole->givePermissionTo([
-            'upload waves',
-            'join circles',
-            'gift drops',
-            'view wallet',
-        ]);
+        // 2. Create Roles and Assign Permissions
+        
+        // Admin
+        $adminRole = Role::updateOrCreate(['name' => UserRole::Admin->value, 'guard_name' => 'web']);
+        $adminRole->syncPermissions(Permission::all());
 
-        // Assign permissions to 'pro'
-        $proRole = Role::findByName('pro');
-        $proRole->givePermissionTo([
-            'upload waves',
-            'join circles',
-            'gift drops',
-            'view wallet',
-            'create circles',
-            'publish skill drops',
-            'host gated rooms',
-            'host wave challenges',
-            'view analytics',
-        ]);
-
-        // Assign permissions to 'studio' (Same as Pro, with potentially more in future)
-        $studioRole = Role::findByName('studio');
-        $studioRole->givePermissionTo([
+        // Studio
+        $studioRole = Role::updateOrCreate(['name' => UserRole::Studio->value, 'guard_name' => 'web']);
+        $studioRole->syncPermissions([
             'upload waves',
             'join circles',
             'gift drops',
@@ -84,8 +59,29 @@ class RolesAndPermissionsSeeder extends Seeder
             'view analytics',
         ]);
 
-        // Assign everything to admin
-        $adminRole = Role::findByName('admin');
-        $adminRole->givePermissionTo(Permission::all());
+        // Pro
+        $proRole = Role::updateOrCreate(['name' => UserRole::Pro->value, 'guard_name' => 'web']);
+        $proRole->syncPermissions([
+            'upload waves',
+            'join circles',
+            'gift drops',
+            'view wallet',
+            'create circles',
+            'publish skill drops',
+            'host gated rooms',
+            'host wave challenges',
+            'view analytics',
+        ]);
+
+        // User (Free)
+        $userRole = Role::updateOrCreate(['name' => UserRole::User->value, 'guard_name' => 'web']);
+        $userRole->syncPermissions([
+            'upload waves',
+            'join circles',
+            'gift drops',
+            'view wallet',
+        ]);
+
+        $this->command->info('Roles and Permissions seeded successfully.');
     }
 }

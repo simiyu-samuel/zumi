@@ -30,7 +30,15 @@ class SearchService
     public function searchUsers(string $query, int $perPage = null): LengthAwarePaginator
     {
         $perPage = $perPage ?? config('zumi.pagination.default_per_page', 15);
-        return User::search($query)->paginate($perPage);
+        
+        $currentUserId = auth()->id();
+
+        return User::search($query)
+            ->query(function ($builder) use ($currentUserId) {
+                $builder->where('role', '!=', \App\Enums\UserRole::Admin)
+                    ->when($currentUserId, fn($q) => $q->where('id', '!=', $currentUserId));
+            })
+            ->paginate($perPage);
     }
 
     /**

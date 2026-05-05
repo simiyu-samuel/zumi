@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\SearchController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('search')->group(function () {
+Route::prefix('search')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [SearchController::class, 'global']);
     Route::get('/users', [SearchController::class, 'users']);
     Route::get('/waves', [SearchController::class, 'waves']);
