@@ -307,14 +307,14 @@ function WaveCard({
         </div>
 
         {/* Actions Sidebar */}
-        <div className="flex flex-col gap-6 items-center">
+        <div className="flex flex-col gap-6 items-center z-20 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
           {/* Like */}
           <button
             onClick={() => onLike(wave.id)}
             className="flex flex-col items-center gap-1 group/action cursor-pointer"
           >
-            <div className={`w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${wave.is_liked ? "text-red-400" : "group-hover/action:text-teal"}`}>
-              <svg className="w-6 h-6" fill={wave.is_liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+            <div className={`w-12 h-12 rounded-full glass-dark flex items-center justify-center transition-all ${wave.is_liked ? "text-red-400" : "group-hover/action:text-teal"}`}>
+              <svg className="w-6 h-6 drop-shadow-md" fill={wave.is_liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={wave.is_liked ? 0 : 2} d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3c1.74 0 3.124.588 4.312 1.57A6.981 6.981 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
               </svg>
             </div>
@@ -326,12 +326,12 @@ function WaveCard({
             onClick={() => onComment(wave.id)}
             className="flex flex-col items-center gap-1 group/action cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-full glass flex items-center justify-center group-hover/action:text-teal transition-all">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 rounded-full glass-dark flex items-center justify-center group-hover/action:text-teal transition-all">
+              <svg className="w-6 h-6 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <span className="text-[12px] font-bold text-white">{formatCount(wave.comments_count)}</span>
+            <span className="text-[12px] font-bold text-white drop-shadow-sm">{formatCount(wave.comments_count)}</span>
           </div>
 
           {/* Share */}
@@ -339,23 +339,23 @@ function WaveCard({
             onClick={() => onShare(wave.id)}
             className="flex flex-col items-center gap-1 group/action cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-full glass flex items-center justify-center group-hover/action:text-teal transition-all">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 rounded-full glass-dark flex items-center justify-center group-hover/action:text-teal transition-all">
+              <svg className="w-6 h-6 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
             </div>
-            <span className="text-[12px] font-bold text-white">{formatCount(wave.shares_count)}</span>
+            <span className="text-[12px] font-bold text-white drop-shadow-sm">{formatCount(wave.shares_count)}</span>
           </button>
 
           {/* Views */}
           <div className="flex flex-col items-center gap-1">
-            <div className="w-12 h-12 rounded-full glass flex items-center justify-center text-slate-400">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 rounded-full glass-dark flex items-center justify-center text-slate-400">
+              <svg className="w-6 h-6 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </div>
-            <span className="text-[12px] font-bold text-slate-400">{formatCount(wave.views_count)}</span>
+            <span className="text-[12px] font-bold text-slate-400 drop-shadow-sm">{formatCount(wave.views_count)}</span>
           </div>
         </div>
       </div>

@@ -110,17 +110,21 @@ export function Sidebar() {
 
         {/* User Profile Section */}
         <div className="pt-6 border-t border-white/5 relative">
-          {showProfileMenu && (
-            <div className="absolute bottom-full left-0 w-full mb-4 glass border border-white/10 rounded-r16 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <button 
-                onClick={() => logout()}
-                className="w-full flex items-center gap-3 px-5 py-4 text-red-400 hover:bg-white/5 transition-colors font-bold text-sm"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Logout session
-              </button>
+        {showProfileMenu && (
+          <div className="absolute bottom-[calc(100%+24px)] left-0 w-full bg-slate-950 border border-white/10 rounded-r24 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[100] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)">
+            <div className="p-2">
+                <button 
+                  onClick={() => logout()}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-r16 transition-all font-bold text-sm group/logout"
+                >
+                  <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center group-hover/logout:bg-red-500 group-hover/logout:text-white transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </div>
+                  Logout session
+                </button>
+              </div>
             </div>
           )}
 

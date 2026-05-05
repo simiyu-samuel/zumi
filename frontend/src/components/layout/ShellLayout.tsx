@@ -36,13 +36,13 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen aurora-bg text-slate-200">
+    <div className="flex h-screen overflow-hidden aurora-bg text-slate-200">
       {/* Sidebar for Desktop */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-h-screen feed-container">
-        <div className="flex-1 w-full max-w-[600px] mx-auto glass-dark min-h-screen border-x border-white/5 flex flex-col relative shadow-2xl">
+      <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth relative">
+        <div className="w-full max-w-[600px] mx-auto glass-dark min-h-screen border-x border-white/5 flex flex-col shadow-2xl">
           {children}
         </div>
       </main>
@@ -59,11 +59,11 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
               See all
             </button>
           </div>
-          <div className="space-y-5">
+          <div className="space-y-3">
             {suggested.length === 0 &&
               [1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-slate-800 animate-pulse" />
+                  <div className="w-9 h-9 rounded-full bg-slate-800 animate-pulse" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 w-24 bg-slate-800 rounded animate-pulse" />
                     <div className="h-3 w-16 bg-slate-800/50 rounded animate-pulse" />
@@ -75,7 +75,7 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
               return (
                 <div key={u.id} className="flex items-center gap-3 group">
                   <Link href={`/profile/${u.username}`} className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-11 h-11 rounded-full bg-teal/20 border border-teal/30 overflow-hidden flex items-center justify-center font-bold text-teal text-sm ring-2 ring-transparent group-hover:ring-teal/30 transition-all shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-teal/20 border border-teal/30 overflow-hidden flex items-center justify-center font-bold text-teal text-[13px] ring-2 ring-transparent group-hover:ring-teal/30 transition-all shrink-0">
                       {u.avatar_url ? (
                         <img src={u.avatar_url} alt={u.name} className="w-full h-full object-cover" />
                       ) : (
@@ -83,10 +83,10 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-bold text-white truncate group-hover:text-teal transition-colors">
+                      <div className="text-[13px] font-bold text-white truncate group-hover:text-teal transition-colors leading-tight">
                         {u.name}
                       </div>
-                      <div className="text-[12px] text-slate-500 truncate">
+                      <div className="text-[11px] text-slate-500 truncate">
                         @{u.username}
                       </div>
                     </div>
@@ -94,7 +94,7 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
                   <button
                     onClick={() => handleFollow(u.id)}
                     disabled={isFollowed}
-                    className={`px-4 py-1.5 rounded-full text-[13px] font-bold transition-all ${
+                    className={`px-3 py-1 rounded-full text-[12px] font-bold transition-all ${
                       isFollowed
                         ? "bg-teal/20 text-teal border border-teal/30 cursor-default"
                         : "bg-white/5 border border-white/10 hover:bg-white hover:text-black"
@@ -115,28 +115,28 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
               Top Gated Rooms
             </h3>
           </div>
-          <div className="space-y-5">
+          <div className="space-y-3">
             {rooms.length === 0 && (
-              <p className="text-[12px] text-slate-500 italic">No rooms active</p>
+              <p className="text-[11px] text-slate-500 italic">No rooms active</p>
             )}
             {rooms.slice(0, 3).map((room) => (
-              <div key={room.id} className="flex flex-col gap-2 p-3 rounded-r12 bg-white/5 border border-white/5 hover:border-teal/30 transition-all cursor-pointer group">
-                <div className="flex justify-between items-start">
-                  <div className="text-[14px] font-bold text-white group-hover:text-teal transition-colors truncate max-w-[140px]">
+              <div key={room.id} className="flex flex-col gap-1.5 p-2.5 rounded-r12 bg-white/5 border border-white/5 hover:border-teal/30 transition-all cursor-pointer group">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="text-[13px] font-bold text-white group-hover:text-teal transition-colors truncate flex-1">
                     {room.title}
                   </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal/20 text-teal text-[10px] font-black uppercase">
-                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-teal/20 text-teal text-[9px] font-black uppercase shrink-0">
+                    <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     {room.entry_fee_drops}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                   <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-slate-400">
+                   <div className="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">
                       {room.host?.name?.charAt(0)}
                    </div>
-                   <span className="text-[11px] text-slate-500">by {room.host?.name}</span>
+                   <span className="text-[10px] text-slate-500">by {room.host?.name}</span>
                 </div>
               </div>
             ))}
