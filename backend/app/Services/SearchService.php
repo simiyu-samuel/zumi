@@ -35,7 +35,8 @@ class SearchService
 
         return User::search($query)
             ->query(function ($builder) use ($currentUserId) {
-                $builder->where('role', '!=', \App\Enums\UserRole::Admin)
+                $builder->withCount(['followers', 'following'])
+                    ->where('role', '!=', \App\Enums\UserRole::Admin)
                     ->when($currentUserId, fn($q) => $q->where('id', '!=', $currentUserId));
             })
             ->paginate($perPage);

@@ -23,6 +23,8 @@ class UserResource extends JsonResource
             'avatar_url'           => $this->getFirstMediaUrl(\App\Models\User::COLLECTION_AVATAR),
             'banner_url'           => $this->getFirstMediaUrl(\App\Models\User::COLLECTION_BANNER),
             'drops_balance'        => $this->drops_balance,
+            'followers_count'      => $this->whenCounted('followers'),
+            'following_count'      => $this->whenCounted('following'),
             'onboarding_completed' => $this->onboarding_completed,
             'verified_at'          => $this->verified_at,
             'role'                 => $this->role,

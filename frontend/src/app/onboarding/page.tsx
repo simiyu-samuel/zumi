@@ -214,7 +214,11 @@ export default function OnboardingPage() {
                     <div className="follow-handle text-xs text-slate-400 mt-0.5">@{creator.username}</div>
                     <div className="follow-meta flex items-center gap-1.5 mt-1">
                       <span className="follow-tag text-[10px] font-bold px-1.5 py-0.5 rounded-rpill bg-teal-light text-teal-dark">CREATOR</span>
-                      <span className="follow-followers text-[11px] text-slate-400">{Math.floor(Math.random() * 50) + 1}k followers</span>
+                      <span className="follow-followers text-[11px] text-slate-400">
+                        {creator.followers_count >= 1000 
+                          ? `${(creator.followers_count / 1000).toFixed(1)}k` 
+                          : creator.followers_count} followers
+                      </span>
                     </div>
                   </div>
                   <button 
