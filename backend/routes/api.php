@@ -30,4 +30,5 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/modules/webhooks.php';
     require __DIR__ . '/api/modules/search.php';
     require __DIR__ . '/api/modules/moderation.php';
+    require __DIR__ . '/api/modules/notifications.php';
 });

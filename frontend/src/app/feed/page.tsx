@@ -28,24 +28,66 @@ export default function FeedPage() {
   const { user, token } = useAuth();
   const [activeTab, setActiveTab] = useState<FeedTab>("for-you");
   const [waves, setWaves] = useState<Wave[]>([]);
-  const [gatedRooms, setGatedRooms] = useState<GatedRoom[]>([]);
+  const [gatedRooms, setGatedRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerTarget = React.useRef(null);
+
   const [activeCommentWaveId, setActiveCommentWaveId] = useState<string | null>(null);
   const [activeShareWaveId, setActiveShareWaveId] = useState<string | null>(null);
   const [activeGiftWaveId, setActiveGiftWaveId] = useState<string | null>(null);
 
-  const fetchFeed = useCallback(async () => {
-    setLoading(true);
+  const fetchFeed = useCallback(async (pageNum: number, append = false) => {
+    if (!token) return;
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+
     try {
       const fetcher = activeTab === "for-you" ? getDiscoveryFeed : getFollowedFeed;
-      const res = await fetcher(1, 10);
-      setWaves(res.data || []);
+      const res = await fetcher(pageNum, 15);
+      const items = res.data || [];
+      
+      if (append) {
+        setWaves(prev => [...prev, ...items]);
+      } else {
+        setWaves(items);
+      }
+      
+      setHasMore(items.length >= 15);
     } catch (err) {
       console.error("Feed fetch error:", err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, [activeTab]);
+  }, [activeTab, token]);
+
+  useEffect(() => {
+    setPage(1);
+    fetchFeed(1, false);
+  }, [activeTab, fetchFeed]);
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const target = observerTarget.current;
+    if (loading || !hasMore || loadingMore || !target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          fetchFeed(nextPage, true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [loading, hasMore, loadingMore, page, fetchFeed]);
 
   const fetchRooms = useCallback(async () => {
     if (!token) return;
@@ -56,10 +98,6 @@ export default function FeedPage() {
       console.error("Rooms fetch error:", err);
     }
   }, [token]);
-
-  useEffect(() => {
-    fetchFeed();
-  }, [fetchFeed]);
 
   useEffect(() => {
     if (token) {
@@ -244,6 +282,22 @@ export default function FeedPage() {
                 onUnlock={handleUnlock}
               />
             ))}
+
+            {/* Infinite Scroll Sentinel */}
+            <div ref={observerTarget} className="h-32 flex items-center justify-center">
+              {loadingMore && (
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-teal/20 border-t-teal rounded-full animate-spin" />
+                  <span className="text-[12px] text-slate-500 font-bold uppercase tracking-widest">More Waves Incoming</span>
+                </div>
+              )}
+              {!hasMore && waves.length > 0 && (
+                <div className="flex flex-col items-center gap-2 opacity-30">
+                  <div className="w-8 h-px bg-slate-700" />
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">End of the Ocean</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

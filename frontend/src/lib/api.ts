@@ -152,3 +152,66 @@ export function postComment(waveId: string, content: string, parentId?: string) 
 export function likeComment(commentId: string) {
   return apiFetch(`/comments/${commentId}/like`, { method: "POST" });
 }
+
+// ─── Notifications ──────────────────────────────────────────────────
+export interface Notification {
+  id: string;
+  type: string;
+  data: {
+    type?: string;
+    message?: string;
+    sender_name?: string;
+    sender_id?: string;
+    amount?: number;
+    commenter_name?: string;
+    commenter_username?: string;
+    comment_excerpt?: string;
+    creator_name?: string;
+    source_type?: string;
+    source_id?: string;
+    [key: string]: any;
+  };
+  read_at: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export function getNotifications(page = 1, perPage = 15) {
+  return apiFetch<{ data: Notification[]; meta: any }>(`/notifications?page=${page}&per_page=${perPage}`);
+}
+
+export function getUnreadCount() {
+  return apiFetch<{ unread_count: number }>("/notifications/unread-count");
+}
+
+export function markNotificationRead(id: string) {
+  return apiFetch(`/notifications/${id}/read`, { method: "POST" });
+}
+
+export function markAllNotificationsRead() {
+  return apiFetch(`/notifications/read-all`, { method: "POST" });
+}
+
+// ─── Search ─────────────────────────────────────────────────────────
+export function searchUsers(query: string) {
+  return apiFetch<{ data: SuggestedUser[] }>(`/users/search?query=${encodeURIComponent(query)}`);
+}
+
+// ─── Wallet / Gift History ──────────────────────────────────────────
+export interface GiftTransaction {
+  id: string;
+  type: string;
+  amount: number;
+  balance_after: number;
+  description: string;
+  user: WaveUser | null;
+  created_at: string;
+}
+
+export function getWalletData() {
+  return apiFetch<{ balance: number; transactions: { data: GiftTransaction[] } }>("/wallet");
+}
+
+export function getGiftHistory(page = 1, perPage = 15) {
+  return apiFetch<{ data: GiftTransaction[]; meta: any }>(`/wallet/gifts?page=${page}&per_page=${perPage}`);
+}

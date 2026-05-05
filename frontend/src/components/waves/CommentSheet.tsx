@@ -140,6 +140,90 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
     }
   };
 
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [mentionIndex, setMentionIndex] = useState(-1);
+  const [mentionLoading, setMentionLoading] = useState(false);
+
+  // Handle @mention search
+  useEffect(() => {
+    if (!mentionSearch) {
+      setMentionResults([]);
+      setShowMentionMenu(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setMentionLoading(true);
+      try {
+        const { searchUsers } = await import("@/lib/api");
+        const res = await searchUsers(mentionSearch);
+        // Filter out admin as requested
+        const filtered = (res.data || []).filter((u: any) => u.username !== "admin");
+        setMentionResults(filtered);
+        setShowMentionMenu(filtered.length > 0);
+        setMentionIndex(0);
+      } catch (err) {
+        setShowMentionMenu(false);
+      } finally {
+        setMentionLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [mentionSearch]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const cursor = e.target.selectionStart || 0;
+    setNewComment(val);
+
+    // Detect if we are typing after an @
+    const textBeforeCursor = val.substring(0, cursor);
+    const lastAt = textBeforeCursor.lastIndexOf("@");
+    
+    if (lastAt !== -1) {
+      const query = textBeforeCursor.substring(lastAt + 1);
+      // Only trigger if @ is at start of string or after a space
+      const isStart = lastAt === 0 || textBeforeCursor[lastAt - 1] === " ";
+      
+      if (isStart && !query.includes(" ")) {
+        setMentionSearch(query);
+        return;
+      }
+    }
+    
+    setMentionSearch("");
+  };
+
+  const selectMention = (username: string) => {
+    const cursor = scrollRef.current?.querySelector('input')?.selectionStart || newComment.length;
+    const textBeforeAt = newComment.substring(0, newComment.lastIndexOf("@", cursor - 1));
+    const textAfterMention = newComment.substring(cursor);
+    
+    setNewComment(`${textBeforeAt}@${username} ${textAfterMention}`);
+    setMentionSearch("");
+    setShowMentionMenu(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showMentionMenu) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setMentionIndex(prev => (prev + 1) % mentionResults.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setMentionIndex(prev => (prev - 1 + mentionResults.length) % mentionResults.length);
+      } else if (e.key === "Enter" && mentionIndex !== -1) {
+        e.preventDefault();
+        selectMention(mentionResults[mentionIndex].username);
+      } else if (e.key === "Escape") {
+        setShowMentionMenu(false);
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center animate-fade-in bg-black/60 backdrop-blur-sm">
       <div 
@@ -195,6 +279,34 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
           )}
         </div>
 
+        {/* Mention Suggestions Menu */}
+        {showMentionMenu && (
+          <div className="mx-6 mb-2 bg-slate-900 border border-white/10 rounded-xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-2 duration-200 z-50">
+            <div className="p-2 border-b border-white/5 flex items-center justify-between">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Mention Users</span>
+              {mentionLoading && <div className="w-3 h-3 border border-teal/30 border-t-teal rounded-full animate-spin mr-2" />}
+            </div>
+            <div className="max-h-48 overflow-y-auto no-scrollbar">
+              {mentionResults.map((u, idx) => (
+                <button
+                  key={u.id}
+                  onClick={() => selectMention(u.username)}
+                  onMouseEnter={() => setMentionIndex(idx)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${idx === mentionIndex ? 'bg-teal/20 text-teal' : 'text-slate-300 hover:bg-white/5'}`}
+                >
+                  <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/10 overflow-hidden flex items-center justify-center text-[10px] font-bold text-teal uppercase">
+                    {u.avatar_url ? <img src={u.avatar_url} className="w-full h-full object-cover" /> : u.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-bold truncate leading-tight">{u.name}</div>
+                    <div className="text-[11px] text-slate-500 truncate">@{u.username}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Reply Indicator */}
         {replyTo && (
           <div className="px-6 py-2 bg-teal/10 border-t border-teal/20 flex justify-between items-center animate-in slide-in-from-bottom-2">
@@ -222,7 +334,8 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
               <input 
                 type="text"
                 value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 placeholder={replyTo ? "Write a reply..." : "Add a comment..."}
                 className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:border-teal/50 focus:bg-white/10 transition-all"
               />

@@ -37,4 +37,12 @@ class EloquentDropsRepository implements DropsRepositoryInterface
 
         return $credits - $debits;
     }
+
+    public function getGiftHistoryForUser(User $user, int $perPage = 20): LengthAwarePaginator
+    {
+        return DropsLedger::where('user_id', $user->id)
+            ->where('description', 'like', '%Gift%')
+            ->latest('created_at')
+            ->paginate($perPage);
+    }
 }

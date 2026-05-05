@@ -10,5 +10,6 @@ interface DropsRepositoryInterface
 {
     public function create(array $data): DropsLedger;
     public function getForUser(User $user, int $perPage = 20): LengthAwarePaginator;
+    public function getGiftHistoryForUser(User $user, int $perPage = 20): LengthAwarePaginator;
     public function calculateBalance(User $user): int;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -64,8 +64,24 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!token) return;
+    
+    const fetchUnread = async () => {
+      try {
+        const res = await import("@/lib/api").then(m => m.getUnreadCount());
+        setUnreadCount(res.unread_count);
+      } catch (err) {}
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, [token]);
 
   return (
     <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 px-8 py-10">
@@ -76,14 +92,21 @@ export function Sidebar() {
       <nav className="flex-1 space-y-2">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
+          const isNotifications = item.label === "Notifications";
+          
           return (
             <Link 
               key={item.href} 
               href={item.href}
               className={`flex items-center gap-4 px-4 py-4 rounded-r24 text-[16px] font-bold transition-all duration-300 group ${isActive ? 'bg-teal/10 text-teal' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
             >
-              <div className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+              <div className={`relative transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
                 {item.icon}
+                {isNotifications && unreadCount > 0 && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-black border-2 border-slate-950">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </div>
+                )}
               </div>
               {item.label}
               {isActive && (
@@ -153,18 +176,42 @@ export function Sidebar() {
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { token } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!token) return;
+    const fetchUnread = async () => {
+      try {
+        const res = await import("@/lib/api").then(m => m.getUnreadCount());
+        setUnreadCount(res.unread_count);
+      } catch (err) {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   return (
     <nav className="lg:hidden flex justify-around items-center h-20 border-t border-white/5 glass-dark sticky bottom-0 z-50 px-4">
       {NAV_ITEMS.slice(0, 5).map((item) => {
         const isActive = pathname === item.href;
+        const isNotifications = item.label === "Notifications";
+
         return (
           <Link 
             key={item.href} 
             href={item.href}
-            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 ${isActive ? 'text-teal scale-110' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-300 relative ${isActive ? 'text-teal scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            {item.icon}
+            <div className="relative">
+              {item.icon}
+              {isNotifications && unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-black border-2 border-slate-950">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </div>
+              )}
+            </div>
             {isActive && <div className="w-1 h-1 rounded-full bg-teal mt-1 shadow-[0_0_4px_#1a9e75]"></div>}
           </Link>
         );

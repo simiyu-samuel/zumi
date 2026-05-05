@@ -65,4 +65,22 @@ class DropsController extends Controller
             'current_balance' => $sender->refresh()->drops_balance,
         ]);
     }
+
+    /**
+     * Get gift history (sent/received).
+     */
+    public function giftHistory(Request $request): JsonResponse
+    {
+        Gate::authorize('view-wallet');
+
+        $user = $request->user();
+        $transactions = $this->dropsRepository->getGiftHistoryForUser(
+            $user,
+            $request->input('per_page', 15)
+        );
+
+        return response()->json(
+            DropsTransactionResource::collection($transactions)->response()->getData(true)
+        );
+    }
 }
