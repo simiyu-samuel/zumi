@@ -233,7 +233,7 @@ function WaveCard({
   onGift: (id: string, amount: number) => void;
 }) {
   return (
-    <div className="relative aspect-[9/16] w-full rounded-r24 overflow-hidden bg-slate-900 group shadow-2xl">
+    <div className="relative aspect-[4/5] w-full max-h-[600px] mx-auto rounded-r24 overflow-hidden bg-slate-900 group shadow-2xl">
       {/* Thumbnail / Video */}
       {wave.thumbnail_url ? (
         <img
