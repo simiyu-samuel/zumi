@@ -26,6 +26,7 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/modules/challenges.php';
     require __DIR__ . '/api/modules/skill_drops.php';
     require __DIR__ . '/api/modules/gated_rooms.php';
+    require __DIR__ . '/api/modules/trending.php';
     require __DIR__ . '/api/modules/subscriptions.php';
     require __DIR__ . '/api/modules/webhooks.php';
     require __DIR__ . '/api/modules/search.php';

@@ -10,10 +10,14 @@ import {
   getFollowedFeed,
   getGatedRooms,
   getWave,
+  getTrending,
+  getSkillDrops,
   likeWave,
   shareWave,
   purchaseWave,
   type Wave,
+  type TrendingData,
+  type SkillDrop,
 } from "@/lib/api";
 import { CommentSheet } from "@/components/waves/CommentSheet";
 import { ShareSheet } from "@/components/waves/ShareSheet";
@@ -44,6 +48,26 @@ export default function FeedPage() {
   const [activeCommentWaveId, setActiveCommentWaveId] = useState<string | null>(null);
   const [activeShareWaveId, setActiveShareWaveId] = useState<string | null>(null);
   const [activeGiftWaveId, setActiveGiftWaveId] = useState<string | null>(null);
+  const [trending, setTrending] = useState<TrendingData | null>(null);
+  const [skillDrops, setSkillDrops] = useState<SkillDrop[]>([]);
+
+  const fetchData = useCallback(async () => {
+    if (!token) return;
+    try {
+      const [trendingRes, dropsRes] = await Promise.all([
+        getTrending(),
+        getSkillDrops(undefined, 5)
+      ]);
+      setTrending(trendingRes);
+      setSkillDrops(dropsRes.data || []);
+    } catch (err) {
+      console.error("Data fetch error:", err);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const fetchFeed = useCallback(async (cursor?: string | null, append = false) => {
     if (!token) return;
@@ -206,19 +230,39 @@ export default function FeedPage() {
       )}
 
       {/* Sticky Header */}
-      <header className="px-8 py-6 flex justify-between items-center sticky top-0 bg-black/60 backdrop-blur-2xl z-30 border-b border-white/5">
-        <div className="flex gap-10">
+      <header className="px-8 py-4 flex justify-between items-center sticky top-0 bg-slate-950/80 backdrop-blur-2xl z-30 border-b border-white/5">
+        <div className="flex gap-8">
           <button
             onClick={() => setActiveTab("for-you")}
-            className={`text-[16px] font-black tracking-tighter pb-1 transition-all ${activeTab === "for-you" ? "text-teal border-b-2 border-teal scale-105" : "text-slate-500 hover:text-slate-300"}`}
+            className={`text-[15px] font-bold tracking-wide pb-1 transition-all ${activeTab === "for-you" ? "text-teal border-b-2 border-teal" : "text-slate-500 hover:text-slate-300"}`}
           >
-            FOR YOU
+            For You
           </button>
           <button
             onClick={() => setActiveTab("following")}
-            className={`text-[16px] font-black tracking-tighter pb-1 transition-all ${activeTab === "following" ? "text-teal border-b-2 border-teal scale-105" : "text-slate-500 hover:text-slate-300"}`}
+            className={`text-[15px] font-bold tracking-wide pb-1 transition-all ${activeTab === "following" ? "text-teal border-b-2 border-teal" : "text-slate-500 hover:text-slate-300"}`}
           >
-            FOLLOWING
+            Following
+          </button>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              placeholder="Search Zumi" 
+              className="bg-slate-900 border border-white/5 text-slate-200 text-[13px] font-semibold rounded-full pl-10 pr-4 py-2 w-48 lg:w-64 focus:outline-none focus:border-teal/50 transition-colors placeholder:text-slate-600" 
+            />
+          </div>
+          <button className="text-slate-500 hover:text-white transition-colors">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </button>
         </div>
       </header>
@@ -228,13 +272,13 @@ export default function FeedPage() {
         {liveRooms.length > 0 && (
           <section className="px-8 py-6">
             <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-teal animate-pulse shadow-[0_0_8px_#1a9e75]"></div>
-                <h2 className="text-[14px] font-black text-white uppercase tracking-wider">
-                  Live Gated Rooms
+              <div className="flex items-center gap-2">
+                <h2 className="text-[20px] font-bold text-white tracking-wide">
+                  Live Rooms
                 </h2>
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500/80 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
               </div>
-              <Link href="/circles" className="text-[11px] font-black text-slate-500 hover:text-teal uppercase tracking-widest transition-all">
+              <Link href="/circles" className="text-[13px] font-bold text-teal hover:text-teal-400 transition-colors">
                 View All
               </Link>
             </div>
@@ -242,54 +286,34 @@ export default function FeedPage() {
               {liveRooms.map((room) => (
                 <div
                   key={room.id}
-                  className="flex-shrink-0 w-[240px] aspect-[4/5] rounded-r24 overflow-hidden relative group cursor-pointer border border-white/5 shadow-2xl transition-all hover:border-teal/50 hover:scale-[1.02]"
+                  className="flex-shrink-0 w-[180px] rounded-[16px] bg-[#0B0F15] border border-white/5 overflow-hidden relative group cursor-pointer shadow-lg hover:border-teal/30 transition-all hover:-translate-y-1"
                 >
-                  {/* Thumbnail / Background */}
-                  <div className="absolute inset-0 bg-slate-900">
+                  <div className="relative h-[160px] w-full">
                     <img 
-                      src={room.host?.avatar_url} // Fallback to host avatar if no room thumb
+                      src={room.host?.avatar_url || "/brand/default-avatar.png"} 
                       alt={room.title}
-                      className="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity blur-[2px] group-hover:blur-0"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-                  </div>
-
-                  {/* Content Overlay */}
-                  <div className="absolute inset-0 p-5 flex flex-col justify-between z-10">
-                    <div className="flex justify-between items-start">
-                      <div className="px-2.5 py-1 bg-red-600 rounded-full text-[9px] font-black text-white border border-white/10 shadow-lg flex items-center gap-1.5 animate-pulse">
-                        <div className="w-1 h-1 rounded-full bg-white"></div>
-                        LIVE
-                      </div>
-                      <div className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[10px] font-bold text-teal border border-teal/20">
-                        {room.entry_fee} ◆
-                      </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F15] via-black/20 to-transparent" />
+                    
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-[#FF6B6B]/90 backdrop-blur rounded-[4px] text-[9px] font-black text-white flex items-center gap-1">
+                       <div className="w-1 h-1 rounded-full bg-white"></div> LIVE
+                    </div>
+                    
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur rounded-[4px] text-[9px] font-bold text-white flex items-center gap-1">
+                       {room.entry_fee > 0 ? `${room.entry_fee} ◆` : 'FREE'}
                     </div>
 
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xs" className="border-2 border-teal" />
-                        <span className="text-[11px] font-bold text-slate-300">@{room.host?.username}</span>
-                      </div>
-                      <h3 className="text-[15px] font-black text-white leading-tight line-clamp-2">
-                        {room.title}
-                      </h3>
-                      <div className="mt-3 flex items-center gap-4">
-                         <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            {Math.floor(Math.random() * 500) + 50}
-                         </div>
-                         <button className="flex-1 py-1.5 bg-teal text-slate-950 text-[10px] font-black rounded-lg uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                            Join Room
-                         </button>
-                      </div>
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                       <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xs" className="w-5 h-5 border border-white/20" />
+                       <span className="text-[11px] font-bold text-white/90 truncate max-w-[120px]">{room.host?.name}</span>
                     </div>
                   </div>
-
-                  {/* Glass Sheen */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+                  <div className="p-3">
+                    <h3 className="text-[12px] font-bold text-white/90 truncate">
+                      {room.title}
+                    </h3>
+                  </div>
                 </div>
               ))}
             </div>
@@ -347,11 +371,12 @@ export default function FeedPage() {
               ];
 
               // Inject promo cards every few items
-              if (idx === 1 && activeTab === "for-you") {
-                elements.push(<WaveChallengeCard key="challenge-injection" />);
+              // Inject promo cards every few items
+              if (idx === 1 && activeTab === "for-you" && trending?.active_challenge) {
+                elements.push(<WaveChallengeCard key="challenge-injection" challenge={trending.active_challenge} />);
               }
-              if (idx === 3 && activeTab === "for-you") {
-                elements.push(<SkillDropPromoCard key="skilldrop-injection" />);
+              if (idx === 3 && activeTab === "for-you" && skillDrops.length > 0) {
+                elements.push(<SkillDropPromoCard key="skilldrop-injection" drop={skillDrops[0]} />);
               }
 
               return elements;
@@ -517,7 +542,7 @@ function WaveCard({
   );
 }
 
-function WaveChallengeCard() {
+function WaveChallengeCard({ challenge }: { challenge: any }) {
   return (
     <div className="glass p-8 rounded-r24 border border-teal/20 relative overflow-hidden group cursor-pointer">
       <div className="absolute top-0 right-0 p-4">
@@ -534,29 +559,22 @@ function WaveChallengeCard() {
               </svg>
            </div>
            <div>
-              <div className="text-[18px] font-black text-white">The Digital Deep Sea</div>
-              <div className="text-[12px] text-teal font-bold uppercase tracking-widest">5,000 Drops Prize Pool</div>
+              <div className="text-[18px] font-black text-white">{challenge.title}</div>
+              <div className="text-[12px] text-teal font-bold uppercase tracking-widest">{challenge.prize_pool.toLocaleString()} Drops Prize Pool</div>
            </div>
         </div>
 
-        <p className="text-slate-400 text-[14px] leading-relaxed">
-          Show us your best interpretation of bioluminescent life using any digital medium. Highest engagement wins!
+        <p className="text-slate-400 text-[14px] leading-relaxed line-clamp-2">
+          {challenge.description}
         </p>
 
         <div className="flex items-center gap-4">
-           <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white">
-                  {i}
-                </div>
-              ))}
-           </div>
-           <span className="text-[12px] text-slate-500 font-bold">124+ Entries already</span>
+           <span className="text-[12px] text-slate-500 font-bold">{challenge.participations_count || 0}+ Entries already</span>
         </div>
 
-        <button className="w-full py-4 bg-teal text-slate-950 font-black uppercase tracking-widest rounded-r16 hover:scale-[1.02] transition-transform">
+        <Link href={`/challenges/${challenge.id}`} className="w-full py-4 bg-teal text-slate-950 text-center font-black uppercase tracking-widest rounded-r16 hover:scale-[1.02] transition-transform">
            Enter Now
-        </button>
+        </Link>
       </div>
 
       <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-teal/5 blur-3xl group-hover:bg-teal/10 transition-all"></div>
@@ -564,7 +582,7 @@ function WaveChallengeCard() {
   );
 }
 
-function SkillDropPromoCard() {
+function SkillDropPromoCard({ drop }: { drop: SkillDrop }) {
   return (
     <div className="glass p-8 rounded-r24 border border-violet-500/20 relative overflow-hidden group cursor-pointer">
       <div className="absolute top-0 right-0 p-4">
@@ -576,22 +594,22 @@ function SkillDropPromoCard() {
       <div className="relative z-10 flex flex-col gap-6">
         <div className="flex items-center gap-4">
            <div className="w-20 h-20 rounded-r16 bg-slate-800 overflow-hidden shrink-0 border border-white/5">
-              <img src="/api/placeholder/80/80" alt="Skill Drop" className="w-full h-full object-cover" />
+              <img src={drop.thumbnail_url || "/api/placeholder/80/80"} alt={drop.title} className="w-full h-full object-cover" />
            </div>
            <div>
-              <div className="text-[18px] font-black text-white group-hover:text-violet-400 transition-colors">Mastering Node-Based Art</div>
-              <div className="text-[13px] text-slate-500 font-bold">by @aria_visuals</div>
+              <div className="text-[18px] font-black text-white group-hover:text-violet-400 transition-colors line-clamp-1">{drop.title}</div>
+              <div className="text-[13px] text-slate-500 font-bold">by @{drop.user?.username}</div>
            </div>
         </div>
 
         <div className="flex items-center justify-between p-4 bg-white/5 rounded-r16 border border-white/5">
            <div className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-white">850</span>
+              <span className="text-xl font-black text-white">{drop.price_drops}</span>
               <span className="text-[11px] font-bold text-violet-400 uppercase">Drops</span>
            </div>
-           <button className="px-6 py-2 bg-violet-500 text-white font-black uppercase tracking-widest text-[11px] rounded-full hover:bg-violet-600 transition-colors">
+           <Link href={`/market/${drop.id}`} className="px-6 py-2 bg-violet-500 text-white font-black uppercase tracking-widest text-[11px] rounded-full hover:bg-violet-600 transition-colors">
               Buy Now
-           </button>
+           </Link>
         </div>
       </div>
 

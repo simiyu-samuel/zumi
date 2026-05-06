@@ -62,4 +62,13 @@ class EloquentChallengeRepository implements ChallengeRepositoryInterface
             ChallengeParticipation::where('id', $participationId)->increment('votes_count');
         });
     }
+
+    public function getTopActive(): ?Challenge
+    {
+        return Challenge::where('status', ChallengeStatus::Active)
+            ->where('ends_at', '>', now())
+            ->with(Challenge::DEFAULT_EAGER_LOAD)
+            ->orderByDesc('prize_pool')
+            ->first();
+    }
 }

@@ -34,4 +34,6 @@ interface WaveRepositoryInterface
 
     // Circle Insights
     public function getTopForCircle(string $circleId, int $limit = 3): \Illuminate\Database\Eloquent\Collection;
+    public function getTrendingHashtags(int $days = 7, int $limit = 5): array;
+    public function getTopPerforming(int $days = 7, int $limit = 5): \Illuminate\Database\Eloquent\Collection;
 }

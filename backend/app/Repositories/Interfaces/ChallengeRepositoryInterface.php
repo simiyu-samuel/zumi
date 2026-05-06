@@ -15,4 +15,5 @@ interface ChallengeRepositoryInterface
     public function delete(Challenge $challenge): bool;
     public function addParticipation(Challenge $challenge, User $user, string $waveId): void;
     public function addVote(string $participationId, User $user): void;
+    public function getTopActive(): ?Challenge;
 }

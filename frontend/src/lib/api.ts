@@ -92,6 +92,7 @@ export interface SuggestedUser {
   bio: string | null;
   avatar_url: string;
   followers_count: number | null;
+  role: string;
 }
 
 export function getDiscoveryFeed(cursor?: string, perPage = 15) {
@@ -248,3 +249,206 @@ export function getWalletData() {
 export function getGiftHistory(page = 1, perPage = 15) {
   return apiFetch<{ data: GiftTransaction[]; meta: any }>(`/wallet/gifts?page=${page}&per_page=${perPage}`);
 }
+
+// ─── Trending ───────────────────────────────────────────────────────
+export interface TrendingHashtag {
+  tag: string;
+  count: number;
+  label: string;
+}
+
+export interface TrendingWave {
+  id: string;
+  title: string;
+  views_count: number;
+  likes_count: number;
+  user: { name: string; username: string };
+}
+
+export interface TrendingData {
+  hashtags: TrendingHashtag[];
+  top_waves: TrendingWave[];
+  active_challenge: {
+    id: string;
+    title: string;
+    description: string;
+    prize_pool: number;
+    ends_at: string;
+    participations_count: number;
+    user: { name: string; username: string; avatar_url: string };
+  } | null;
+}
+
+export function getTrending() {
+  return apiFetch<TrendingData>("/trending");
+}
+
+// ─── Challenges ─────────────────────────────────────────────────────
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  prize_pool: number;
+  ends_at: string;
+  user: WaveUser;
+  winner: WaveUser | null;
+  participations: any[];
+  created_at: string;
+}
+
+export function getActiveChallenges(perPage = 5) {
+  return apiFetch<{ data: Challenge[] }>(`/challenges?per_page=${perPage}`);
+}
+
+export function getChallenge(id: string) {
+  return apiFetch<{ data: Challenge }>(`/challenges/${id}`);
+}
+
+export function joinChallenge(challengeId: string, waveId: string) {
+  return apiFetch(`/challenges/${challengeId}/join`, {
+    method: "POST",
+    body: JSON.stringify({ wave_id: waveId }),
+  });
+}
+
+export function createChallenge(data: { title: string; description: string; type: string; prize_pool: number; ends_at: string }) {
+  return apiFetch(`/challenges`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Skill Drops ────────────────────────────────────────────────────
+export interface SkillDrop {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  price_drops: number;
+  preview_url: string | null;
+  content_url: string | null;
+  sales_count: number;
+  rating_avg: number;
+  user: WaveUser;
+  is_owned: boolean;
+  is_purchased: boolean;
+  created_at: string;
+}
+
+export function getSkillDrops(perPage = 15) {
+  return apiFetch<{ data: SkillDrop[] }>(`/skill-drops?per_page=${perPage}`);
+}
+
+export function getSkillDrop(id: string) {
+  return apiFetch<{ data: SkillDrop }>(`/skill-drops/${id}`);
+}
+
+export function getMySkillDrops(perPage = 15) {
+  return apiFetch<{ data: SkillDrop[] }>(`/skill-drops/my-drops?per_page=${perPage}`);
+}
+
+export function getSkillDropLibrary(perPage = 15) {
+  return apiFetch<{ data: SkillDrop[] }>(`/skill-drops/library?per_page=${perPage}`);
+}
+
+export function purchaseSkillDrop(id: string) {
+  return apiFetch(`/skill-drops/${id}/purchase`, { method: "POST" });
+}
+
+export function createSkillDrop(data: { title: string; description: string; price_drops: number; preview_url?: string; content_url?: string }) {
+  return apiFetch(`/skill-drops`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Circles ────────────────────────────────────────────────────────
+export interface Circle {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  type: string;
+  status: string;
+  members_count: number;
+  owner: WaveUser;
+  is_member: boolean;
+  created_at: string;
+}
+
+export function getCircles(perPage = 15) {
+  return apiFetch<{ data: Circle[] }>(`/circles?per_page=${perPage}`);
+}
+
+export function getCircle(slug: string) {
+  return apiFetch<{ data: Circle }>(`/circles/${slug}`);
+}
+
+export function createCircle(data: { name: string; description: string; type: string }) {
+  return apiFetch(`/circles`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Search (Global) ────────────────────────────────────────────────
+export function globalSearch(query: string, limit = 15) {
+  return apiFetch<{ users: WaveUser[]; waves: Wave[]; circles: Circle[] }>(
+    `/search?q=${encodeURIComponent(query)}&limit=${limit}`
+  );
+}
+
+export function searchCircles(query: string, perPage = 15) {
+  return apiFetch<{ data: Circle[] }>(`/search/circles?q=${encodeURIComponent(query)}&per_page=${perPage}`);
+}
+
+// ─── Waves (additional) ─────────────────────────────────────────────
+export function recordWaveView(waveId: string) {
+  return apiFetch(`/waves/${waveId}/view`, { method: "POST" });
+}
+
+export function toggleBookmark(waveId: string) {
+  return apiFetch(`/waves/${waveId}/bookmark`, { method: "POST" });
+}
+
+// ─── Wave Upload ────────────────────────────────────────────────────
+export function initializeWaveUpload(title: string, sizeBytes: number) {
+  return apiFetch<{ upload_url: string; stream_id: string }>(`/waves/upload/initialize`, {
+    method: "POST",
+    body: JSON.stringify({ title, size_bytes: sizeBytes }),
+  });
+}
+
+export function createWave(data: {
+  title: string;
+  description?: string;
+  stream_id?: string;
+  visibility?: string;
+  gated_drops?: number;
+  circle_id?: string;
+}) {
+  return apiFetch(`/waves`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Gated Rooms (additional) ───────────────────────────────────────
+export function createGatedRoom(data: {
+  title: string;
+  description?: string;
+  entry_fee_drops: number;
+  scheduled_at?: string;
+}) {
+  return apiFetch(`/rooms`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function joinGatedRoom(roomId: string) {
+  return apiFetch(`/rooms/${roomId}/join`, { method: "POST" });
+}
+

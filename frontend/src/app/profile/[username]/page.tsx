@@ -26,7 +26,7 @@ function formatCount(n: number): string {
 export default function ProfilePage() {
   const { username } = useParams() as { username: string };
   const router = useRouter();
-  const { user: currentUser, token } = useAuth();
+  const { user: currentUser, token, logout } = useAuth();
   
   const [profile, setProfile] = useState<WaveUser | null>(null);
   const [waves, setWaves] = useState<Wave[]>([]);
@@ -211,9 +211,17 @@ export default function ProfilePage() {
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 py-5">
             {isOwnProfile ? (
-              <button className="px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-[14px]">
-                Edit Profile
-              </button>
+              <div className="flex gap-2">
+                <button className="px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-[14px]">
+                  Edit Profile
+                </button>
+                <button 
+                  onClick={() => logout()}
+                  className="px-6 py-2.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 font-bold hover:bg-red-500/20 transition-all text-[14px]"
+                >
+                  Log Out
+                </button>
+              </div>
             ) : (
               <>
                 <button 

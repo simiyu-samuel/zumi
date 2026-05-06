@@ -140,4 +140,39 @@ class EloquentWaveRepository implements WaveRepositoryInterface
             ->limit($limit)
             ->get();
     }
+
+    public function getTrendingHashtags(int $days = 7, int $limit = 5): array
+    {
+        $recentWaves = Wave::where('created_at', '>=', now()->subDays($days))
+            ->select('title', 'description')
+            ->limit(200) // Sample size
+            ->get();
+
+        $hashtags = [];
+
+        foreach ($recentWaves as $wave) {
+            $text = ($wave->title ?? '') . ' ' . ($wave->description ?? '');
+            preg_match_all('/#([a-zA-Z0-9_]+)/', $text, $matches);
+
+            foreach ($matches[1] as $tag) {
+                $lower = strtolower($tag);
+                $hashtags[$lower] = ($hashtags[$lower] ?? 0) + 1;
+            }
+        }
+
+        arsort($hashtags);
+        
+        return array_slice($hashtags, 0, $limit, true);
+    }
+
+    public function getTopPerforming(int $days = 7, int $limit = 5): \Illuminate\Database\Eloquent\Collection
+    {
+        return Wave::with('user')
+            ->where('created_at', '>=', now()->subDays($days))
+            ->select('*')
+            ->selectRaw('(likes_count + comments_count + shares_count) as engagement')
+            ->orderByDesc('engagement')
+            ->limit($limit)
+            ->get();
+    }
 }
