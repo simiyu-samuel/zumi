@@ -86,6 +86,7 @@ class WaveService
             if ($wave->user_id !== $user->id) {
                 $waveOwner = $wave->user ?? $wave->load('user')->user;
                 $this->flowScoreService->award($waveOwner, 'wave_liked');
+                $this->flowScoreService->award($user, 'engagement');
                 $waveOwner->notify(new \App\Notifications\WaveLikedNotification($wave, $user));
             }
         }

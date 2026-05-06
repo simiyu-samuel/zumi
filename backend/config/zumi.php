@@ -23,6 +23,8 @@ return [
             'wave_posted'      => 5,
             'wave_liked'       => 1,
             'comment_received' => 2,
+            'follower_gained'  => 10,
+            'engagement'       => 1, // Points for the person performing the action (liking/commenting)
             'circle_joined'    => 10,
             'challenge_won'    => 50,
         ],

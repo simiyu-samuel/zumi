@@ -34,7 +34,7 @@ class FlowScoreService
      */
     public function summary(User $user): array
     {
-        $score = $user->flow_score;
+        $score = (int) ($user->flow_score ?? 0);
         $tier  = FlowScoreTier::fromScore($score);
 
         return [

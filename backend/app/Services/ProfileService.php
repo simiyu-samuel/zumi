@@ -8,7 +8,8 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 class ProfileService
 {
     public function __construct(
-        protected UserRepositoryInterface $userRepository
+        protected UserRepositoryInterface $userRepository,
+        protected FollowService $followService,
     ) {}
 
     public function findByUsername(string $username)
@@ -33,7 +34,10 @@ class ProfileService
 
         if (!empty($data['suggested_follows'])) {
             foreach ($data['suggested_follows'] as $followId) {
-                $user->following()->syncWithoutDetaching([$followId]);
+                $following = User::find($followId);
+                if ($following) {
+                    $this->followService->follow($user, $following);
+                }
             }
         }
 

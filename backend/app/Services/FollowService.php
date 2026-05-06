@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\Interfaces\FollowRepositoryInterface;
+use App\Services\FlowScoreService;
 
 class FollowService
 {
     public function __construct(
-        protected FollowRepositoryInterface $followRepository
+        protected FollowRepositoryInterface $followRepository,
+        protected FlowScoreService $flowScoreService,
     ) {}
 
     /**
@@ -25,6 +27,9 @@ class FollowService
         }
 
         $this->followRepository->follow($follower, $following);
+
+        // Award Flow Score to the user being followed
+        $this->flowScoreService->award($following, 'follower_gained');
 
         $following->notify(new \App\Notifications\NewFollowerNotification($follower));
 

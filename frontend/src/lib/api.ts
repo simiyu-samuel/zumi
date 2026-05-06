@@ -42,6 +42,13 @@ export interface WaveUser {
   banner_url: string | null;
   drops_balance: number;
   flow_score: number;
+  flow_score_summary?: {
+    score: number;
+    tier: string;
+    tier_label: string;
+    next_threshold: number | null;
+    points_to_next: number | null;
+  };
   followers_count: number;
   following_count: number;
   role: string;

@@ -202,6 +202,7 @@ export default function ProfilePage() {
                 src={profile.avatar_url} 
                 name={profile.name} 
                 size="xl" 
+                role={profile.role}
                 className="w-28 h-28 sm:w-32 sm:h-32 border-[4px] border-teal shadow-2xl" 
               />
             </div>
@@ -281,8 +282,12 @@ export default function ProfilePage() {
                     </svg>
                  </div>
                  <div className="flex flex-col">
-                    <span className="text-[13px] font-black text-white leading-none">{profile.flow_score}</span>
-                    <span className="text-[8px] font-black text-violet-300 uppercase tracking-tighter">Flow Score</span>
+                    <span className="text-[13px] font-black text-white leading-none">
+                      {profile.flow_score_summary?.score ?? profile.flow_score}
+                    </span>
+                    <span className="text-[10px] font-black text-violet-300 uppercase tracking-tighter mt-0.5">
+                      {profile.flow_score_summary?.tier_label ?? 'Rising'}
+                    </span>
                  </div>
               </div>
             </div>

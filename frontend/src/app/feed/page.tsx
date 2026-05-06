@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ShellLayout } from "@/components/layout/ShellLayout";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -359,11 +360,13 @@ function WaveCard({
       <div className="absolute bottom-0 left-0 right-0 p-6 z-20 flex justify-between items-end">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <Avatar src={wave.user.avatar_url} name={wave.user.name} size="lg" className="border-2 border-teal/50" />
-            <div>
-              <div className="font-bold text-white text-[17px]">{wave.user.name}</div>
-              <div className="text-teal text-sm font-semibold">@{wave.user.username}</div>
-            </div>
+            <Link href={`/profile/${wave.user.username}`}>
+              <Avatar src={wave.user.avatar_url} name={wave.user.name} size="lg" role={wave.user.role} className="border-2 border-teal/50" />
+            </Link>
+            <Link href={`/profile/${wave.user.username}`} className="group/creator">
+              <div className="font-bold text-white text-[17px] group-hover/creator:text-teal transition-colors">{wave.user.name}</div>
+              <div className="text-teal text-sm font-semibold opacity-80 group-hover/creator:opacity-100 transition-opacity">@{wave.user.username}</div>
+            </Link>
           </div>
 
           {/* Gated Overlay or Title */}

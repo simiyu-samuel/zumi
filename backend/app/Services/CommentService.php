@@ -34,6 +34,7 @@ class CommentService
         if (isset($commentable->user_id) && $commentable->user_id !== $user->id) {
             $owner = $commentable->user ?? $commentable->load('user')->user;
             $this->flowScoreService->award($owner, 'comment_received');
+            $this->flowScoreService->award($user, 'engagement');
             $owner->notify(new \App\Notifications\NewCommentNotification($comment, $user));
         }
 
@@ -67,6 +68,7 @@ class CommentService
             if ($comment->user_id !== $user->id) {
                 $commentOwner = $comment->user ?? $comment->load(Comment::RELATION_USER)->user;
                 $this->flowScoreService->award($commentOwner, 'comment_liked');
+                $this->flowScoreService->award($user, 'engagement');
                 // You could add a CommentLikedNotification here if needed
             }
             $liked = true;

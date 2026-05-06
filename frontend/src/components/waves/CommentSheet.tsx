@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { getComments, postComment, likeComment, type Comment } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
@@ -295,7 +296,7 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
                   onMouseEnter={() => setMentionIndex(idx)}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${idx === mentionIndex ? 'bg-teal/20 text-teal' : 'text-slate-300 hover:bg-white/5'}`}
                 >
-                  <Avatar src={u.avatar_url} name={u.name} size="sm" />
+                  <Avatar src={u.avatar_url} name={u.name} size="sm" role={u.role} />
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-bold truncate leading-tight">{u.name}</div>
                     <div className="text-[11px] text-slate-500 truncate">@{u.username}</div>
@@ -326,7 +327,7 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
         {/* Input Footer */}
         <div className="p-6 pt-2 border-t border-white/5 bg-slate-900/50 backdrop-blur-md shrink-0">
           <form onSubmit={handleSubmit} className="flex items-center gap-4">
-            <Avatar src={user?.avatar_url} name={user?.name} size="md" />
+            <Avatar src={user?.avatar_url} name={user?.name} size="md" role={user?.role} />
             <div className="flex-1 relative">
               <input 
                 type="text"
@@ -375,12 +376,14 @@ function CommentItem({
 
   return (
     <div className={`flex gap-4 ${isReply ? 'mt-4 ml-10 scale-95' : ''}`}>
-      <Avatar src={comment.user.avatar_url} name={comment.user.name} size={isReply ? "sm" : "md"} />
+      <Link href={`/profile/${comment.user.username}`}>
+        <Avatar src={comment.user.avatar_url} name={comment.user.name} size={isReply ? "sm" : "md"} role={comment.user.role} />
+      </Link>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[14px] font-black text-white hover:text-teal transition-colors cursor-pointer">
+          <Link href={`/profile/${comment.user.username}`} className="text-[14px] font-black text-white hover:text-teal transition-colors">
             @{comment.user.username}
-          </span>
+          </Link>
           <span className="text-[11px] text-slate-600 font-bold uppercase">
             {new Date(comment.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </span>

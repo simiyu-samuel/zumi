@@ -80,6 +80,7 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
                       src={u.avatar_url} 
                       name={u.name} 
                       size="sm" 
+                      role={u.role}
                       className="w-9 h-9 ring-2 ring-transparent group-hover:ring-teal/30 transition-all" 
                     />
                     <div className="flex-1 min-w-0">
@@ -132,10 +133,10 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
                     {room.entry_fee_drops}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                   <Avatar src={room.host?.avatar_url} name={room.host?.name} size="sm" className="w-4 h-4 text-[7px]" />
-                   <span className="text-[10px] text-slate-500">by {room.host?.name}</span>
-                </div>
+                <Link href={`/profile/${room.host?.username}`} className="flex items-center gap-2 group/host">
+                   <Avatar src={room.host?.avatar_url} name={room.host?.name} size="sm" role={room.host?.role} className="w-4 h-4 text-[7px]" />
+                   <span className="text-[10px] text-slate-500 group-hover/host:text-teal transition-colors">by {room.host?.name}</span>
+                </Link>
               </div>
             ))}
           </div>

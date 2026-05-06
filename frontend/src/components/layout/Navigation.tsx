@@ -154,7 +154,7 @@ export function Sidebar() {
             <div className="absolute bottom-[calc(100%+24px)] left-0 w-[280px] bg-slate-950/90 backdrop-blur-2xl border border-white/10 rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[100] animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
               <div className="p-6 border-b border-white/5 bg-white/5">
                 <div className="flex items-center gap-3">
-                  <Avatar src={user?.avatar_url} name={user?.name} size="md" />
+                  <Avatar src={user?.avatar_url} name={user?.name} size="md" role={user?.role} />
                   <div className="min-w-0">
                     <div className="text-sm font-black text-white truncate">{user?.name}</div>
                     <div className="text-[11px] font-bold text-slate-500 truncate">@{user?.username}</div>
@@ -234,6 +234,7 @@ export function Sidebar() {
               src={user?.avatar_url} 
               name={user?.name} 
               size="lg" 
+              role={user?.role}
               className="transition-transform group-hover:scale-105" 
             />
             <div className="min-w-0">
