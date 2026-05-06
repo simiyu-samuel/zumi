@@ -29,6 +29,11 @@ class WaveService
         return $this->waveRepository->getFollowedFeed($user, $perPage);
     }
 
+    public function getUserWaves(string $userId, int $perPage = 15): CursorPaginator
+    {
+        return $this->waveRepository->getByUser($userId, $perPage);
+    }
+
     /**
      * Initialize a Wave upload by getting a Cloudflare Stream upload URL.
      */

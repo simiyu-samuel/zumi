@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DeviceFrame } from "@/components/DeviceFrame";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
 
 const INTERESTS = [
   { id: "tech", label: "Tech", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
@@ -197,14 +198,8 @@ export default function OnboardingPage() {
             <div className="follows-list flex-1 overflow-y-auto px-6">
               {suggestedUsers.map((creator) => (
                 <div key={creator.id} className="follow-card flex items-center gap-3 py-3 border-b border-slate-100 last:border-0">
-                  <div className="follow-avatar w-12 h-12 rounded-full flex-shrink-0 bg-teal relative overflow-hidden">
-                    {creator.avatar_url ? (
-                      <img src={creator.avatar_url} alt={creator.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white font-head font-extrabold text-lg uppercase">
-                        {creator.name.charAt(0)}
-                      </div>
-                    )}
+                  <div className="relative">
+                    <Avatar src={creator.avatar_url} name={creator.name} size="lg" className="w-12 h-12" />
                     <div className="avatar-verified absolute bottom-[-1px] right-[-1px] w-4 h-4 rounded-full bg-teal border-2 border-white flex items-center justify-center">
                       <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     </div>

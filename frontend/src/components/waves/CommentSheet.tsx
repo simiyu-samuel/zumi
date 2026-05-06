@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getComments, postComment, likeComment, type Comment } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
 import echo from "@/lib/echo";
 
 interface CommentSheetProps {
@@ -294,9 +295,7 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
                   onMouseEnter={() => setMentionIndex(idx)}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${idx === mentionIndex ? 'bg-teal/20 text-teal' : 'text-slate-300 hover:bg-white/5'}`}
                 >
-                  <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/10 overflow-hidden flex items-center justify-center text-[10px] font-bold text-teal uppercase">
-                    {u.avatar_url ? <img src={u.avatar_url} className="w-full h-full object-cover" /> : u.name.charAt(0)}
-                  </div>
+                  <Avatar src={u.avatar_url} name={u.name} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-bold truncate leading-tight">{u.name}</div>
                     <div className="text-[11px] text-slate-500 truncate">@{u.username}</div>
@@ -327,9 +326,7 @@ export function CommentSheet({ waveId, onClose }: CommentSheetProps) {
         {/* Input Footer */}
         <div className="p-6 pt-2 border-t border-white/5 bg-slate-900/50 backdrop-blur-md shrink-0">
           <form onSubmit={handleSubmit} className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-teal/20 border border-teal/30 flex items-center justify-center font-bold text-teal shrink-0">
-              {user?.name?.charAt(0)}
-            </div>
+            <Avatar src={user?.avatar_url} name={user?.name} size="md" />
             <div className="flex-1 relative">
               <input 
                 type="text"
@@ -378,13 +375,7 @@ function CommentItem({
 
   return (
     <div className={`flex gap-4 ${isReply ? 'mt-4 ml-10 scale-95' : ''}`}>
-      <div className={`${isReply ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-slate-800 border border-white/5 flex items-center justify-center font-bold text-teal shrink-0 overflow-hidden`}>
-        {comment.user.avatar_url ? (
-          <img src={comment.user.avatar_url} alt={comment.user.name} className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-teal-light">{comment.user.name.charAt(0)}</span>
-        )}
-      </div>
+      <Avatar src={comment.user.avatar_url} name={comment.user.name} size={isReply ? "sm" : "md"} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[14px] font-black text-white hover:text-teal transition-colors cursor-pointer">

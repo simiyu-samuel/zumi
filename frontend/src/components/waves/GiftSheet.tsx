@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { giftWave } from "@/lib/api";
+import { giftWave, giftUser } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 interface GiftSheetProps {
-  waveId: string;
+  waveId?: string;
+  userId?: string;
   onClose: () => void;
   onSuccess?: (amount: number) => void;
 }
 
-export function GiftSheet({ waveId, onClose, onSuccess }: GiftSheetProps) {
+export function GiftSheet({ waveId, userId, onClose, onSuccess }: GiftSheetProps) {
   const { user } = useAuth();
   const [amount, setAmount] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,14 @@ export function GiftSheet({ waveId, onClose, onSuccess }: GiftSheetProps) {
     setLoading(true);
     setError(null);
     try {
-      await giftWave(waveId, Number(amount));
+      if (waveId) {
+        await giftWave(waveId, Number(amount));
+      } else if (userId) {
+        await giftUser(userId, Number(amount));
+      } else {
+        throw new Error("No target for gift");
+      }
+      
       setSuccess(true);
       if (onSuccess) onSuccess(Number(amount));
       setTimeout(onClose, 2000);

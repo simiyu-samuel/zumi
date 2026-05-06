@@ -29,6 +29,16 @@ class WaveController extends Controller
         return WaveResource::collection($waves);
     }
 
+    public function userWaves(Request $request, string $userId)
+    {
+        $waves = $this->waveService->getUserWaves(
+            $userId,
+            $request->input('per_page', config('zumi.pagination.default_per_page', 15))
+        );
+        
+        return WaveResource::collection($waves);
+    }
+
     public function followedFeed(Request $request)
     {
         $waves = $this->waveService->getFollowedFeed(

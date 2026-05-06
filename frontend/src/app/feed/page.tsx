@@ -15,6 +15,7 @@ import {
 import { CommentSheet } from "@/components/waves/CommentSheet";
 import { ShareSheet } from "@/components/waves/ShareSheet";
 import { GiftSheet } from "@/components/waves/GiftSheet";
+import { Avatar } from "@/components/ui/Avatar";
 
 type FeedTab = "for-you" | "following";
 
@@ -222,12 +223,8 @@ export default function FeedPage() {
                   className="flex-shrink-0 flex flex-col items-center gap-2 group cursor-pointer"
                 >
                   <div className="relative p-1 rounded-full bg-gradient-to-tr from-teal to-cyan-400 group-hover:scale-105 transition-transform">
-                    <div className="w-16 h-16 rounded-full bg-slate-900 border-2 border-black overflow-hidden relative">
-                      <div className="absolute inset-0 bg-slate-800 flex items-center justify-center">
-                        <span className="text-[18px] font-bold text-teal">
-                          {room.host?.name?.charAt(0) || "?"}
-                        </span>
-                      </div>
+                    <div className="w-16 h-16 rounded-full border-2 border-black overflow-hidden relative">
+                      <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xl" className="w-full h-full border-0" />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -343,15 +340,7 @@ function WaveCard({
       <div className="absolute bottom-0 left-0 right-0 p-6 z-20 flex justify-between items-end">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full border-2 border-teal/50 p-0.5 overflow-hidden text-center">
-              {wave.user.avatar_url ? (
-                <img src={wave.user.avatar_url} alt={wave.user.name} className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <div className="w-full h-full rounded-full bg-teal/20 flex items-center justify-center font-bold text-teal text-lg">
-                  {wave.user.name.charAt(0)}
-                </div>
-              )}
-            </div>
+            <Avatar src={wave.user.avatar_url} name={wave.user.name} size="lg" className="border-2 border-teal/50" />
             <div>
               <div className="font-bold text-white text-[17px]">{wave.user.name}</div>
               <div className="text-teal text-sm font-semibold">@{wave.user.username}</div>

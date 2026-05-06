@@ -19,3 +19,4 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public routes
 Route::get('waves', [WaveController::class, 'index']);
 Route::get('waves/{id}', [WaveController::class, 'show']);
+Route::get('/users/{userId}/waves', [WaveController::class, 'userWaves']);

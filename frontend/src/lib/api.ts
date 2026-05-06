@@ -39,10 +39,13 @@ export interface WaveUser {
   username: string;
   bio: string | null;
   avatar_url: string;
+  banner_url: string | null;
   drops_balance: number;
-  followers_count: number | null;
-  following_count: number | null;
+  flow_score: number;
+  followers_count: number;
+  following_count: number;
   role: string;
+  is_following?: boolean;
 }
 
 export interface Wave {
@@ -129,6 +132,13 @@ export function giftWave(waveId: string, amount: number) {
   });
 }
 
+export function giftUser(receiverId: string, amount: number) {
+  return apiFetch(`/drops/gift`, {
+    method: "POST",
+    body: JSON.stringify({ receiver_id: receiverId, amount }),
+  });
+}
+
 export interface Comment {
   id: string;
   content: string;
@@ -196,8 +206,18 @@ export function markAllNotificationsRead() {
 
 // ─── Search ─────────────────────────────────────────────────────────
 export function searchUsers(query: string) {
-  return apiFetch<{ data: SuggestedUser[] }>(`/users/search?query=${encodeURIComponent(query)}`);
+  return apiFetch<{ data: SuggestedUser[] }>(`/search/users?q=${encodeURIComponent(query)}`);
 }
+
+export function getUserProfile(username: string) {
+  return apiFetch<{ data: WaveUser }>(`/users/${username}`);
+}
+
+export function getUserWaves(userId: string, cursor?: string) {
+  const url = `/users/${userId}/waves${cursor ? `?cursor=${cursor}` : ""}`;
+  return apiFetch<{ data: Wave[]; next_cursor: string | null }>(url);
+}
+
 
 // ─── Wallet / Gift History ──────────────────────────────────────────
 export interface GiftTransaction {

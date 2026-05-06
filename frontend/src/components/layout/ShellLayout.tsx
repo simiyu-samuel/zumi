@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Sidebar, BottomNav } from "./Navigation";
+import { Avatar } from "@/components/ui/Avatar";
 import { getSuggestedUsers, followUser, getGatedRooms, type SuggestedUser, type GatedRoom } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -75,13 +76,12 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
               return (
                 <div key={u.id} className="flex items-center gap-3 group">
                   <Link href={`/profile/${u.username}`} className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-teal/20 border border-teal/30 overflow-hidden flex items-center justify-center font-bold text-teal text-[13px] ring-2 ring-transparent group-hover:ring-teal/30 transition-all shrink-0">
-                      {u.avatar_url ? (
-                        <img src={u.avatar_url} alt={u.name} className="w-full h-full object-cover" />
-                      ) : (
-                        u.name.charAt(0)
-                      )}
-                    </div>
+                    <Avatar 
+                      src={u.avatar_url} 
+                      name={u.name} 
+                      size="sm" 
+                      className="w-9 h-9 ring-2 ring-transparent group-hover:ring-teal/30 transition-all" 
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-bold text-white truncate group-hover:text-teal transition-colors leading-tight">
                         {u.name}
@@ -133,9 +133,7 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                   <div className="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">
-                      {room.host?.name?.charAt(0)}
-                   </div>
+                   <Avatar src={room.host?.avatar_url} name={room.host?.name} size="sm" className="w-4 h-4 text-[7px]" />
                    <span className="text-[10px] text-slate-500">by {room.host?.name}</span>
                 </div>
               </div>
