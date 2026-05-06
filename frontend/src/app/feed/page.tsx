@@ -61,7 +61,7 @@ export default function FeedPage() {
           const specificWaveRes = await getWave(waveIdParam);
           if (specificWaveRes.data) {
             // Remove it from the list if it's already there to avoid duplicates
-            items = items.filter(w => w.id !== waveIdParam);
+            items = items.filter((w: Wave) => w.id !== waveIdParam);
             // Prepend it
             items = [specificWaveRes.data, ...items];
           }
@@ -73,7 +73,7 @@ export default function FeedPage() {
       if (append) {
         setWaves(prev => {
           // Robust duplicate prevention
-          const existingIds = new Set(prev.map(w => w.id));
+          const existingIds = new Set(prev.map((w: Wave) => w.id));
           const newItems = items.filter((w: Wave) => !existingIds.has(w.id));
           return [...prev, ...newItems];
         });
@@ -206,17 +206,17 @@ export default function FeedPage() {
       )}
 
       {/* Sticky Header */}
-      <header className="px-8 py-5 flex justify-between items-center sticky top-0 bg-black/40 backdrop-blur-xl z-30 border-b border-white/5">
-        <div className="flex gap-8">
+      <header className="px-8 py-6 flex justify-between items-center sticky top-0 bg-black/60 backdrop-blur-2xl z-30 border-b border-white/5">
+        <div className="flex gap-10">
           <button
             onClick={() => setActiveTab("for-you")}
-            className={`text-[15px] font-black tracking-tight pb-1 transition-colors ${activeTab === "for-you" ? "text-white border-b-2 border-teal" : "text-slate-500 hover:text-white"}`}
+            className={`text-[16px] font-black tracking-tighter pb-1 transition-all ${activeTab === "for-you" ? "text-teal border-b-2 border-teal scale-105" : "text-slate-500 hover:text-slate-300"}`}
           >
             FOR YOU
           </button>
           <button
             onClick={() => setActiveTab("following")}
-            className={`text-[15px] font-bold tracking-tight pb-1 transition-colors ${activeTab === "following" ? "text-white border-b-2 border-teal" : "text-slate-500 hover:text-white"}`}
+            className={`text-[16px] font-black tracking-tighter pb-1 transition-all ${activeTab === "following" ? "text-teal border-b-2 border-teal scale-105" : "text-slate-500 hover:text-slate-300"}`}
           >
             FOLLOWING
           </button>
@@ -227,38 +227,69 @@ export default function FeedPage() {
         {/* Live Gated Rooms Tray */}
         {liveRooms.length > 0 && (
           <section className="px-8 py-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[13px] font-black text-slate-500 uppercase tracking-widest">
-                Live Gated Rooms
-              </h2>
-              <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-teal animate-pulse shadow-[0_0_8px_#1a9e75]"></div>
+                <h2 className="text-[14px] font-black text-white uppercase tracking-wider">
+                  Live Gated Rooms
+                </h2>
               </div>
+              <Link href="/circles" className="text-[11px] font-black text-slate-500 hover:text-teal uppercase tracking-widest transition-all">
+                View All
+              </Link>
             </div>
-            <div className="flex gap-5 overflow-x-auto no-scrollbar pb-2">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
               {liveRooms.map((room) => (
                 <div
                   key={room.id}
-                  className="flex-shrink-0 flex flex-col items-center gap-2 group cursor-pointer"
+                  className="flex-shrink-0 w-[240px] aspect-[4/5] rounded-r24 overflow-hidden relative group cursor-pointer border border-white/5 shadow-2xl transition-all hover:border-teal/50 hover:scale-[1.02]"
                 >
-                  <div className="relative p-1 rounded-full bg-gradient-to-tr from-teal to-cyan-400 group-hover:scale-105 transition-transform">
-                    <div className="w-16 h-16 rounded-full border-2 border-black overflow-hidden relative">
-                      <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xl" className="w-full h-full border-0" />
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
+                  {/* Thumbnail / Background */}
+                  <div className="absolute inset-0 bg-slate-900">
+                    <img 
+                      src={room.host?.avatar_url} // Fallback to host avatar if no room thumb
+                      alt={room.title}
+                      className="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity blur-[2px] group-hover:blur-0"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="absolute inset-0 p-5 flex flex-col justify-between z-10">
+                    <div className="flex justify-between items-start">
+                      <div className="px-2.5 py-1 bg-red-600 rounded-full text-[9px] font-black text-white border border-white/10 shadow-lg flex items-center gap-1.5 animate-pulse">
+                        <div className="w-1 h-1 rounded-full bg-white"></div>
+                        LIVE
+                      </div>
+                      <div className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[10px] font-bold text-teal border border-teal/20">
+                        {room.entry_fee} ◆
                       </div>
                     </div>
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-teal text-[9px] font-black px-2 py-0.5 rounded-full text-white ring-2 ring-black">
-                      LIVE
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xs" className="border-2 border-teal" />
+                        <span className="text-[11px] font-bold text-slate-300">@{room.host?.username}</span>
+                      </div>
+                      <h3 className="text-[15px] font-black text-white leading-tight line-clamp-2">
+                        {room.title}
+                      </h3>
+                      <div className="mt-3 flex items-center gap-4">
+                         <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            {Math.floor(Math.random() * 500) + 50}
+                         </div>
+                         <button className="flex-1 py-1.5 bg-teal text-slate-950 text-[10px] font-black rounded-lg uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                            Join Room
+                         </button>
+                      </div>
                     </div>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-300 max-w-[72px] truncate text-center">
-                    {room.title.split(" ").slice(0, 2).join(" ")}
-                  </span>
-                  <span className="text-[10px] text-teal font-bold">{room.entry_fee_drops} Drops</span>
+
+                  {/* Glass Sheen */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
                 </div>
               ))}
             </div>
@@ -275,33 +306,56 @@ export default function FeedPage() {
 
         {/* Empty State */}
         {!loading && waves.length === 0 && (
-          <div className="px-8 py-20 flex flex-col items-center gap-4">
-            <svg className="w-16 h-16 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            <p className="text-lg font-bold text-slate-400">No waves yet</p>
-            <p className="text-sm text-slate-600 text-center max-w-xs">
-              {activeTab === "following"
-                ? "Follow some creators to see their waves here."
-                : "Be the first to drop a wave!"}
-            </p>
+          <div className="px-8 py-20 flex flex-col items-center gap-6">
+            <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center relative">
+               <svg className="w-10 h-10 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+               </svg>
+               <div className="absolute inset-0 rounded-full border border-teal/20 animate-ping"></div>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-black text-white mb-2">Seed your feed</p>
+              <p className="text-[14px] text-slate-500 max-w-xs mx-auto leading-relaxed">
+                {activeTab === "following"
+                  ? "You're not following anyone yet. Head to Discover to find amazing creators."
+                  : "We're curating the perfect waves for you. While we wait, why not check out some trending creators?"}
+              </p>
+            </div>
+            <Link 
+              href="/discover"
+              className="px-8 py-3 bg-teal text-slate-950 font-black rounded-full uppercase tracking-widest text-[12px] hover:scale-105 transition-transform"
+            >
+              Go to Discover
+            </Link>
           </div>
         )}
 
         {/* Video Feed */}
         {!loading && waves.length > 0 && (
           <div className="px-8 space-y-10 pb-20">
-            {waves.map((wave) => (
-              <WaveCard
-                key={wave.id}
-                wave={wave}
-                onLike={handleLike}
-                onShare={handleShare}
-                onComment={handleComment}
-                onGift={handleGift}
-                onUnlock={handleUnlock}
-              />
-            ))}
+            {waves.map((wave, idx) => {
+              const elements = [
+                <WaveCard
+                  key={wave.id}
+                  wave={wave}
+                  onLike={handleLike}
+                  onShare={handleShare}
+                  onComment={handleComment}
+                  onGift={handleGift}
+                  onUnlock={handleUnlock}
+                />
+              ];
+
+              // Inject promo cards every few items
+              if (idx === 1 && activeTab === "for-you") {
+                elements.push(<WaveChallengeCard key="challenge-injection" />);
+              }
+              if (idx === 3 && activeTab === "for-you") {
+                elements.push(<SkillDropPromoCard key="skilldrop-injection" />);
+              }
+
+              return elements;
+            })}
 
             {/* Infinite Scroll Sentinel */}
             <div ref={observerTarget} className="h-32 flex items-center justify-center">
@@ -395,14 +449,12 @@ function WaveCard({
               {/* Gift Drops Button */}
               <button 
                 onClick={() => onGift(wave.id)} 
-                className="flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all group/gift"
+                className="flex items-center gap-3 px-6 py-3.5 rounded-full bg-teal text-slate-950 font-black uppercase tracking-widest text-[13px] hover:scale-105 transition-all shadow-[0_8px_20px_rgba(26,158,117,0.3)] group/gift"
               >
-                <div className="p-1.5 rounded-full bg-teal/20 text-teal group-hover/gift:bg-teal group-hover/gift:text-white transition-colors">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <span className="text-[14px] font-black text-white uppercase tracking-wider">Gift Drops</span>
+                <svg className="w-5 h-5 animate-bounce-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Gift Drops
               </button>
             </>
           )}
@@ -461,6 +513,89 @@ function WaveCard({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function WaveChallengeCard() {
+  return (
+    <div className="glass p-8 rounded-r24 border border-teal/20 relative overflow-hidden group cursor-pointer">
+      <div className="absolute top-0 right-0 p-4">
+        <div className="bg-teal text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
+          Active Challenge
+        </div>
+      </div>
+      
+      <div className="relative z-10 flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+           <div className="w-12 h-12 rounded-full bg-teal/20 flex items-center justify-center text-teal">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+           </div>
+           <div>
+              <div className="text-[18px] font-black text-white">The Digital Deep Sea</div>
+              <div className="text-[12px] text-teal font-bold uppercase tracking-widest">5,000 Drops Prize Pool</div>
+           </div>
+        </div>
+
+        <p className="text-slate-400 text-[14px] leading-relaxed">
+          Show us your best interpretation of bioluminescent life using any digital medium. Highest engagement wins!
+        </p>
+
+        <div className="flex items-center gap-4">
+           <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white">
+                  {i}
+                </div>
+              ))}
+           </div>
+           <span className="text-[12px] text-slate-500 font-bold">124+ Entries already</span>
+        </div>
+
+        <button className="w-full py-4 bg-teal text-slate-950 font-black uppercase tracking-widest rounded-r16 hover:scale-[1.02] transition-transform">
+           Enter Now
+        </button>
+      </div>
+
+      <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-teal/5 blur-3xl group-hover:bg-teal/10 transition-all"></div>
+    </div>
+  );
+}
+
+function SkillDropPromoCard() {
+  return (
+    <div className="glass p-8 rounded-r24 border border-violet-500/20 relative overflow-hidden group cursor-pointer">
+      <div className="absolute top-0 right-0 p-4">
+        <div className="bg-violet-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
+          Skill Drop
+        </div>
+      </div>
+      
+      <div className="relative z-10 flex flex-col gap-6">
+        <div className="flex items-center gap-4">
+           <div className="w-20 h-20 rounded-r16 bg-slate-800 overflow-hidden shrink-0 border border-white/5">
+              <img src="/api/placeholder/80/80" alt="Skill Drop" className="w-full h-full object-cover" />
+           </div>
+           <div>
+              <div className="text-[18px] font-black text-white group-hover:text-violet-400 transition-colors">Mastering Node-Based Art</div>
+              <div className="text-[13px] text-slate-500 font-bold">by @aria_visuals</div>
+           </div>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-white/5 rounded-r16 border border-white/5">
+           <div className="flex items-baseline gap-1">
+              <span className="text-xl font-black text-white">850</span>
+              <span className="text-[11px] font-bold text-violet-400 uppercase">Drops</span>
+           </div>
+           <button className="px-6 py-2 bg-violet-500 text-white font-black uppercase tracking-widest text-[11px] rounded-full hover:bg-violet-600 transition-colors">
+              Buy Now
+           </button>
+        </div>
+      </div>
+
+      <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-violet-500/5 blur-3xl group-hover:bg-violet-500/10 transition-all"></div>
     </div>
   );
 }

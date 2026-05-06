@@ -10,6 +10,8 @@ interface User {
   email: string;
   onboarding_completed: boolean;
   drops_balance: number;
+  avatar_url?: string;
+  role?: string;
 }
 
 interface AuthContextType {

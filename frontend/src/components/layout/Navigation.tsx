@@ -17,8 +17,8 @@ const NAV_ITEMS = [
     )
   },
   { 
-    label: "Explore", 
-    href: "/explore",
+    label: "Discover", 
+    href: "/discover",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -26,11 +26,30 @@ const NAV_ITEMS = [
     )
   },
   { 
-    label: "Circles & Rooms", 
+    label: "Waves", 
+    href: "/waves",
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    )
+  },
+  { 
+    label: "Circles", 
     href: "/circles",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    )
+  },
+  { 
+    label: "Flow Market", 
+    href: "/market",
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
       </svg>
     )
   },
@@ -44,7 +63,7 @@ const NAV_ITEMS = [
     )
   },
   { 
-    label: "Drops Wallet", 
+    label: "Wallet", 
     href: "/wallet",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,7 +96,7 @@ export function Sidebar() {
       try {
         const res = await import("@/lib/api").then(m => m.getUnreadCount());
         setUnreadCount(res.unread_count);
-      } catch (err) {}
+      } catch { }
     };
 
     fetchUnread();
@@ -99,12 +118,19 @@ export function Sidebar() {
   }, [showProfileMenu]);
 
   return (
-    <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 px-8 py-10">
-      <div className="font-head font-extrabold text-4xl mb-12 px-2 text-white tracking-tighter">
-        zu<span className="text-teal">mi</span>
+    <aside className="hidden lg:flex flex-col w-64 h-full px-4 py-6 overflow-y-auto no-scrollbar border-l border-white/5">
+      <div className="mb-6 px-2 group cursor-pointer shrink-0">
+        <div className="flex items-center gap-1 mb-1">
+          <div className="font-head font-black text-3xl text-white tracking-tighter">
+            <span className="text-teal bg-teal/10 px-1 rounded-r4 mr-0.5">Z</span>umi
+          </div>
+        </div>
+        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] px-1 group-hover:text-teal transition-colors">
+          Flow with your people.
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-1">
         {NAV_ITEMS.map((item) => {
           let href = item.href;
           if (item.label === "Profile" && user?.username) {
@@ -117,7 +143,7 @@ export function Sidebar() {
             <Link 
               key={item.href} 
               href={href}
-              className={`flex items-center gap-4 px-4 py-4 rounded-r24 text-[16px] font-bold transition-all duration-300 group ${isActive ? 'bg-teal/10 text-teal' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+              className={`flex items-center gap-4 px-4 py-4 rounded-r12 text-[16px] font-bold transition-all duration-300 group ${isActive ? 'bg-teal/10 text-teal' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
             >
               <div className={`relative transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
                 {item.icon}
@@ -127,17 +153,31 @@ export function Sidebar() {
                   </div>
                 )}
               </div>
-              {item.label}
+              <div className="flex items-center justify-between flex-1 min-w-0">
+                <span className="truncate">{item.label}</span>
+                {item.label === "Wallet" && user?.drops_balance !== undefined && (
+                  <span className="text-[10px] bg-teal/20 text-teal px-2 py-0.5 rounded-full font-black ml-2 shrink-0">
+                    {user.drops_balance > 999 ? `${(user.drops_balance / 1000).toFixed(1)}k` : user.drops_balance} ◆
+                  </span>
+                )}
+              </div>
               {isActive && (
                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-teal shadow-[0_0_8px_#1a9e75]"></div>
               )}
             </Link>
           );
         })}
+
+        <button className="w-full mt-6 mb-[10px] flex items-center justify-center gap-2 bg-teal hover:bg-teal-600 text-slate-950 py-4 rounded-r12 font-black transition-all duration-300 shadow-[0_8px_20px_rgba(26,158,117,0.3)] hover:shadow-[0_12px_24px_rgba(26,158,117,0.4)] active:scale-[0.98]">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+          </svg>
+          CREATE
+        </button>
       </nav>
 
       <div className="mt-auto space-y-6">
-        <div className="glass p-5 rounded-r24 relative overflow-hidden group">
+        <div className="glass p-5 rounded-r12 relative overflow-hidden group">
            <div className="relative z-10">
               <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Your Balance</div>
               <div className="flex items-baseline gap-1.5">
@@ -166,7 +206,7 @@ export function Sidebar() {
                 <Link 
                   href={`/profile/${user?.username}`}
                   onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r20 transition-all font-bold text-[13px] group/item"
+                  className="flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r12 transition-all font-bold text-[13px] group/item"
                 >
                   <div className="w-8 h-8 rounded-full bg-teal/10 flex items-center justify-center group-hover/item:bg-teal group-hover/item:text-white transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,7 +216,20 @@ export function Sidebar() {
                   View profile
                 </Link>
 
-                <button className="w-full flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r20 transition-all font-bold text-[13px] group/item">
+                <Link 
+                  href="/studio"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r12 transition-all font-bold text-[13px] group/item"
+                >
+                  <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center group-hover/item:bg-violet-500 group-hover/item:text-white transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  Creator Studio
+                </Link>
+
+                <button className="w-full flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r12 transition-all font-bold text-[13px] group/item">
                   <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover/item:bg-slate-700 transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -186,7 +239,7 @@ export function Sidebar() {
                   Settings & Privacy
                 </button>
 
-                <button className="w-full flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r20 transition-all font-bold text-[13px] group/item">
+                <button className="w-full flex items-center gap-3 px-4 py-3.5 text-white hover:bg-white/5 rounded-r12 transition-all font-bold text-[13px] group/item">
                   <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center group-hover/item:bg-violet-500 group-hover/item:text-white transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -195,7 +248,7 @@ export function Sidebar() {
                   Manage Subscriptions
                 </button>
 
-                <div className="mx-2 my-2 p-3 bg-white/5 rounded-r20 flex items-center justify-between">
+                <div className="mx-2 my-2 p-3 bg-white/5 rounded-r12 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
                       <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +265,7 @@ export function Sidebar() {
                 <div className="mt-2 pt-2 border-t border-white/5">
                   <button 
                     onClick={() => logout()}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 text-red-400 hover:bg-red-500/10 rounded-r20 transition-all font-bold text-[13px] group/logout"
+                    className="w-full flex items-center gap-3 px-4 py-3.5 text-red-400 hover:bg-red-500/10 rounded-r12 transition-all font-bold text-[13px] group/logout"
                   >
                     <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center group-hover/logout:bg-red-500 group-hover/logout:text-white transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -264,16 +317,34 @@ export function BottomNav() {
       try {
         const res = await import("@/lib/api").then(m => m.getUnreadCount());
         setUnreadCount(res.unread_count);
-      } catch (err) {}
+      } catch { }
     };
     fetchUnread();
     const interval = setInterval(fetchUnread, 30000);
     return () => clearInterval(interval);
   }, [token]);
 
+  const mobileNavItems = [
+    NAV_ITEMS[0], // Home
+    NAV_ITEMS[2], // Waves
+    { label: "Create", href: "#create", icon: null }, // Special center button
+    NAV_ITEMS[3], // Circles
+    NAV_ITEMS[NAV_ITEMS.length - 1], // Profile
+  ];
+
   return (
     <nav className="lg:hidden flex justify-around items-center h-20 border-t border-white/5 glass-dark sticky bottom-0 z-50 px-4">
-      {NAV_ITEMS.slice(0, 5).map((item) => {
+      {mobileNavItems.map((item) => {
+        if (item.label === "Create") {
+          return (
+            <button key="create" className="relative -top-6 w-14 h-14 bg-teal rounded-full flex items-center justify-center shadow-[0_8px_16px_rgba(26,158,117,0.4)] border-4 border-slate-950 active:scale-90 transition-transform">
+              <svg className="w-7 h-7 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          );
+        }
+
         const isActive = pathname === item.href;
         const isNotifications = item.label === "Notifications";
 
