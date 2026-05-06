@@ -112,7 +112,11 @@ class WaveService
                     $wave->gated_drops,
                     DropsTransactionType::Spend,
                     $wave,
-                    ['title' => $wave->title]
+                    [
+                        'title' => $wave->title,
+                        'debit_description' => "Unlocked Wave: {$wave->title}",
+                        'credit_description' => "Earning from Wave: {$wave->title}",
+                    ]
                 );
 
                 $this->waveRepository->addPurchase($wave, $user->id, $wave->gated_drops);
@@ -158,7 +162,10 @@ class WaveService
     public function giftWave(User $sender, Wave $wave, int $amount): array
     {
         $dropsService = app(DropsService::class);
-        $result = $dropsService->gift($sender, $wave->user, $amount, $wave);
+        $result = $dropsService->gift($sender, $wave->user, $amount, $wave, [
+            'debit_description' => "Gifted @{$wave->user->username} for '{$wave->title}'",
+            'credit_description' => "Received Gift from @{$sender->username} for '{$wave->title}'",
+        ]);
 
         if ($result['success']) {
             // Award Flow Score to the giver

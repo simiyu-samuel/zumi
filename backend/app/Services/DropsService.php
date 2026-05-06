@@ -22,7 +22,7 @@ class DropsService
     /**
      * Credit Drops to a user.
      */
-    public function credit(User $user, int $amount, string|DropsTransactionType $type, ?string $referenceType = null, ?string $referenceId = null, array $metadata = []): DropsLedger
+    public function credit(User $user, int $amount, string|DropsTransactionType $type, ?string $description = null, ?string $referenceType = null, ?string $referenceId = null, array $metadata = []): DropsLedger
     {
         $type = $type instanceof DropsTransactionType ? $type->value : $type;
 
@@ -30,11 +30,12 @@ class DropsService
             throw new InvalidArgumentException('Credit amount must be positive.');
         }
 
-        return DB::transaction(function () use ($user, $amount, $type, $referenceType, $referenceId, $metadata) {
+        return DB::transaction(function () use ($user, $amount, $type, $description, $referenceType, $referenceId, $metadata) {
             $ledger = $this->dropsRepository->create([
                 'user_id'        => $user->id,
                 'type'           => $type,
                 'amount'         => $amount,
+                'description'    => $description ?: "Credit: " . ucfirst($type),
                 'direction'      => DropsTransactionDirection::Credit,
                 'reference_type' => $referenceType,
                 'reference_id'   => $referenceId,
@@ -51,7 +52,7 @@ class DropsService
     /**
      * Debit Drops from a user.
      */
-    public function debit(User $user, int $amount, string|DropsTransactionType $type, ?string $referenceType = null, ?string $referenceId = null, array $metadata = []): DropsLedger
+    public function debit(User $user, int $amount, string|DropsTransactionType $type, ?string $description = null, ?string $referenceType = null, ?string $referenceId = null, array $metadata = []): DropsLedger
     {
         $type = $type instanceof DropsTransactionType ? $type->value : $type;
 
@@ -63,11 +64,12 @@ class DropsService
             throw new InvalidArgumentException('Insufficient Drops balance.');
         }
 
-        return DB::transaction(function () use ($user, $amount, $type, $referenceType, $referenceId, $metadata) {
+        return DB::transaction(function () use ($user, $amount, $type, $description, $referenceType, $referenceId, $metadata) {
             $ledger = $this->dropsRepository->create([
                 'user_id'        => $user->id,
                 'type'           => $type,
                 'amount'         => $amount,
+                'description'    => $description ?: "Debit: " . ucfirst($type),
                 'direction'      => DropsTransactionDirection::Debit,
                 'reference_type' => $referenceType,
                 'reference_id'   => $referenceId,
@@ -99,6 +101,7 @@ class DropsService
                 $sender, 
                 $amount, 
                 $type, 
+                $metadata['debit_description'] ?? "Sent " . ($type === DropsTransactionType::Gift ? "Gift" : "Payment") . " to @{$receiver->username}",
                 $referenceType, 
                 $referenceId, 
                 array_merge($metadata, ['receiver_id' => $receiver->id])
@@ -113,6 +116,7 @@ class DropsService
                 $receiver, 
                 $netAmount, 
                 $type, 
+                $metadata['credit_description'] ?? "Received " . ($type === DropsTransactionType::Gift ? "Gift" : "Payment") . " from @{$sender->username}",
                 $referenceType, 
                 $referenceId, 
                 array_merge($metadata, ['sender_id' => $sender->id, 'gross_amount' => $amount, 'fee_deducted' => $feeAmount])
@@ -124,6 +128,7 @@ class DropsService
                     'user_id'        => null,
                     'type'           => DropsTransactionType::Fee->value,
                     'amount'         => $feeAmount,
+                    'description'    => "Platform Fee: " . ucfirst($type->value) . " between @{$sender->username} and @{$receiver->username}",
                     'direction'      => DropsTransactionDirection::Credit,
                     'reference_type' => $referenceType,
                     'reference_id'   => $referenceId,
@@ -137,10 +142,10 @@ class DropsService
     /**
      * Gift Drops from one user to another.
      */
-    public function gift(User $sender, User $receiver, int $amount, ?Model $reference = null): array
+    public function gift(User $sender, User $receiver, int $amount, ?Model $reference = null, array $metadata = []): array
     {
         try {
-            $this->transfer($sender, $receiver, $amount, DropsTransactionType::Gift, $reference);
+            $this->transfer($sender, $receiver, $amount, DropsTransactionType::Gift, $reference, $metadata);
             
             // Notify receiver
             $receiver->notify(new \App\Notifications\DropsReceivedNotification($sender, $amount, $reference));

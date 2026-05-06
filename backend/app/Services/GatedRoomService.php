@@ -75,7 +75,11 @@ class GatedRoomService
                             $room->entry_fee_drops,
                             \App\Enums\DropsTransactionType::GatedRoomEntry,
                             $room,
-                            ['title' => 'Join Room: ' . $room->title]
+                            [
+                                'title' => 'Join Room: ' . $room->title,
+                                'debit_description' => "Entered Live Room: {$room->title}",
+                                'credit_description' => "Member entry for Room: {$room->title}",
+                            ]
                         );
 
                         // 2. Record participant

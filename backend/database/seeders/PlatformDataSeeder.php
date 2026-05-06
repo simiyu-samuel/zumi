@@ -281,7 +281,8 @@ class PlatformDataSeeder extends Seeder
             for ($c = 0; $c < $numComments; $c++) {
                 $commenter = $allUsers[array_rand($allUsers)];
                 \App\Models\Comment::create([
-                    'wave_id' => $wave->id,
+                    'commentable_id' => $wave->id,
+                    'commentable_type' => \App\Models\Wave::class,
                     'user_id' => $commenter->id,
                     'content' => $commentTexts[($waveIdx + $c) % count($commentTexts)],
                     'likes_count' => rand(0, 50),

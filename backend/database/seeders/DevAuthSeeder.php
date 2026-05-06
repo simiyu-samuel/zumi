@@ -38,6 +38,7 @@ class DevAuthSeeder extends Seeder
                 'onboarding_completed' => true,
                 'verified_at' => now(),
                 'bio' => 'Professional content creator on Zumi.',
+                'drops_balance' => 100000,
             ]
         );
 

@@ -157,7 +157,7 @@ export function Sidebar({ onCreateClick }: { onCreateClick?: () => void }) {
                 <span className="truncate">{item.label}</span>
                 {item.label === "Wallet" && user?.drops_balance !== undefined && (
                   <span className="text-[10px] bg-teal/20 text-teal px-2 py-0.5 rounded-full font-black ml-2 shrink-0">
-                    {user.drops_balance > 999 ? `${(user.drops_balance / 1000).toFixed(1)}k` : user.drops_balance} ◆
+                    {user.drops_balance >= 1000000 ? `${(user.drops_balance / 1000000).toFixed(1)}M` : user.drops_balance.toLocaleString()} ◆
                   </span>
                 )}
               </div>
@@ -336,7 +336,7 @@ export function BottomNav({ onCreateClick }: { onCreateClick?: () => void }) {
   ];
 
   return (
-    <nav className="lg:hidden flex justify-around items-center h-20 border-t border-white/5 glass-dark sticky bottom-0 z-50 px-4">
+    <nav className="lg:hidden flex justify-around items-center h-20 glass-dark fixed bottom-0 left-0 right-0 z-50 px-4">
       {mobileNavItems.map((item) => {
         if (item.label === "Create") {
           return (

@@ -47,8 +47,8 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
   const toggleCreate = () => setShowCreateModal(!showCreateModal);
 
   return (
-    <div className="flex h-screen overflow-hidden aurora-bg text-slate-200">
-      <div className="flex w-full max-w-[1280px] mx-auto relative h-screen">
+    <div className="flex flex-col h-[100dvh] overflow-hidden aurora-bg text-slate-200">
+      <div className="flex-1 flex w-full max-w-[1280px] mx-auto relative overflow-hidden">
         {/* Sidebar for Desktop */}
         {!hideSidebarOnMobile && <Sidebar onCreateClick={toggleCreate} />}
         {hideSidebarOnMobile && (
@@ -59,7 +59,7 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
 
         {/* Main Content Area */}
         <main className="flex-1 h-full overflow-y-auto no-scrollbar relative border-x border-white/5 bg-slate-950/20">
-          <div className="w-full max-w-[600px] mx-auto flex flex-col relative z-10">
+          <div className="w-full max-w-[600px] mx-auto flex flex-col relative z-10 h-full">
             {children}
           </div>
         </main>

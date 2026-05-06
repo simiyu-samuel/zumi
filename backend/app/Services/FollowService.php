@@ -23,7 +23,7 @@ class FollowService
         }
 
         if ($this->followRepository->isFollowing($follower, $following)) {
-            return false;
+            return true;
         }
 
         $this->followRepository->follow($follower, $following);

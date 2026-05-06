@@ -23,6 +23,7 @@ class DropsLedger extends Model
         'user_id',
         'type',
         'amount',
+        'description',
         'direction',
         'reference_type',
         'reference_id',

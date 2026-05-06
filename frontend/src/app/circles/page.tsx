@@ -14,8 +14,6 @@ export default function CirclesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
-    
     setLoading(true);
     Promise.all([
       getCircles(),

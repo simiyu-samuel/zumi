@@ -64,7 +64,11 @@ class CircleService
                     $circle->monthly_drops_price,
                     DropsTransactionType::CircleSubscription,
                     $circle,
-                    ['title' => 'Circle subscription: ' . $circle->name],
+                    [
+                        'title' => 'Circle subscription: ' . $circle->name,
+                        'debit_description' => "Joined Circle: {$circle->name}",
+                        'credit_description' => "New Member in Circle: {$circle->name}",
+                    ],
                 );
                 $this->circleRepository->addMember($circle, $user);
                 $this->flowScoreService->award($circle->owner, 'circle_joined');

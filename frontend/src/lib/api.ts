@@ -237,6 +237,7 @@ export interface GiftTransaction {
   type: string;
   amount: number;
   balance_after: number;
+  direction: 'credit' | 'debit';
   description: string;
   user: WaveUser | null;
   created_at: string;

@@ -73,7 +73,11 @@ class SkillDropService
                     $skillDrop->price_drops,
                     DropsTransactionType::Spend,
                     $skillDrop,
-                    ['title' => 'Purchase Skill Drop: ' . $skillDrop->title]
+                    [
+                        'title' => 'Purchase Skill Drop: ' . $skillDrop->title,
+                        'debit_description' => "Purchased Skill Drop: {$skillDrop->title}",
+                        'credit_description' => "Sale of Skill Drop: {$skillDrop->title}",
+                    ]
                 );
 
                 // 2. Record purchase

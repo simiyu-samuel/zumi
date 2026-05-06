@@ -52,7 +52,6 @@ export default function FeedPage() {
   const [skillDrops, setSkillDrops] = useState<SkillDrop[]>([]);
 
   const fetchData = useCallback(async () => {
-    if (!token) return;
     try {
       const [trendingRes, dropsRes] = await Promise.all([
         getTrending(),
@@ -70,7 +69,6 @@ export default function FeedPage() {
   }, [fetchData]);
 
   const fetchFeed = useCallback(async (cursor?: string | null, append = false) => {
-    if (!token) return;
     if (!append) setLoading(true);
     else setLoadingMore(true);
 
@@ -304,10 +302,10 @@ export default function FeedPage() {
                        {room.entry_fee > 0 ? `${room.entry_fee} ◆` : 'FREE'}
                     </div>
 
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
-                       <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xs" className="w-5 h-5 border border-white/20" />
-                       <span className="text-[11px] font-bold text-white/90 truncate max-w-[120px]">{room.host?.name}</span>
-                    </div>
+                    <Link href={`/profile/${room.host?.username}`} className="absolute bottom-2 left-2 flex items-center gap-1.5 group/host cursor-pointer z-20">
+                       <Avatar src={room.host?.avatar_url} name={room.host?.name} size="xs" className="w-5 h-5 border border-white/20 group-hover/host:border-teal transition-colors" />
+                       <span className="text-[11px] font-bold text-white/90 truncate max-w-[120px] group-hover/host:text-teal transition-colors">{room.host?.name}</span>
+                    </Link>
                   </div>
                   <div className="p-3">
                     <h3 className="text-[12px] font-bold text-white/90 truncate">
@@ -598,7 +596,7 @@ function SkillDropPromoCard({ drop }: { drop: SkillDrop }) {
            </div>
            <div>
               <div className="text-[18px] font-black text-white group-hover:text-violet-400 transition-colors line-clamp-1">{drop.title}</div>
-              <div className="text-[13px] text-slate-500 font-bold">by @{drop.user?.username}</div>
+              <Link href={`/profile/${drop.user?.username}`} className="text-[13px] text-slate-500 font-bold hover:text-violet-400 transition-colors">by @{drop.user?.username}</Link>
            </div>
         </div>
 

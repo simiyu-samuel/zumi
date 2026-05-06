@@ -8,7 +8,7 @@ import { getWalletData, getGiftHistory, type GiftTransaction } from "@/lib/api";
 type WalletTab = "all" | "gifts";
 
 export default function WalletPage() {
-  const { token, user } = useAuth();
+  const { token, user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState<WalletTab>("all");
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<GiftTransaction[]>([]);
@@ -27,9 +27,10 @@ export default function WalletPage() {
       if (activeTab === "all") {
         const res = await getWalletData();
         setBalance(res.balance);
+        updateUser({ drops_balance: res.balance });
         const items = res.transactions.data || [];
         setTransactions(append ? [...transactions, ...items] : items);
-        setHasMore(false); // getWalletData index usually doesn't paginate well in this simplified call
+        setHasMore(false);
       } else {
         const res = await getGiftHistory(pageNum, 15);
         const items = res.data || [];
@@ -117,8 +118,9 @@ export default function WalletPage() {
         ) : (
           <div className="divide-y divide-white/5">
             {activeItems.map((tx) => {
-              const isGift = tx.description.toLowerCase().includes("gift");
-              const isReceived = tx.amount > 0;
+              const description = tx.description || tx.type || "Transaction";
+              const isGift = description.toLowerCase().includes("gift") || tx.type === "gift";
+              const isReceived = tx.direction === 'credit';
               
               return (
                 <div key={tx.id} className="px-8 py-6 flex items-center gap-5 hover:bg-white/5 transition-colors group">
@@ -135,9 +137,9 @@ export default function WalletPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
-                       <h4 className="font-bold text-white text-[15px] truncate max-w-[70%]">{tx.description}</h4>
+                       <h4 className="font-bold text-white text-[15px] truncate max-w-[70%]">{description || "Transaction"}</h4>
                        <span className={`font-black text-[15px] ${isReceived ? 'text-emerald-400' : 'text-white'}`}>
-                          {isReceived ? '+' : ''}{tx.amount}
+                          {isReceived ? '+' : '-'}{tx.amount}
                        </span>
                     </div>
                     <div className="flex justify-between items-center">
