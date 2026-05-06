@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { ShellLayout } from "@/components/layout/ShellLayout";
 import { useAuth } from "@/context/AuthContext";
 import {
   getDiscoveryFeed,
   getFollowedFeed,
   getGatedRooms,
+  getWave,
   likeWave,
   shareWave,
   purchaseWave,
@@ -27,6 +29,8 @@ function formatCount(n: number): string {
 
 export default function FeedPage() {
   const { user, token } = useAuth();
+  const searchParams = useSearchParams();
+  const waveIdParam = searchParams.get("wave");
   const [activeTab, setActiveTab] = useState<FeedTab>("for-you");
   const [waves, setWaves] = useState<Wave[]>([]);
   const [gatedRooms, setGatedRooms] = useState<any[]>([]);
@@ -48,7 +52,22 @@ export default function FeedPage() {
     try {
       const fetcher = activeTab === "for-you" ? getDiscoveryFeed : getFollowedFeed;
       const res = await fetcher(cursor || undefined, 15);
-      const items = res.data || [];
+      let items = res.data || [];
+      
+      // If we have a specific wave requested via param and it's not the first load of more items
+      if (!append && waveIdParam) {
+        try {
+          const specificWaveRes = await getWave(waveIdParam);
+          if (specificWaveRes.data) {
+            // Remove it from the list if it's already there to avoid duplicates
+            items = items.filter(w => w.id !== waveIdParam);
+            // Prepend it
+            items = [specificWaveRes.data, ...items];
+          }
+        } catch (err) {
+          console.error("Error fetching specific wave:", err);
+        }
+      }
       
       if (append) {
         setWaves(prev => {
@@ -69,7 +88,7 @@ export default function FeedPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [activeTab, token]);
+  }, [activeTab, token, waveIdParam]);
 
   useEffect(() => {
     fetchFeed(null, false);

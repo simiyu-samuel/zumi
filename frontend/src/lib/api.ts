@@ -113,6 +113,10 @@ export function unfollowUser(userId: string) {
   return apiFetch(`/users/${userId}/unfollow`, { method: "POST" });
 }
 
+export function getWave(waveId: string) {
+  return apiFetch<{ data: Wave }>(`/waves/${waveId}`);
+}
+
 export function likeWave(waveId: string) {
   return apiFetch(`/waves/${waveId}/like`, { method: "POST" });
 }
