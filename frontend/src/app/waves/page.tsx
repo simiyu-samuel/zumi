@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ShellLayout } from "@/components/layout/ShellLayout";
 import { Avatar } from "@/components/ui/Avatar";
 import { useAuth } from "@/context/AuthContext";
-import { getDiscoveryFeed, likeWave, shareWave, followUser, type Wave } from "@/lib/api";
+import { getDiscoveryFeed, likeWave, followUser, type Wave } from "@/lib/api";
 import { CommentSheet } from "@/components/waves/CommentSheet";
 import { ShareSheet } from "@/components/waves/ShareSheet";
 import { GiftSheet } from "@/components/waves/GiftSheet";
+import Link from "next/link";
 
 export default function WavesPage() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const [waves, setWaves] = useState<Wave[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +20,7 @@ export default function WavesPage() {
   const [showShare, setShowShare] = useState(false);
   const [showGifts, setShowGifts] = useState(false);
   const [activeWaveId, setActiveWaveId] = useState<string | null>(null);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     async function fetchWaves() {
@@ -26,20 +28,18 @@ export default function WavesPage() {
       setError(null);
       try {
         const res = await getDiscoveryFeed(undefined, 15);
-        console.log("[WavesPage] Raw API response:", JSON.stringify(res).substring(0, 500));
-        
+
         let items: Wave[] = [];
         if (res && Array.isArray(res.data)) {
           items = res.data;
         } else if (Array.isArray(res)) {
           items = res;
         }
-        
-        console.log("[WavesPage] Extracted items count:", items.length);
+
         setWaves(items);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("[WavesPage] Fetch error:", err);
-        setError(err?.message || "Failed to load");
+        setError(err instanceof Error ? err.message : "Failed to load");
       } finally {
         setLoading(false);
       }
@@ -86,10 +86,18 @@ export default function WavesPage() {
     if (index !== activeIndex) setActiveIndex(index);
   };
 
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    scroller.scrollTo({ top: 0, behavior: "auto" });
+    setActiveIndex(0);
+  }, [waves.length]);
+
   // ─── Loading State ────────────────────────────────────────────────────
   if (loading) {
     return (
-      <ShellLayout>
+      <ShellLayout disableMainScroll>
         <div className="py-20 flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-teal/20 border-t-teal rounded-full animate-spin" />
           <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Loading Waves...</p>
@@ -101,7 +109,7 @@ export default function WavesPage() {
   // ─── Error State ──────────────────────────────────────────────────────
   if (error) {
     return (
-      <ShellLayout>
+      <ShellLayout disableMainScroll>
         <div className="py-20 flex flex-col items-center gap-4">
           <p className="text-red-400 font-bold">{error}</p>
           <button onClick={() => window.location.reload()} className="px-4 py-2 bg-teal/20 text-teal rounded-full text-sm font-bold">Retry</button>
@@ -113,7 +121,7 @@ export default function WavesPage() {
   // ─── Empty State ──────────────────────────────────────────────────────
   if (waves.length === 0) {
     return (
-      <ShellLayout>
+      <ShellLayout disableMainScroll>
         <div className="py-20 flex flex-col items-center gap-4">
           <svg className="w-16 h-16 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -128,23 +136,29 @@ export default function WavesPage() {
 
   // ─── Immersive Waves Feed ─────────────────────────────────────────────
   return (
-    <ShellLayout hideSidebarOnMobile>
+    <ShellLayout hideSidebarOnMobile disableMainScroll>
       {/* Immersive snap-scroll container */}
       <div
+        ref={scrollerRef}
         className="no-scrollbar flex-1"
         onScroll={onScroll}
         style={{
           width: '100%',
+          height: '100%',
           overflowY: 'scroll',
           scrollSnapType: 'y mandatory',
           background: '#050914',
+          overscrollBehaviorY: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
         }}
       >
         {waves.map((wave, index) => (
           <div
             key={wave.id}
             style={{
-              height: '100%',
+              height: '100dvh',
+              minHeight: '100dvh',
               width: '100%',
               position: 'relative',
               scrollSnapAlign: 'start',

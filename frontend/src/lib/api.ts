@@ -387,7 +387,7 @@ export function getCircle(slug: string) {
   return apiFetch<{ data: Circle }>(`/circles/${slug}`);
 }
 
-export function createCircle(data: { name: string; description: string; type: string }) {
+export function createCircle(data: { name: string; description: string; type: string; monthly_drops_price?: number }) {
   return apiFetch(`/circles`, {
     method: "POST",
     body: JSON.stringify(data),
@@ -416,7 +416,7 @@ export function toggleBookmark(waveId: string) {
 
 // ─── Wave Upload ────────────────────────────────────────────────────
 export function initializeWaveUpload(title: string, sizeBytes: number) {
-  return apiFetch<{ upload_url: string; stream_id: string }>(`/waves/upload/initialize`, {
+  return apiFetch<{ upload_url: string; stream_id: string }>(`/waves/initialize-upload`, {
     method: "POST",
     body: JSON.stringify({ title, size_bytes: sizeBytes }),
   });
@@ -452,4 +452,3 @@ export function createGatedRoom(data: {
 export function joinGatedRoom(roomId: string) {
   return apiFetch(`/rooms/${roomId}/join`, { method: "POST" });
 }
-

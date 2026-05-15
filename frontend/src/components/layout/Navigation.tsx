@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
+import { getAccessibleCreateOptions } from "@/lib/create";
 
 const NAV_ITEMS = [
   { 
@@ -82,7 +83,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export function Sidebar({ onCreateClick }: { onCreateClick?: () => void }) {
+export function Sidebar() {
   const pathname = usePathname();
   const { user, logout, token } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -117,8 +118,10 @@ export function Sidebar({ onCreateClick }: { onCreateClick?: () => void }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showProfileMenu]);
 
+  const createOptions = getAccessibleCreateOptions(user?.role);
+
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-full px-4 py-6 overflow-y-auto no-scrollbar border-l border-white/5">
+    <aside className="hidden lg:flex flex-col w-64 h-full px-4 py-6 overflow-y-auto panel-scrollbar border-l border-white/5">
       <div className="mb-6 px-2 group cursor-pointer shrink-0">
         <div className="flex items-center gap-1 mb-1">
           <div className="font-head font-black text-3xl text-white tracking-tighter">
@@ -168,15 +171,18 @@ export function Sidebar({ onCreateClick }: { onCreateClick?: () => void }) {
           );
         })}
 
-        <button 
-          onClick={onCreateClick}
+        <Link 
+          href="/create"
           className="w-full mt-6 mb-[10px] flex items-center justify-center gap-2 bg-teal hover:bg-teal-600 text-slate-950 py-4 rounded-r12 font-black transition-all duration-300 shadow-[0_8px_20px_rgba(26,158,117,0.3)] hover:shadow-[0_12px_24px_rgba(26,158,117,0.4)] active:scale-[0.98]"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
           </svg>
           CREATE
-        </button>
+        </Link>
+        <div className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">
+          {createOptions.length} creation lanes available
+        </div>
       </nav>
 
       <div className="mt-auto space-y-6">
@@ -309,7 +315,7 @@ export function Sidebar({ onCreateClick }: { onCreateClick?: () => void }) {
   );
 }
 
-export function BottomNav({ onCreateClick }: { onCreateClick?: () => void }) {
+export function BottomNav() {
   const pathname = usePathname();
   const { token } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -340,15 +346,15 @@ export function BottomNav({ onCreateClick }: { onCreateClick?: () => void }) {
       {mobileNavItems.map((item) => {
         if (item.label === "Create") {
           return (
-            <button 
+            <Link 
               key="create" 
-              onClick={onCreateClick}
+              href="/create"
               className="relative -top-6 w-14 h-14 bg-teal rounded-full flex items-center justify-center shadow-[0_8px_16px_rgba(26,158,117,0.4)] border-4 border-slate-950 active:scale-90 transition-transform"
             >
               <svg className="w-7 h-7 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
               </svg>
-            </button>
+            </Link>
           );
         }
 

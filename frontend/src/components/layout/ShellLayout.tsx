@@ -4,17 +4,31 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Sidebar, BottomNav } from "./Navigation";
 import { Avatar } from "@/components/ui/Avatar";
-import { CreateModal } from "./CreateModal";
 import { getSuggestedUsers, followUser, getGatedRooms, getTrending, type SuggestedUser, type GatedRoom, type TrendingData } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-export function ShellLayout({ children, hideSidebarOnMobile = false }: { children: React.ReactNode, hideSidebarOnMobile?: boolean }) {
+export function ShellLayout({
+  children,
+  hideSidebarOnMobile = false,
+  disableMainScroll = false,
+  fullWidth = false,
+}: {
+  children: React.ReactNode;
+  hideSidebarOnMobile?: boolean;
+  disableMainScroll?: boolean;
+  fullWidth?: boolean;
+}) {
   const { token, user } = useAuth();
   const [suggested, setSuggested] = useState<SuggestedUser[]>([]);
   const [rooms, setRooms] = useState<GatedRoom[]>([]);
   const [trending, setTrending] = useState<TrendingData | null>(null);
   const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const activeChallengeEndLabel = trending?.active_challenge
+    ? new Date(trending.active_challenge.ends_at).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
 
   useEffect(() => {
     if (!token) return;
@@ -44,28 +58,30 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
     }
   };
 
-  const toggleCreate = () => setShowCreateModal(!showCreateModal);
-
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden aurora-bg text-slate-200">
       <div className="flex-1 flex w-full max-w-[1280px] mx-auto relative overflow-hidden">
         {/* Sidebar for Desktop */}
-        {!hideSidebarOnMobile && <Sidebar onCreateClick={toggleCreate} />}
+        {!hideSidebarOnMobile && <Sidebar />}
         {hideSidebarOnMobile && (
           <div className="hidden lg:block h-full">
-            <Sidebar onCreateClick={toggleCreate} />
+            <Sidebar />
           </div>
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 h-full overflow-y-auto no-scrollbar relative border-x border-white/5 bg-slate-950/20">
-          <div className="w-full max-w-[600px] mx-auto flex flex-col relative z-10 h-full">
+        <main
+          className={`flex-1 h-full relative border-x border-white/5 bg-slate-950/20 ${
+            disableMainScroll ? "overflow-hidden" : "overflow-y-auto panel-scrollbar"
+          }`}
+        >
+          <div className={`w-full ${fullWidth ? "" : "max-w-[600px]"} mx-auto flex flex-col relative z-10 ${disableMainScroll ? "h-full" : "min-h-full"}`}>
             {children}
           </div>
         </main>
 
         {/* Right Sidebar for Desktop */}
-        <aside className="hidden xl:flex flex-col w-[350px] h-full py-8 px-6 space-y-6 overflow-y-auto no-scrollbar border-l border-white/5">
+        <aside className="hidden xl:flex flex-col w-[350px] h-full py-7 px-5 space-y-5 overflow-y-auto panel-scrollbar border-l border-white/5">
         
         {/* User Header */}
         {user && (
@@ -89,7 +105,7 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
         )}
 
         {/* Suggested Creators */}
-        <div className="glass p-6 rounded-r12 border border-white/5 relative overflow-hidden group/widget">
+        <div className="glass p-5 rounded-r12 border border-white/5 relative group/widget">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-head font-black text-[17px] tracking-tight uppercase text-white leading-none">
               Suggested <span className="text-teal">Creators</span>
@@ -98,11 +114,11 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
               See all
             </Link>
           </div>
-          <div className="space-y-5">
+          <div className="max-h-[300px] overflow-y-auto panel-scrollbar pr-1.5 space-y-4">
             {suggested.map((u) => {
               const isFollowed = followedIds.has(u.id);
               return (
-                <div key={u.id} className="flex items-center gap-4 group">
+                <div key={u.id} className="flex items-center gap-3 group">
                   <Link href={`/profile/${u.username}`} className="flex items-center gap-3 flex-1 min-w-0">
                     <Avatar 
                       src={u.avatar_url} 
@@ -112,7 +128,7 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
                       className="w-10 h-10 border-2 border-white/5 group-hover:border-teal/30 transition-all shadow-lg" 
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-bold text-white truncate group-hover:text-teal transition-colors leading-tight">
+                      <div className="text-[13px] font-bold text-white truncate group-hover:text-teal transition-colors leading-tight">
                         {u.name}
                       </div>
                       <div className="text-[11px] text-slate-500 truncate font-semibold">
@@ -123,7 +139,7 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
                   <button 
                     onClick={() => handleFollow(u.id)}
                     disabled={isFollowed}
-                    className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
+                    className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.16em] transition-all ${
                       isFollowed 
                         ? 'bg-white/5 text-slate-500 border border-white/10' 
                         : 'bg-teal/10 text-teal border border-teal/20 hover:bg-teal hover:text-slate-950'
@@ -143,15 +159,15 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-900 opacity-90 group-hover/challenge:opacity-100 transition-opacity" />
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
             
-            <div className="relative p-5 z-10">
+          <div className="relative p-4 z-10">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] bg-white/20 px-2 py-0.5 rounded backdrop-blur-md">Active Challenge</span>
                 <span className="text-[11px] font-black text-indigo-200">
-                  {Math.max(0, Math.ceil((new Date(trending.active_challenge.ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} Days Left
+                  Ends {activeChallengeEndLabel}
                 </span>
               </div>
               
-              <h4 className="text-[18px] font-head font-black text-white leading-tight mb-2">
+              <h4 className="text-[17px] font-head font-black text-white leading-tight mb-2">
                 {trending.active_challenge.title}
               </h4>
               
@@ -174,20 +190,20 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
         )}
 
         {/* Top Gated Rooms */}
-        <div className="glass p-6 rounded-r12 border border-white/5 relative overflow-hidden group/widget">
+        <div className="glass p-5 rounded-r12 border border-white/5 relative group/widget">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-none">
               Top Gated Rooms
             </h3>
           </div>
-          <div className="space-y-4">
-            {rooms.slice(0, 3).map((room, idx) => (
+          <div className="max-h-[280px] overflow-y-auto panel-scrollbar pr-1.5 space-y-3.5">
+            {rooms.map((room, idx) => (
               <div key={room.id} className="flex items-center gap-4 group/room cursor-pointer">
                 <div className="text-teal font-black text-[15px] w-4">{idx + 1}</div>
-                <div className="text-[13px] font-bold text-white group-hover/room:text-teal transition-colors truncate flex-1">
+                <div className="text-[12px] font-bold text-white group-hover/room:text-teal transition-colors truncate flex-1">
                   {room.title}
                 </div>
-                <div className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 rounded-sm font-black flex items-center gap-1 shrink-0">
+                <div className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 rounded-full font-black flex items-center gap-1 shrink-0">
                   {room.entry_fee_drops} <span className="text-teal">◆</span>
                 </div>
               </div>
@@ -232,11 +248,7 @@ export function ShellLayout({ children, hideSidebarOnMobile = false }: { childre
     </div>
 
       {/* Bottom Nav for Mobile */}
-      <BottomNav onCreateClick={toggleCreate} />
-
-      {/* Global Create Modal */}
-      <CreateModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
+      <BottomNav />
     </div>
   );
 }
-
